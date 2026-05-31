@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Recipe Timeline</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; background: #FFF8F0; display: flex; justify-content: center; padding: 20px; }
+.phone { width: 390px; background: #FFF8F0; border-radius: 44px; box-shadow: 0 0 0 1px #E8DED5, 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 54px; background: #FFF8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1F14; font-weight: 600; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 0 16px 8px; }
+.header .back { font-size: 24px; color: #7A6A5A; cursor: pointer; border: none; background: none; }
+.content { padding: 0 16px; }
+.hero-img { width: 100%; height: 200px; border-radius: 16px; background: #FDF0E9; display: flex; align-items: center; justify-content: center; font-size: 64px; margin-bottom: 16px; }
+.recipe-title { font-size: 24px; font-weight: 700; color: #2D1F14; margin-bottom: 4px; }
+.recipe-subtitle { font-size: 14px; color: #7A6A5A; margin-bottom: 16px; }
+.total-time { font-size: 18px; font-weight: 700; color: #D4562A; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.timeline { position: relative; padding-left: 80px; margin-bottom: 24px; }
+.timeline-line { position: absolute; left: 76px; top: 0; bottom: 0; width: 2px; background: #E8DED5; }
+.timeline-item { position: relative; margin-bottom: 20px; }
+.timeline-time { position: absolute; left: -80px; width: 68px; text-align: right; font-size: 13px; color: #7A6A5A; font-weight: 600; padding-top: 4px; }
+.timeline-dot { position: absolute; left: -84px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #D4562A; border: 2px solid #FFF8F0; }
+.timeline-bar { background: #FDF0E9; border-radius: 8px; padding: 12px 14px; margin-left: 16px; }
+.timeline-bar.parallel { margin-left: 32px; width: 80%; }
+.timeline-task { font-size: 14px; font-weight: 600; color: #2D1F14; }
+.timeline-desc { font-size: 12px; color: #7A6A5A; margin-top: 2px; }
+.chart-row { display: flex; height: 20px; gap: 2px; margin: 16px 0 24px; }
+.chart-seg { border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; font-weight: 600; height: 20px; }
+.chart-seg.prep { background: #F9A825; }
+.chart-seg.cook { background: #D4562A; }
+.chart-seg.rest { background: #2E7D32; }
+.ingredients { margin-bottom: 24px; }
+.ingredients h3 { font-size: 16px; font-weight: 700; color: #2D1F14; margin-bottom: 12px; }
+.ingredient-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E8DED5; font-size: 14px; color: #2D1F14; }
+.ingredient-row .qty { color: #7A6A5A; }
+.shopping-note { background: #FDF0E9; border-radius: 12px; padding: 14px; margin-bottom: 24px; font-size: 14px; color: #2D1F14; display: flex; justify-content: space-between; align-items: center; }
+.shopping-note button { padding: 8px 16px; border-radius: 9999px; border: none; background: #D4562A; color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; }
+.tab-bar { display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid #E8DED5; align-items: center; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: #B5A99E; cursor: pointer; border: none; background: none; font-family: inherit; padding: 6px 0; }
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D4562A; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #FDF0E9; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #D4562A; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header">
+    <button class="back">←</button>
+    <div></div>
+    <button class="card-btn icon" style="background:none;border:none;font-size:20px;color:#D4562A;cursor:pointer;">♥</button>
+  </div>
+  <div class="content">
+    <div class="hero-img">🍲</div>
+    <div class="recipe-title">Bún gà nấu nấm</div>
+    <div class="recipe-subtitle">Vietnamese · Chicken noodle soup · 2 servings</div>
+
+    <div class="total-time">⏱ Total: 25 minutes</div>
+
+    <div class="chart-row">
+      <div class="chart-seg prep" style="width:20%;">Prep 5min</div>
+      <div class="chart-seg cook" style="width:60%;">Cook 15min</div>
+      <div class="chart-seg rest" style="width:20%;">Rest 5min</div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-line"></div>
+      <div class="timeline-item">
+        <div class="timeline-time">0-5 min</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-bar">
+          <div class="timeline-task">Prep ingredients</div>
+          <div class="timeline-desc">Chop chicken, broccoli; mince garlic</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">5-10 min</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-bar">
+          <div class="timeline-task">Sauté garlic & chicken</div>
+          <div class="timeline-desc">Add oil, garlic, chicken pieces — 5 min</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">10-20 min</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-bar">
+          <div class="timeline-task">Add broth & broccoli</div>
+          <div class="timeline-desc">Pour chicken broth, add broccoli, simmer 10 min</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">5-15 min</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-bar parallel" style="background:#FFF8F0;border:1px solid #E8DED5;">
+          <div class="timeline-task">Boil noodles (parallel)</div>
+          <div class="timeline-desc">Cook vermicelli in separate pot — 10 min</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">20-25 min</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-bar">
+          <div class="timeline-task">Plate & serve</div>
+          <div class="timeline-desc">Add noodles to bowl, pour soup, garnish</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ingredients">
+      <h3>Ingredients</h3>
+      <div class="ingredient-row"><span>Chicken thigh</span><span class="qty">200 g</span></div>
+      <div class="ingredient-row"><span>Broccoli</span><span class="qty">1 head</span></div>
+      <div class="ingredient-row"><span>Eggs</span><span class="qty">3</span></div>
+      <div class="ingredient-row"><span>Vermicelli noodles</span><span class="qty">150 g</span></div>
+      <div class="ingredient-row"><span>Garlic</span><span class="qty">3 cloves</span></div>
+      <div class="ingredient-row"><span style="color:#D4562A;">Soy sauce</span><span class="qty" style="color:#D4562A;">2 tbsp ✱ missing</span></div>
+    </div>
+
+    <div class="shopping-note">
+      <span>1 missing ingredient</span>
+      <button>Copy list</button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item active"><span class="tab-icon">🏠</span><span>Home</span></button>
+    <button class="tab-item"><span class="tab-icon">🔍</span><span>Discover</span></button>
+    <button class="tab-item"><span class="tab-icon">❤️</span><span>Favorites</span></button>
+    <button class="tab-item" style="flex:0.5;"><div class="avatar">M</div></button>
+  </div>
+</div>
+</body>
+</html>

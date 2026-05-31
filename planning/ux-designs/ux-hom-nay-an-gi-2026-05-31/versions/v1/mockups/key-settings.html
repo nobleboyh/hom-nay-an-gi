@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Settings</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; background: #FFF8F0; display: flex; justify-content: center; padding: 20px; }
+.phone { width: 390px; background: #FFF8F0; border-radius: 44px; box-shadow: 0 0 0 1px #E8DED5, 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 54px; background: #FFF8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1F14; font-weight: 600; }
+.header { display: flex; align-items: center; gap: 16px; padding: 0 16px 16px; }
+.header .back { font-size: 24px; color: #7A6A5A; cursor: pointer; border: none; background: none; }
+.header h1 { font-size: 22px; font-weight: 700; color: #2D1F14; }
+.content { padding: 0 16px; }
+.section-label { font-size: 13px; color: #7A6A5A; font-weight: 600; margin-bottom: 4px; padding: 0 4px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 20px; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #E8DED5; }
+.setting-row .label { font-size: 15px; color: #2D1F14; }
+.setting-row .value { font-size: 14px; color: #7A6A5A; }
+.setting-row .chevron { color: #B5A99E; font-size: 16px; }
+.toggle { width: 48px; height: 28px; border-radius: 14px; background: #E8DED5; position: relative; cursor: pointer; border: none; }
+.toggle.on { background: #D4562A; }
+.toggle .knob { width: 24px; height: 24px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
+.toggle.on .knob { left: 22px; }
+.tab-bar { display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid #E8DED5; align-items: center; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: #B5A99E; cursor: pointer; border: none; background: none; font-family: inherit; padding: 6px 0; }
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D4562A; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #FDF0E9; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #D4562A; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header">
+    <button class="back">←</button>
+    <h1>Settings</h1>
+  </div>
+  <div class="content">
+    <div class="section-label">Preferences</div>
+    <div class="setting-row">
+      <span class="label">Dietary preferences</span>
+      <span class="value">Vegetarian, Light <span class="chevron">›</span></span>
+    </div>
+    <div class="setting-row">
+      <span class="label">Allergies</span>
+      <span class="value">Peanuts, Shellfish <span class="chevron">›</span></span>
+    </div>
+    <div class="setting-row">
+      <span class="label">Disliked ingredients</span>
+      <span class="value">2 items <span class="chevron">›</span></span>
+    </div>
+    <div class="setting-row">
+      <span class="label">Preferred cuisines</span>
+      <span class="value">Vietnamese, Chinese <span class="chevron">›</span></span>
+    </div>
+
+    <div class="section-label">Notifications</div>
+    <div class="setting-row">
+      <span class="label">Breakfast reminder (7:00 AM)</span>
+      <div class="toggle on"><div class="knob"></div></div>
+    </div>
+    <div class="setting-row">
+      <span class="label">Lunch reminder (12:00 PM)</span>
+      <div class="toggle on"><div class="knob"></div></div>
+    </div>
+    <div class="setting-row">
+      <span class="label">Dinner reminder (7:00 PM)</span>
+      <div class="toggle"><div class="knob"></div></div>
+    </div>
+    <div class="setting-row">
+      <span class="label">Daily suggestion (10:00 AM)</span>
+      <div class="toggle on"><div class="knob"></div></div>
+    </div>
+
+    <div class="section-label">Display</div>
+    <div class="setting-row">
+      <span class="label">Theme</span>
+      <span class="value">Light <span class="chevron">›</span></span>
+    </div>
+    <div class="setting-row">
+      <span class="label">Measurement units</span>
+      <span class="value">Metric (g, ml) <span class="chevron">›</span></span>
+    </div>
+
+    <div class="section-label">Privacy</div>
+    <div class="setting-row">
+      <span class="label">Clear search history</span>
+      <span class="chevron">›</span>
+    </div>
+    <div class="setting-row">
+      <span class="label">Clear all favorites</span>
+      <span class="chevron">›</span>
+    </div>
+    <div class="setting-row" style="border-bottom:none;">
+      <span class="label" style="color:#D4562A;">Delete account</span>
+      <span class="chevron">›</span>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item"><span class="tab-icon">🏠</span><span>Home</span></button>
+    <button class="tab-item"><span class="tab-icon">🔍</span><span>Discover</span></button>
+    <button class="tab-item"><span class="tab-icon">❤️</span><span>Favorites</span></button>
+    <button class="tab-item active" style="flex:0.5;"><div class="avatar">M</div></button>
+  </div>
+</div>
+</body>
+</html>

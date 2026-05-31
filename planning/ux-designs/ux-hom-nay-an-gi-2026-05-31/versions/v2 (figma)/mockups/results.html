@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Results (v2 Figma)</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #FFF8F0; display: flex; justify-content: center; padding: 20px; }
+.phone { width: 390px; background: #FFF8F0; border-radius: 44px; box-shadow: 0 0 0 1px rgba(141,111,71,0.15), 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 48px; background: #FFF8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1810; font-weight: 600; }
+.header { display: flex; align-items: center; gap: 12px; padding: 8px 24px 4px; }
+.header .back { width: 36px; height: 36px; border: none; background: none; font-size: 24px; cursor: pointer; color: #2D1810; }
+.header h2 { font-size: 18px; font-weight: 600; color: #2D1810; flex: 1; }
+.result-count { font-size: 14px; color: #7D6B5A; padding: 4px 24px 12px; }
+.sort-row { display: flex; gap: 8px; padding: 0 24px 12px; flex-wrap: wrap; }
+.sort-chip { height: 32px; padding: 0 14px; border-radius: 12px; border: 1px solid rgba(141,111,71,0.15); background: #FFFFFF; color: #7D6B5A; font-size: 13px; cursor: pointer; font-family: inherit; }
+.sort-chip.active { background: #D97036; color: #fff; border-color: #D97036; }
+.content { padding: 0 24px; }
+.card { background: #FFFFFF; border: 1px solid rgba(141,111,71,0.15); border-radius: 16px; margin-bottom: 12px; overflow: hidden; cursor: pointer; transition: 200ms ease; }
+.card.compact { display: flex; align-items: center; padding: 14px 16px; gap: 14px; }
+.card-emoji { width: 48px; height: 48px; border-radius: 12px; background: #F5E6D3; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.card-info { flex: 1; }
+.card-name { font-size: 16px; font-weight: 600; color: #2D1810; }
+.card-name-en { font-size: 13px; color: #7D6B5A; }
+.card-match { background: #D97036; color: #fff; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; white-space: nowrap; }
+.card-chevron { color: #7D6B5A; font-size: 16px; margin-left: 8px; }
+.card.expanded { padding: 0; }
+.card.expanded .card-hero { width: 100%; height: 160px; background: #F5E6D3; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+.card.expanded .card-body { padding: 16px; }
+.card.expanded .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.card.expanded .card-header .names .card-name { font-size: 18px; }
+.card-stats { display: flex; gap: 16px; margin: 8px 0; }
+.card-stat { font-size: 13px; color: #7D6B5A; display: flex; align-items: center; gap: 4px; }
+.card-stat strong { color: #2D1810; }
+.card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 12px; }
+.card-tag { padding: 4px 12px; border-radius: 9999px; background: #F5E6D3; color: #7D6B5A; font-size: 12px; }
+.card-actions { display: flex; gap: 8px; }
+.primary-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: #D97036; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.secondary-btn { padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(141,111,71,0.15); background: #FFFBF5; color: #7D6B5A; font-size: 14px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+.icon-btn { width: 44px; border-radius: 12px; border: 1px solid rgba(141,111,71,0.15); background: #FFFBF5; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #C94A3A; }
+.tab-bar { display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid rgba(141,111,71,0.15); align-items: center; margin-top: 12px; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: #7D6B5A; cursor: pointer; border: none; background: none; font-family: inherit; padding: 6px 0; }
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D97036; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header">
+    <button class="back">←</button>
+    <h2>Results (4 dishes)</h2>
+  </div>
+  <div class="result-count">for chicken, broccoli, eggs</div>
+  <div class="sort-row">
+    <button class="sort-chip active">By Match</button>
+    <button class="sort-chip">By Time</button>
+    <button class="sort-chip">By Calories</button>
+  </div>
+  <div class="content">
+    <!-- Compact card -->
+    <div class="card compact">
+      <div class="card-emoji">🥘</div>
+      <div class="card-info">
+        <div class="card-name">Gà Xào Bông Cải</div>
+        <div class="card-name-en">Chicken Stir-fry</div>
+      </div>
+      <div class="card-match">95%</div>
+      <span class="card-chevron">▼</span>
+    </div>
+
+    <!-- Expanded card -->
+    <div class="card expanded">
+      <div class="card-hero">🍲</div>
+      <div class="card-body">
+        <div class="card-header">
+          <div class="names">
+            <div class="card-name">Súp Gà Nấm</div>
+            <div class="card-name-en">Chicken Mushroom Soup</div>
+          </div>
+          <div class="card-match">90%</div>
+        </div>
+        <div class="card-stats">
+          <span class="card-stat">⏱ <strong>25 min</strong></span>
+          <span class="card-stat">🔥 <strong>420 kcal</strong></span>
+        </div>
+        <div class="card-tags">
+          <span class="card-tag">Light</span>
+          <span class="card-tag">Meat</span>
+          <span class="card-tag">Vietnamese</span>
+        </div>
+        <div class="card-actions">
+          <button class="primary-btn">View Recipe</button>
+          <button class="secondary-btn">🛒 List</button>
+          <button class="icon-btn">♥</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card compact">
+      <div class="card-emoji">🥗</div>
+      <div class="card-info">
+        <div class="card-name">Gỏi Gà Bắp Cải</div>
+        <div class="card-name-en">Chicken Cabbage Salad</div>
+      </div>
+      <div class="card-match">78%</div>
+      <span class="card-chevron">▼</span>
+    </div>
+
+    <div class="card compact">
+      <div class="card-emoji">🍚</div>
+      <div class="card-info">
+        <div class="card-name">Cơm Chiên Trứng</div>
+        <div class="card-name-en">Egg Fried Rice</div>
+      </div>
+      <div class="card-match">72%</div>
+      <span class="card-chevron">▼</span>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item active"><span class="tab-icon">🏠</span><span>Home</span></button>
+    <button class="tab-item"><span class="tab-icon">🔍</span><span>Discover</span></button>
+    <button class="tab-item"><span class="tab-icon">❤️</span><span>Favorites</span></button>
+  </div>
+</div>
+</body>
+</html>

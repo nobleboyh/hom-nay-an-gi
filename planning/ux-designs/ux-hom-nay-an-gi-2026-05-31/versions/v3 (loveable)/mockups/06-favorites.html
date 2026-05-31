@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Favorites (v3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; display: flex; justify-content: center; padding: 20px; background: radial-gradient(ellipse 60% 50% at 10% 10%, oklch(0.62 0.14 38 / 0.14), transparent), radial-gradient(ellipse 50% 40% at 90% 90%, oklch(0.58 0.06 145 / 0.16), transparent); background-attachment: fixed; }
+.phone { width: 360px; background: oklch(1 0 0); border-radius: 48px; box-shadow: 0 30px 80px -20px rgba(80,40,20,0.35); overflow: hidden; }
+.status-bar { height: 48px; background: oklch(0.22 0.02 60); color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 12px; font-weight: 600; }
+.content { padding: 12px 20px 20px; }
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.header h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: oklch(0.22 0.02 60); }
+.header .clear { font-size: 13px; color: oklch(0.62 0.14 38); cursor: pointer; border: none; background: none; font-weight: 500; font-family: 'Inter', sans-serif; }
+.collections { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+.collection { flex-shrink: 0; padding: 10px 18px; border-radius: 999px; border: 1px solid oklch(0.88 0.018 70); background: oklch(1 0 0); font-size: 12px; font-weight: 500; cursor: pointer; color: oklch(0.5 0.02 60); display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; }
+.collection.active { background: oklch(0.62 0.14 38); color: #fff; border-color: oklch(0.62 0.14 38); }
+.fav-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid oklch(0.88 0.018 70); }
+.fav-img { width: 52px; height: 52px; border-radius: 12px; background: oklch(0.94 0.015 80); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.fav-info { flex: 1; }
+.fav-name { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 600; color: oklch(0.22 0.02 60); }
+.fav-name-en { font-size: 11px; color: oklch(0.5 0.02 60); }
+.fav-meta { font-size: 11px; color: oklch(0.5 0.02 60); display: flex; gap: 10px; margin-top: 2px; }
+.fav-heart { width: 36px; height: 36px; border-radius: 50%; border: 1px solid oklch(0.88 0.018 70); background: oklch(1 0 0); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: oklch(0.62 0.14 38); }
+.bottom-nav { display: flex; height: 64px; background: oklch(1 0 0 / 0.95); backdrop-filter: blur(8px); border-top: 1px solid oklch(0.88 0.018 70); align-items: center; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 10px; color: oklch(0.5 0.02 60); cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif; padding: 6px 0; }
+.nav-item .icon { font-size: 20px; }
+.nav-item.active { color: oklch(0.62 0.14 38); }
+.empty-state { text-align: center; padding: 48px 20px; }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state h3 { font-family: 'Fraunces', serif; font-size: 18px; color: oklch(0.22 0.02 60); }
+.empty-state p { font-size: 12px; color: oklch(0.5 0.02 60); margin: 6px 0 16px; }
+.explore-btn { padding: 12px 28px; border-radius: 999px; border: none; background: oklch(0.62 0.14 38); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="content">
+    <div class="header">
+      <h2>Favorites</h2>
+      <button class="clear">Clear all</button>
+    </div>
+
+    <div class="collections">
+      <button class="collection active">All</button>
+      <button class="collection">🍜 Pho</button>
+      <button class="collection">🥗 Salads</button>
+      <button class="collection">🍲 Soups</button>
+      <button class="collection">🔥 Quick</button>
+    </div>
+
+    <div class="fav-item">
+      <div class="fav-img">🥘</div>
+      <div class="fav-info">
+        <div class="fav-name">Gà xào bông cải</div>
+        <div class="fav-name-en">Chicken stir-fry</div>
+        <div class="fav-meta"><span>⏱ 25 min</span><span>🔥 420 kcal</span></div>
+      </div>
+      <button class="fav-heart">♥</button>
+    </div>
+
+    <div class="fav-item">
+      <div class="fav-img">🍲</div>
+      <div class="fav-info">
+        <div class="fav-name">Súp gà nấm</div>
+        <div class="fav-name-en">Chicken mushroom soup</div>
+        <div class="fav-meta"><span>⏱ 35 min</span><span>🔥 280 kcal</span></div>
+      </div>
+      <button class="fav-heart">♥</button>
+    </div>
+
+    <div class="fav-item">
+      <div class="fav-img">🥗</div>
+      <div class="fav-info">
+        <div class="fav-name">Gỏi gà bắp cải</div>
+        <div class="fav-name-en">Chicken cabbage salad</div>
+        <div class="fav-meta"><span>⏱ 15 min</span><span>🔥 180 kcal</span></div>
+      </div>
+      <button class="fav-heart">♥</button>
+    </div>
+
+    <p style="font-size:11px;color:oklch(0.5 0.02 60);padding:8px 0;">3 saved · 1 collection</p>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item"><span class="icon">🏠</span><span>Home</span></button>
+    <button class="nav-item"><span class="icon">🔍</span><span>Discover</span></button>
+    <button class="nav-item active"><span class="icon">❤️</span><span>Favorites</span></button>
+    <button class="nav-item"><span class="icon">⚙</span><span>Settings</span></button>
+  </div>
+</div>
+</body>
+</html>

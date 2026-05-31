@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Login (v3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; display: flex; justify-content: center; padding: 20px; background: radial-gradient(ellipse 60% 50% at 10% 10%, oklch(0.62 0.14 38 / 0.14), transparent), radial-gradient(ellipse 50% 40% at 90% 90%, oklch(0.58 0.06 145 / 0.16), transparent); background-attachment: fixed; }
+.phone { width: 360px; background: oklch(1 0 0); border-radius: 48px; box-shadow: 0 30px 80px -20px rgba(80,40,20,0.35); overflow: hidden; }
+.status-bar { height: 48px; background: oklch(0.22 0.02 60); color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 12px; font-weight: 600; }
+.content { padding: 20px; display: flex; flex-direction: column; min-height: 700px; }
+.brand { text-align: center; padding: 32px 0 8px; }
+.brand .icon { font-size: 48px; }
+.brand h1 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: oklch(0.22 0.02 60); margin-top: 8px; }
+.brand p { font-size: 13px; color: oklch(0.5 0.02 60); margin-top: 4px; }
+.form { flex: 1; padding-top: 32px; }
+.input-group { margin-bottom: 16px; }
+.input-group label { font-size: 12px; font-weight: 600; color: oklch(0.22 0.02 60); display: block; margin-bottom: 6px; }
+.input-group input { width: 100%; height: 48px; border-radius: 20px; border: 1px solid oklch(0.88 0.018 70); padding: 0 16px; font-size: 14px; outline: none; font-family: 'Inter', sans-serif; color: oklch(0.22 0.02 60); background: oklch(0.965 0.02 80); }
+.input-group input:focus { border-color: oklch(0.62 0.14 38); }
+.forgot { text-align: right; font-size: 12px; color: oklch(0.62 0.14 38); margin-bottom: 24px; cursor: pointer; }
+.login-btn { width: 100%; height: 48px; border-radius: 20px; border: none; background: oklch(0.62 0.14 38); color: #fff; font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; cursor: pointer; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.divider line { flex: 1; height: 1px; background: oklch(0.88 0.018 70); } /* placeholder for hr */
+.divider span { font-size: 11px; color: oklch(0.5 0.02 60); }
+.social-btn { width: 100%; height: 44px; border-radius: 20px; border: 1px solid oklch(0.88 0.018 70); background: oklch(1 0 0); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Inter', sans-serif; color: oklch(0.22 0.02 60); margin-bottom: 10px; }
+.skip { text-align: center; font-size: 12px; color: oklch(0.5 0.02 60); margin-top: auto; padding: 16px 0; cursor: pointer; }
+.signup { text-align: center; font-size: 12px; color: oklch(0.5 0.02 60); padding: 8px 0; }
+.signup a { color: oklch(0.62 0.14 38); font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="content">
+    <div class="brand">
+      <div class="icon">🍜</div>
+      <h1>Hôm Nay Ăn Gì</h1>
+      <p>Find your next meal in seconds</p>
+    </div>
+    <div class="form">
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" placeholder="your@email.com">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" placeholder="••••••••">
+      </div>
+      <div class="forgot">Forgot password?</div>
+      <button class="login-btn">Sign in</button>
+
+      <div class="divider">
+        <hr style="flex:1;border:none;border-top:1px solid oklch(0.88 0.018 70);">
+        <span>or</span>
+        <hr style="flex:1;border:none;border-top:1px solid oklch(0.88 0.018 70);">
+      </div>
+
+      <button class="social-btn">G Continue with Google</button>
+      <button class="social-btn">🍎 Continue with Apple</button>
+
+      <div class="signup">Don't have an account? <a>Sign up</a></div>
+      <div class="skip">Skip for now →</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

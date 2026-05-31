@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Favorites</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; background: #FFF8F0; display: flex; justify-content: center; padding: 20px; }
+.phone { width: 390px; background: #FFF8F0; border-radius: 44px; box-shadow: 0 0 0 1px #E8DED5, 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 54px; background: #FFF8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1F14; font-weight: 600; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 0 16px 8px; }
+.header h1 { font-size: 28px; font-weight: 700; color: #2D1F14; }
+.header .search-icon { font-size: 20px; color: #7A6A5A; cursor: pointer; border: none; background: none; }
+.content { padding: 0 16px; }
+.search-bar { background: #FFFFFF; border: 1px solid #E8DED5; border-radius: 8px; height: 40px; display: flex; align-items: center; padding: 0 12px; margin-bottom: 16px; }
+.search-bar input { flex: 1; border: none; outline: none; font-size: 14px; color: #2D1F14; background: transparent; font-family: inherit; }
+.search-bar input::placeholder { color: #B5A99E; }
+.fav-item { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #E8DED5; cursor: pointer; }
+.fav-img { width: 56px; height: 56px; border-radius: 8px; background: #FDF0E9; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.fav-info { flex: 1; }
+.fav-name { font-size: 15px; font-weight: 600; color: #2D1F14; }
+.fav-meta { font-size: 12px; color: #7A6A5A; margin-top: 2px; }
+.fav-date { font-size: 11px; color: #B5A99E; }
+.empty { text-align: center; padding: 60px 20px; color: #7A6A5A; }
+.empty .icon { font-size: 48px; margin-bottom: 12px; }
+.empty h3 { font-size: 18px; color: #2D1F14; margin-bottom: 6px; }
+.empty p { font-size: 14px; }
+.empty .cta { margin-top: 16px; padding: 12px 24px; border-radius: 9999px; border: none; background: #D4562A; color: #fff; font-weight: 600; font-size: 14px; cursor: pointer; font-family: inherit; }
+.tab-bar { display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid #E8DED5; align-items: center; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: #B5A99E; cursor: pointer; border: none; background: none; font-family: inherit; padding: 6px 0; }
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D4562A; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #FDF0E9; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #D4562A; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header">
+    <h1>Favorites</h1>
+    <button class="search-icon">🔍</button>
+  </div>
+  <div class="content">
+    <div class="search-bar">
+      <input type="text" placeholder="Search saved dishes...">
+    </div>
+
+    <div class="fav-item">
+      <div class="fav-img">🍲</div>
+      <div class="fav-info">
+        <div class="fav-name">Bún gà nấu nấm</div>
+        <div class="fav-meta">25 min · 420 kcal</div>
+      </div>
+      <div class="fav-date">Today</div>
+    </div>
+
+    <div class="fav-item">
+      <div class="fav-img">🍗</div>
+      <div class="fav-info">
+        <div class="fav-name">Gà xào bông cải</div>
+        <div class="fav-meta">20 min · 380 kcal</div>
+      </div>
+      <div class="fav-date">Yesterday</div>
+    </div>
+
+    <div class="fav-item">
+      <div class="fav-img">🥘</div>
+      <div class="fav-info">
+        <div class="fav-name">Cơm chiên trứng</div>
+        <div class="fav-meta">15 min · 450 kcal</div>
+      </div>
+      <div class="fav-date">2 days ago</div>
+    </div>
+
+    <!-- Example of empty state (commented out -- uncomment to preview)
+    <div class="empty">
+      <div class="icon">❤️</div>
+      <h3>No saved dishes yet</h3>
+      <p>Tap the heart icon on any dish to save it here.</p>
+      <button class="cta">Discover dishes</button>
+    </div>
+    -->
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item"><span class="tab-icon">🏠</span><span>Home</span></button>
+    <button class="tab-item"><span class="tab-icon">🔍</span><span>Discover</span></button>
+    <button class="tab-item active"><span class="tab-icon">❤️</span><span>Favorites</span></button>
+    <button class="tab-item" style="flex:0.5;"><div class="avatar">M</div></button>
+  </div>
+</div>
+</body>
+</html>

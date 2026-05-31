@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Home Input</title>
+<!-- DESIGN.md governing sections: Colors (light mode), Components/Input Field, Components/Tag Chip, Components/Primary Button, Layout & Spacing, Typography -->
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  background: #FFF8F0;
+  display: flex; justify-content: center; align-items: flex-start;
+  min-height: 100vh; padding: 20px;
+}
+.phone {
+  width: 390px; background: #FFF8F0; border-radius: 44px;
+  box-shadow: 0 0 0 1px #E8DED5, 0 8px 40px rgba(0,0,0,0.08);
+  overflow: hidden; position: relative;
+}
+.status-bar {
+  height: 54px; background: #FFF8F0; display: flex;
+  align-items: center; justify-content: space-between;
+  padding: 0 24px; font-size: 14px; color: #2D1F14; font-weight: 600;
+}
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px 12px;
+}
+.header h1 { font-size: 28px; font-weight: 700; color: #2D1F14; }
+.header .drawer-btn {
+  width: 36px; height: 36px; border: none; background: none;
+  font-size: 22px; color: #7A6A5A; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.content { padding: 0 16px; }
+.subtitle { font-size: 15px; color: #7A6A5A; margin-bottom: 16px; }
+.input-container {
+  background: #FFFFFF; border: 1px solid #E8DED5; border-radius: 8px;
+  display: flex; align-items: center; padding: 0 12px; height: 48px;
+}
+.input-container input {
+  flex: 1; border: none; outline: none; font-size: 16px;
+  color: #2D1F14; background: transparent;
+  font-family: inherit;
+}
+.input-container input::placeholder { color: #B5A99E; }
+.input-container .icon-btn {
+  width: 36px; height: 36px; border: none; background: none;
+  font-size: 20px; color: #7A6A5A; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+}
+.input-container .icon-btn:hover { background: #FDF0E9; }
+.tag-section { margin-top: 20px; }
+.tag-label { font-size: 13px; color: #7A6A5A; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag {
+  height: 32px; padding: 0 12px; border-radius: 9999px;
+  background: #FDF0E9; color: #2D1F14; font-size: 13px;
+  display: inline-flex; align-items: center; border: none; cursor: pointer;
+  font-family: inherit;
+}
+.tag.active { background: #D4562A; color: #fff; }
+.tag-sub { margin-top: 12px; }
+.tag-sub .tag { background: #FFF8F0; border: 1px solid #E8DED5; }
+.cooking-time { margin-top: 20px; }
+.time-chips { display: flex; gap: 8px; }
+.time-chip {
+  height: 36px; padding: 0 16px; border-radius: 9999px;
+  background: #FFFFFF; border: 1px solid #E8DED5; color: #7A6A5A;
+  font-size: 13px; display: inline-flex; align-items: center; cursor: pointer;
+  font-family: inherit;
+}
+.time-chip.active { background: #D4562A; color: #fff; border-color: #D4562A; }
+.search-btn {
+  width: 100%; height: 48px; border-radius: 9999px; border: none;
+  background: #D4562A; color: #fff; font-size: 16px; font-weight: 700;
+  margin-top: 24px; cursor: pointer; font-family: inherit;
+}
+.search-btn:disabled { background: #B5A99E; cursor: not-allowed; }
+.tab-bar {
+  display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid #E8DED5;
+  margin-top: 24px; align-items: center;
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 2px; font-size: 11px; color: #B5A99E; cursor: pointer;
+  border: none; background: none; font-family: inherit; padding: 6px 0;
+}
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D4562A; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: #FDF0E9;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: #D4562A; font-weight: 600;
+}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span style="display:flex;gap:6px;">📶 📶 🔋</span>
+  </div>
+  <div class="header">
+    <h1>Ăn gì?</h1>
+    <div class="drawer-btn">☰</div>
+  </div>
+  <div class="content">
+    <p class="subtitle">What's in your fridge?</p>
+    <div class="input-container">
+      <input type="text" placeholder="e.g., chicken, broccoli, eggs" value="chicken, broccoli, eggs">
+      <button class="icon-btn">🎤</button>
+      <button class="icon-btn">📷</button>
+    </div>
+
+    <div class="tag-section">
+      <div class="tag-label">Dish Type</div>
+      <div class="tag-row">
+        <button class="tag active">Meat</button>
+        <button class="tag">Light</button>
+        <button class="tag active">Vietnamese</button>
+        <button class="tag">Salty</button>
+        <button class="tag">Sour</button>
+        <button class="tag">Sweet</button>
+        <button class="tag">Dessert</button>
+      </div>
+    </div>
+
+    <div class="tag-section tag-sub">
+      <div class="tag-label">Mood (optional)</div>
+      <div class="tag-row">
+        <button class="tag">Comfort food</button>
+        <button class="tag">Refreshing</button>
+        <button class="tag">Indulgent</button>
+      </div>
+    </div>
+
+    <div class="cooking-time">
+      <div class="tag-label">Cooking Time</div>
+      <div class="time-chips">
+        <button class="time-chip active">15 min</button>
+        <button class="time-chip">30 min</button>
+        <button class="time-chip">60 min</button>
+        <button class="time-chip">90+ min</button>
+      </div>
+    </div>
+
+    <button class="search-btn">Find dishes (5)</button>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item active">
+      <span class="tab-icon">🏠</span>
+      <span>Home</span>
+    </button>
+    <button class="tab-item">
+      <span class="tab-icon">🔍</span>
+      <span>Discover</span>
+    </button>
+    <button class="tab-item">
+      <span class="tab-icon">❤️</span>
+      <span>Favorites</span>
+    </button>
+    <button class="tab-item" style="flex:0.5;">
+      <div class="avatar">M</div>
+    </button>
+  </div>
+</div>
+</body>
+</html>

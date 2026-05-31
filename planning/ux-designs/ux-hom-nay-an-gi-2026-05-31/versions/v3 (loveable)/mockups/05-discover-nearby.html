@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Discover Nearby (v3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; display: flex; justify-content: center; padding: 20px; background: radial-gradient(ellipse 60% 50% at 10% 10%, oklch(0.62 0.14 38 / 0.14), transparent), radial-gradient(ellipse 50% 40% at 90% 90%, oklch(0.58 0.06 145 / 0.16), transparent); background-attachment: fixed; }
+.phone { width: 360px; background: oklch(1 0 0); border-radius: 48px; box-shadow: 0 30px 80px -20px rgba(80,40,20,0.35); overflow: hidden; }
+.status-bar { height: 48px; background: oklch(0.22 0.02 60); color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 12px; font-weight: 600; }
+.content { padding: 12px 20px 20px; }
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.header .back { font-size: 20px; color: oklch(0.5 0.02 60); cursor: pointer; border: none; background: none; }
+.header h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: oklch(0.22 0.02 60); }
+.map-preview { width: 100%; height: 140px; border-radius: 20px; background: oklch(0.94 0.015 80); display: flex; align-items: center; justify-content: center; font-size: 14px; color: oklch(0.5 0.02 60); margin-bottom: 16px; border: 1px solid oklch(0.88 0.018 70); }
+.filter-section { margin-bottom: 12px; }
+.filter-label { font-size: 11px; font-weight: 600; color: oklch(0.5 0.02 60); margin-bottom: 6px; }
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-chip { padding: 6px 14px; border-radius: 999px; border: 1px solid oklch(0.88 0.018 70); background: oklch(1 0 0); color: oklch(0.5 0.02 60); font-size: 11px; cursor: pointer; font-family: 'Inter', sans-serif; }
+.filter-chip.active { background: oklch(0.62 0.14 38); color: #fff; border-color: oklch(0.62 0.14 38); }
+.price-row { display: flex; gap: 6px; }
+.price-chip { flex: 1; padding: 8px; border-radius: 999px; border: 1px solid oklch(0.88 0.018 70); background: oklch(1 0 0); color: oklch(0.5 0.02 60); font-size: 11px; cursor: pointer; font-family: 'Inter', sans-serif; text-align: center; }
+.price-chip.active { background: oklch(0.62 0.14 38); color: #fff; border-color: oklch(0.62 0.14 38); }
+.section-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; color: oklch(0.22 0.02 60); margin: 12px 0 8px; }
+.dish-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid oklch(0.88 0.018 70); }
+.dish-rank { width: 24px; height: 24px; border-radius: 50%; background: oklch(0.62 0.14 38); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dish-img { width: 48px; height: 48px; border-radius: 12px; background: oklch(0.94 0.015 80); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.dish-info { flex: 1; }
+.dish-name { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 600; color: oklch(0.22 0.02 60); }
+.dish-meta { font-size: 11px; color: oklch(0.5 0.02 60); display: flex; gap: 8px; margin-top: 2px; }
+.dish-order { padding: 6px 14px; border-radius: 999px; border: none; background: oklch(0.62 0.14 38); color: #fff; font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; margin-top: 4px; }
+.bottom-nav { display: flex; height: 64px; background: oklch(1 0 0 / 0.95); backdrop-filter: blur(8px); border-top: 1px solid oklch(0.88 0.018 70); align-items: center; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 10px; color: oklch(0.5 0.02 60); cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif; padding: 6px 0; }
+.nav-item .icon { font-size: 20px; }
+.nav-item.active { color: oklch(0.62 0.14 38); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="content">
+    <div class="header">
+      <button class="back">←</button>
+      <h2>Discover</h2>
+    </div>
+
+    <div class="map-preview">📍 Map preview · District 1, HCMC</div>
+
+    <div class="filter-section">
+      <div class="filter-label">Distance</div>
+      <div class="filter-chips">
+        <button class="filter-chip active">1 km</button>
+        <button class="filter-chip">2 km</button>
+        <button class="filter-chip">5 km</button>
+        <button class="filter-chip">10 km</button>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Price</div>
+      <div class="price-row">
+        <button class="price-chip">$ Low</button>
+        <button class="price-chip active">$$ Mid</button>
+        <button class="price-chip">$$$ High</button>
+      </div>
+    </div>
+
+    <div class="section-title">Trending nearby</div>
+
+    <div class="dish-item">
+      <div class="dish-rank">1</div>
+      <div class="dish-img">🥗</div>
+      <div class="dish-info">
+        <div class="dish-name">Phở salad</div>
+        <div class="dish-meta"><span>📍 1.2 km</span><span>⭐ 4.5</span><span>💰 $$</span></div>
+        <button class="dish-order">Order on GrabFood</button>
+      </div>
+    </div>
+
+    <div class="dish-item">
+      <div class="dish-rank">2</div>
+      <div class="dish-img">🍜</div>
+      <div class="dish-info">
+        <div class="dish-name">Bún chả</div>
+        <div class="dish-meta"><span>📍 2.3 km</span><span>⭐ 4.3</span><span>💰 $$</span></div>
+        <button class="dish-order">Order on GrabFood</button>
+      </div>
+    </div>
+
+    <div class="dish-item">
+      <div class="dish-rank">3</div>
+      <div class="dish-img">🥘</div>
+      <div class="dish-info">
+        <div class="dish-name">Bánh xèo</div>
+        <div class="dish-meta"><span>📍 800 m</span><span>⭐ 4.7</span><span>💰 $</span></div>
+        <button class="dish-order">Order on GrabFood</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item"><span class="icon">🏠</span><span>Home</span></button>
+    <button class="nav-item active"><span class="icon">🔍</span><span>Discover</span></button>
+    <button class="nav-item"><span class="icon">❤️</span><span>Favorites</span></button>
+    <button class="nav-item"><span class="icon">⚙</span><span>Settings</span></button>
+  </div>
+</div>
+</body>
+</html>

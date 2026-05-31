@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Settings (v2 Figma)</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #FFF8F0; display: flex; justify-content: center; padding: 20px; }
+.phone { width: 390px; background: #FFFFFF; border-radius: 44px; box-shadow: 0 0 0 1px rgba(141,111,71,0.15), 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 48px; background: #FFFFFF; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1810; font-weight: 600; }
+.header { display: flex; align-items: center; gap: 12px; padding: 8px 24px; }
+.header .back { width: 36px; height: 36px; border: none; background: none; font-size: 24px; cursor: pointer; color: #2D1810; }
+.header h2 { font-size: 20px; font-weight: 600; color: #2D1810; }
+.content { padding: 8px 24px; }
+.section { margin-bottom: 20px; }
+.section-title { font-size: 12px; font-weight: 700; color: #7D6B5A; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(141,111,71,0.1); }
+.setting-row:last-child { border-bottom: none; }
+.setting-left { display: flex; align-items: center; gap: 12px; }
+.setting-icon { width: 20px; text-align: center; font-size: 16px; color: #7D6B5A; }
+.setting-label { font-size: 15px; color: #2D1810; }
+.setting-sub { font-size: 12px; color: #7D6B5A; }
+.setting-right { display: flex; align-items: center; gap: 8px; }
+.setting-value { font-size: 14px; color: #7D6B5A; }
+.chevron { color: #D4C4B0; font-size: 16px; }
+.toggle { width: 48px; height: 28px; border-radius: 14px; background: #D4C4B0; position: relative; cursor: pointer; border: none; }
+.toggle.on { background: #D97036; }
+.toggle .knob { width: 24px; height: 24px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: transform 200ms; }
+.toggle.on .knob { left: 22px; }
+.destructive { color: #C94A3A; }
+.about { text-align: center; padding: 24px; color: #7D6B5A; }
+.about .logo { font-size: 32px; margin-bottom: 8px; }
+.about .name { font-size: 15px; font-weight: 600; color: #2D1810; }
+.about .version { font-size: 12px; margin-top: 2px; }
+.tab-bar { display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid rgba(141,111,71,0.15); align-items: center; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: #7D6B5A; cursor: pointer; border: none; background: none; font-family: inherit; padding: 6px 0; }
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D97036; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header">
+    <button class="back">←</button>
+    <h2>Settings</h2>
+  </div>
+  <div class="content">
+    <div class="section">
+      <div class="section-title">👤 Account</div>
+      <div class="setting-row">
+        <div class="setting-left">
+          <span class="setting-icon">👤</span>
+          <div>
+            <div class="setting-label">Guest User</div>
+            <div class="setting-sub">Sign in to sync</div>
+          </div>
+        </div>
+        <div class="setting-right"><span class="chevron">▶</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🔔 Notifications</div>
+      <div class="setting-row">
+        <span class="setting-label">Breakfast (7AM)</span>
+        <div class="toggle on"><div class="knob"></div></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Lunch (12PM)</span>
+        <div class="toggle on"><div class="knob"></div></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Dinner (7PM)</span>
+        <div class="toggle"><div class="knob"></div></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Daily (10AM)</span>
+        <div class="toggle on"><div class="knob"></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🥗 Dietary Preferences</div>
+      <div class="setting-row">
+        <span class="setting-label">Vegetarian</span>
+        <div class="toggle"><div class="knob"></div></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Vegan</span>
+        <div class="toggle"><div class="knob"></div></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Gluten-free</span>
+        <div class="toggle"><div class="knob"></div></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Dairy-free</span>
+        <div class="toggle"><div class="knob"></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🌐 Appearance & Language</div>
+      <div class="setting-row">
+        <span class="setting-label">Theme</span>
+        <div class="setting-right"><span class="setting-value">Light</span><span class="chevron">▶</span></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Language</span>
+        <div class="setting-right"><span class="setting-value">Tiếng Việt</span><span class="chevron">▶</span></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Units</span>
+        <div class="setting-right"><span class="setting-value">Metric</span><span class="chevron">▶</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🛡 Privacy & Data</div>
+      <div class="setting-row"><span class="setting-label">Clear search history</span><span class="chevron">▶</span></div>
+      <div class="setting-row"><span class="setting-label">Clear all favorites</span><span class="chevron">▶</span></div>
+      <div class="setting-row"><span class="setting-label destructive">Delete account</span><span class="chevron">▶</span></div>
+    </div>
+
+    <div class="about">
+      <div class="logo">🍜</div>
+      <div class="name">Hôm Nay Ăn Gì</div>
+      <div class="version">Version 1.0.0 (MVP)</div>
+      <div style="margin-top:4px;font-size:11px;">Made with ❤️ for food</div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item"><span class="tab-icon">🏠</span><span>Home</span></button>
+    <button class="tab-item"><span class="tab-icon">🔍</span><span>Discover</span></button>
+    <button class="tab-item active"><span class="tab-icon">❤️</span><span>Favorites</span></button>
+  </div>
+</div>
+</body>
+</html>

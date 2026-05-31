@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Discover (v2 Figma)</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #FFF8F0; display: flex; justify-content: center; padding: 20px; }
+.phone { width: 390px; background: #FFF8F0; border-radius: 44px; box-shadow: 0 0 0 1px rgba(141,111,71,0.15), 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 48px; background: #FFF8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1810; font-weight: 600; }
+.header { display: flex; align-items: center; gap: 12px; padding: 8px 24px 4px; }
+.header .back { width: 36px; height: 36px; border: none; background: none; font-size: 24px; cursor: pointer; color: #2D1810; }
+.header h2 { font-size: 20px; font-weight: 600; color: #2D1810; }
+.content { padding: 12px 24px; }
+.filter-group { margin-bottom: 16px; }
+.filter-label { font-size: 12px; color: #7D6B5A; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+.filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-chip { height: 34px; padding: 0 14px; border-radius: 12px; border: 1px solid rgba(141,111,71,0.15); background: #FFFFFF; color: #7D6B5A; font-size: 13px; cursor: pointer; font-family: inherit; }
+.filter-chip.active { background: #D97036; color: #fff; border-color: #D97036; }
+.price-chips { display: flex; gap: 4px; }
+.price-chip { flex: 1; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid rgba(141,111,71,0.15); background: #FFFFFF; color: #7D6B5A; font-size: 13px; cursor: pointer; font-family: inherit; }
+.price-chip.active { background: #D97036; color: #fff; border-color: #D97036; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 10px; }
+.section-header h3 { font-size: 15px; font-weight: 700; color: #2D1810; display: flex; align-items: center; gap: 6px; }
+.location { font-size: 12px; color: #7D6B5A; display: flex; align-items: center; gap: 4px; }
+.dish-card { display: flex; gap: 14px; padding: 14px; background: #FFFFFF; border: 1px solid rgba(141,111,71,0.15); border-radius: 16px; margin-bottom: 12px; }
+.dish-rank { width: 28px; height: 28px; border-radius: 50%; background: #D97036; color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dish-emoji { width: 56px; height: 56px; border-radius: 12px; background: #F5E6D3; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+.dish-info { flex: 1; }
+.dish-name { font-size: 15px; font-weight: 600; color: #2D1810; }
+.dish-name-en { font-size: 12px; color: #7D6B5A; }
+.dish-meta { display: flex; gap: 12px; margin: 4px 0 8px; font-size: 12px; color: #7D6B5A; }
+.dish-restaurant { font-size: 12px; color: #7D6B5A; }
+.dish-actions { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.dish-order { padding: 6px 14px; border-radius: 12px; border: none; background: #D97036; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.dish-fav { width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(141,111,71,0.15); background: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #C94A3A; }
+.location-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #F5E6D3; border-radius: 12px; font-size: 13px; color: #2D1810; margin-top: 8px; }
+.location-bar .change { color: #D97036; font-weight: 600; cursor: pointer; border: none; background: none; font-family: inherit; }
+.tab-bar { display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid rgba(141,111,71,0.15); align-items: center; margin-top: 16px; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: #7D6B5A; cursor: pointer; border: none; background: none; font-family: inherit; padding: 6px 0; }
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D97036; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header">
+    <button class="back">←</button>
+    <h2>Discover</h2>
+  </div>
+  <div class="content">
+    <div class="filter-group">
+      <div class="filter-label">📍 Distance</div>
+      <div class="filter-chips">
+        <button class="filter-chip active">1 km</button>
+        <button class="filter-chip">2 km</button>
+        <button class="filter-chip">5 km</button>
+        <button class="filter-chip">10 km</button>
+        <button class="filter-chip">20 km</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">💰 Price</div>
+      <div class="price-chips">
+        <button class="price-chip">Low $</button>
+        <button class="price-chip active">Mid $$</button>
+        <button class="price-chip">High $$$</button>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h3>📈 Trending Near You</h3>
+      <span class="location">📍 District 1, HCMC</span>
+    </div>
+
+    <div class="dish-card">
+      <div class="dish-rank">1</div>
+      <div class="dish-emoji">🥗</div>
+      <div class="dish-info">
+        <div class="dish-name">Phở Salad</div>
+        <div class="dish-name-en">Pho Salad</div>
+        <div class="dish-meta">
+          <span>📍 1.2 km</span>
+          <span>⭐ 4.5</span>
+          <span>💰 $$</span>
+        </div>
+        <div class="dish-restaurant">Nhà Hàng SG</div>
+        <div class="dish-actions">
+          <button class="dish-order">Order GrabFood</button>
+          <button class="dish-fav">♥</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dish-card">
+      <div class="dish-rank">2</div>
+      <div class="dish-emoji">🍜</div>
+      <div class="dish-info">
+        <div class="dish-name">Bún Chả</div>
+        <div class="dish-name-en">Grilled Pork Noodles</div>
+        <div class="dish-meta">
+          <span>📍 2.3 km</span>
+          <span>⭐ 4.3</span>
+          <span>💰 $$</span>
+        </div>
+        <div class="dish-restaurant">Bún Chả Hương Liên</div>
+        <div class="dish-actions">
+          <button class="dish-order">Order GrabFood</button>
+          <button class="dish-fav">♥</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dish-card">
+      <div class="dish-rank">3</div>
+      <div class="dish-emoji">🥘</div>
+      <div class="dish-info">
+        <div class="dish-name">Bánh Xèo</div>
+        <div class="dish-name-en">Vietnamese Pancake</div>
+        <div class="dish-meta">
+          <span>📍 800 m</span>
+          <span>⭐ 4.7</span>
+          <span>💰 $</span>
+        </div>
+        <div class="dish-restaurant">Bánh Xèo Cô Mai</div>
+        <div class="dish-actions">
+          <button class="dish-order">Order GrabFood</button>
+          <button class="dish-fav">♥</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="location-bar">
+      <span>📍 District 1, Ho Chi Minh City</span>
+      <button class="change">Change location</button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item"><span class="tab-icon">🏠</span><span>Home</span></button>
+    <button class="tab-item active"><span class="tab-icon">🔍</span><span>Discover</span></button>
+    <button class="tab-item"><span class="tab-icon">❤️</span><span>Favorites</span></button>
+  </div>
+</div>
+</body>
+</html>

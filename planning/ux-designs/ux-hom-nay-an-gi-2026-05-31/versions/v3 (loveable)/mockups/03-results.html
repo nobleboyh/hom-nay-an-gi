@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Results (v3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; display: flex; justify-content: center; padding: 20px; background: radial-gradient(ellipse 60% 50% at 10% 10%, oklch(0.62 0.14 38 / 0.14), transparent), radial-gradient(ellipse 50% 40% at 90% 90%, oklch(0.58 0.06 145 / 0.16), transparent); background-attachment: fixed; }
+.phone { width: 360px; background: oklch(1 0 0); border-radius: 48px; box-shadow: 0 30px 80px -20px rgba(80,40,20,0.35); overflow: hidden; }
+.status-bar { height: 48px; background: oklch(0.22 0.02 60); color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 12px; font-weight: 600; }
+.content { padding: 12px 20px 20px; }
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.header .back { font-size: 20px; color: oklch(0.5 0.02 60); cursor: pointer; border: none; background: none; }
+.header h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: oklch(0.22 0.02 60); }
+.result-meta { font-size: 12px; color: oklch(0.5 0.02 60); margin-bottom: 12px; }
+.sort-row { display: flex; gap: 6px; margin-bottom: 16px; }
+.sort-chip { padding: 6px 14px; border-radius: 999px; border: 1px solid oklch(0.88 0.018 70); background: oklch(1 0 0); color: oklch(0.5 0.02 60); font-size: 11px; cursor: pointer; font-family: 'Inter', sans-serif; }
+.sort-chip.active { background: oklch(0.62 0.14 38); color: #fff; border-color: oklch(0.62 0.14 38); }
+.card { background: oklch(1 0 0); border: 1px solid oklch(0.88 0.018 70); border-radius: 20px; margin-bottom: 10px; overflow: hidden; cursor: pointer; }
+.card-header { display: flex; align-items: center; padding: 14px; gap: 12px; }
+.card-img { width: 44px; height: 44px; border-radius: 12px; background: oklch(0.94 0.015 80); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.card-info { flex: 1; }
+.card-name { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; color: oklch(0.22 0.02 60); }
+.card-name-en { font-size: 11px; color: oklch(0.5 0.02 60); }
+.card-match { padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: oklch(0.62 0.14 38 / 0.15); color: oklch(0.62 0.14 38); }
+.card-carat { color: oklch(0.88 0.018 70); font-size: 14px; }
+.card.expanded .card-hero { width: 100%; height: 140px; background: oklch(0.94 0.015 80); display: flex; align-items: center; justify-content: center; font-size: 40px; }
+.card.expanded .card-body { padding: 0 14px 14px; }
+.card.expanded .card-detail-header { display: flex; align-items: flex-start; justify-content: space-between; margin: 8px 0; }
+.card.expanded .card-detail-header .card-name { font-size: 18px; }
+.card-stats { display: flex; gap: 16px; margin: 6px 0; }
+.card-stat { font-size: 12px; color: oklch(0.5 0.02 60); }
+.card-stat strong { color: oklch(0.22 0.02 60); }
+.card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin: 6px 0 10px; }
+.card-tag { padding: 4px 10px; border-radius: 999px; background: oklch(0.94 0.015 80); color: oklch(0.5 0.02 60); font-size: 10px; }
+.card-actions { display: flex; gap: 8px; }
+.primary-btn { flex: 1; padding: 12px; border-radius: 20px; border: none; background: oklch(0.62 0.14 38); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.icon-btn { width: 44px; border-radius: 20px; border: 1px solid oklch(0.88 0.018 70); background: oklch(1 0 0); font-size: 18px; cursor: pointer; color: oklch(0.62 0.14 38); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="content">
+    <div class="header">
+      <button class="back">←</button>
+      <h2>Results</h2>
+    </div>
+    <div class="result-meta">4 dishes · chicken, broccoli, eggs</div>
+    <div class="sort-row">
+      <button class="sort-chip active">Match</button>
+      <button class="sort-chip">Time</button>
+      <button class="sort-chip">Calories</button>
+    </div>
+
+    <!-- Expanded (top result) -->
+    <div class="card expanded">
+      <div class="card-hero">🥘</div>
+      <div class="card-body">
+        <div class="card-detail-header">
+          <div>
+            <div class="card-name">Gà xào bông cải</div>
+            <div class="card-name-en">Chicken stir-fry</div>
+          </div>
+          <div class="card-match">96%</div>
+        </div>
+        <div class="card-stats">
+          <span class="card-stat">⏱ <strong>25 min</strong></span>
+          <span class="card-stat">🔥 <strong>420 kcal</strong></span>
+        </div>
+        <div class="card-tags">
+          <span class="card-tag">Vietnamese</span>
+          <span class="card-tag">Meat</span>
+          <span class="card-tag">Light</span>
+        </div>
+        <div class="card-actions">
+          <button class="primary-btn">View Recipe</button>
+          <button class="icon-btn">♥</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compact cards -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-img">🍲</div>
+        <div class="card-info">
+          <div class="card-name">Súp gà nấm</div>
+          <div class="card-name-en">Chicken mushroom soup</div>
+        </div>
+        <div class="card-match">90%</div>
+        <span class="card-carat">▼</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-img">🥗</div>
+        <div class="card-info">
+          <div class="card-name">Gỏi gà bắp cải</div>
+          <div class="card-name-en">Chicken cabbage salad</div>
+        </div>
+        <div class="card-match">78%</div>
+        <span class="card-carat">▼</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-img">🍚</div>
+        <div class="card-info">
+          <div class="card-name">Cơm chiên trứng</div>
+          <div class="card-name-en">Egg fried rice</div>
+        </div>
+        <div class="card-match">72%</div>
+        <span class="card-carat">▼</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

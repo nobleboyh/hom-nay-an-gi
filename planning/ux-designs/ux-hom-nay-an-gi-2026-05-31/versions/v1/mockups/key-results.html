@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Results</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  background: #FFF8F0; display: flex; justify-content: center; padding: 20px;
+}
+.phone { width: 390px; background: #FFF8F0; border-radius: 44px; box-shadow: 0 0 0 1px #E8DED5, 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 54px; background: #FFF8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1F14; font-weight: 600; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 0 16px 8px; }
+.header h1 { font-size: 22px; font-weight: 700; color: #2D1F14; }
+.header .back { font-size: 24px; color: #7A6A5A; cursor: pointer; border: none; background: none; }
+.content { padding: 0 16px; }
+.result-count { font-size: 14px; color: #7A6A5A; margin-bottom: 12px; }
+.sort-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.sort-chip { height: 32px; padding: 0 12px; border-radius: 9999px; background: #FFFFFF; border: 1px solid #E8DED5; color: #7A6A5A; font-size: 12px; display: inline-flex; align-items: center; cursor: pointer; font-family: inherit; }
+.sort-chip.active { background: #D4562A; color: #fff; border-color: #D4562A; }
+.card { background: #FFFFFF; border: 1px solid #E8DED5; border-radius: 16px; padding: 16px; margin-bottom: 12px; cursor: pointer; }
+.card.compact { display: flex; align-items: center; gap: 12px; }
+.card-img { width: 60px; height: 60px; border-radius: 8px; background: #FDF0E9; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+.card-info { flex: 1; }
+.card-title { font-size: 16px; font-weight: 600; color: #2D1F14; }
+.card-meta { font-size: 13px; color: #7A6A5A; margin-top: 2px; }
+.card-match { font-size: 13px; color: #2E7D32; font-weight: 600; }
+.card.expanded { }
+.card.expanded .card-img { width: 100%; height: 180px; border-radius: 12px; margin-bottom: 12px; }
+.card.expanded .card-title { font-size: 20px; }
+.card-stats { display: flex; gap: 16px; margin: 8px 0 12px; }
+.card-stat { font-size: 13px; color: #7A6A5A; }
+.card-stat strong { color: #2D1F14; }
+.card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.card-tag { padding: 4px 10px; border-radius: 9999px; background: #FDF0E9; color: #2D1F14; font-size: 11px; }
+.card-actions { display: flex; gap: 8px; }
+.card-btn { padding: 10px 18px; border-radius: 9999px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.card-btn.primary { background: #D4562A; color: #fff; }
+.card-btn.secondary { background: #FDF0E9; color: #2D1F14; }
+.card-btn.icon { background: none; font-size: 20px; padding: 6px; color: #B5A99E; }
+.card-btn.icon.saved { color: #D4562A; }
+.tab-bar { display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid #E8DED5; margin-top: 16px; align-items: center; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: #B5A99E; cursor: pointer; border: none; background: none; font-family: inherit; padding: 6px 0; }
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D4562A; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #FDF0E9; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #D4562A; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header">
+    <button class="back">←</button>
+    <h1>5 dishes found</h1>
+    <div></div>
+  </div>
+  <div class="content">
+    <p class="result-count">for chicken, broccoli, eggs — Vietnamese, Meat</p>
+    <div class="sort-row">
+      <button class="sort-chip active">Relevance</button>
+      <button class="sort-chip">Calories</button>
+      <button class="sort-chip">Cook time</button>
+      <button class="sort-chip">Dish type</button>
+    </div>
+
+    <!-- Compact card -->
+    <div class="card compact">
+      <div class="card-img">🍗</div>
+      <div class="card-info">
+        <div class="card-title">Gà xào bông cải</div>
+        <div class="card-meta">Vietnamese · Stir-fry</div>
+      </div>
+      <div class="card-match">92% match</div>
+    </div>
+
+    <div class="card compact">
+      <div class="card-img">🥘</div>
+      <div class="card-info">
+        <div class="card-title">Cơm chiên trứng</div>
+        <div class="card-meta">Vietnamese · Fried rice</div>
+      </div>
+      <div class="card-match">85% match</div>
+    </div>
+
+    <!-- Expanded card -->
+    <div class="card expanded">
+      <div class="card-img" style="font-size:48px;">🍲</div>
+      <div class="card-title">Bún gà nấu nấm</div>
+      <div class="card-stats">
+        <span class="card-stat"><strong>25 min</strong> · cook</span>
+        <span class="card-stat"><strong>420 kcal</strong> · serving</span>
+        <span class="card-stat"><strong>92%</strong> match</span>
+      </div>
+      <div class="card-tags">
+        <span class="card-tag">Vietnamese</span>
+        <span class="card-tag">Light</span>
+        <span class="card-tag">Meat-included</span>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn primary">View Recipe</button>
+        <button class="card-btn secondary">Shopping List</button>
+        <button class="card-btn icon saved">♥</button>
+      </div>
+    </div>
+
+    <div class="card compact">
+      <div class="card-img">🥗</div>
+      <div class="card-info">
+        <div class="card-title">Gỏi gà bắp cải</div>
+        <div class="card-meta">Vietnamese · Salad</div>
+      </div>
+      <div class="card-match">78% match</div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item active"><span class="tab-icon">🏠</span><span>Home</span></button>
+    <button class="tab-item"><span class="tab-icon">🔍</span><span>Discover</span></button>
+    <button class="tab-item"><span class="tab-icon">❤️</span><span>Favorites</span></button>
+    <button class="tab-item" style="flex:0.5;"><div class="avatar">M</div></button>
+  </div>
+</div>
+</body>
+</html>

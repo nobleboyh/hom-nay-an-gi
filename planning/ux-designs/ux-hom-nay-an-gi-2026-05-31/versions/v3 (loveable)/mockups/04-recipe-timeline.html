@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Recipe Timeline (v3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; display: flex; justify-content: center; padding: 20px; background: radial-gradient(ellipse 60% 50% at 10% 10%, oklch(0.62 0.14 38 / 0.14), transparent), radial-gradient(ellipse 50% 40% at 90% 90%, oklch(0.58 0.06 145 / 0.16), transparent); background-attachment: fixed; }
+.phone { width: 360px; background: oklch(1 0 0); border-radius: 48px; box-shadow: 0 30px 80px -20px rgba(80,40,20,0.35); overflow: hidden; }
+.status-bar { height: 48px; background: oklch(0.22 0.02 60); color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 12px; font-weight: 600; }
+.content { padding: 12px 20px 20px; }
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.header .back { font-size: 20px; color: oklch(0.5 0.02 60); cursor: pointer; border: none; background: none; }
+.header-actions { display: flex; gap: 8px; }
+.header-btn { width: 36px; height: 36px; border-radius: 999px; border: 1px solid oklch(0.88 0.018 70); background: oklch(1 0 0); font-size: 16px; cursor: pointer; color: oklch(0.5 0.02 60); }
+.hero-img { width: 100%; height: 180px; border-radius: 20px; background: oklch(0.94 0.015 80); display: flex; align-items: center; justify-content: center; font-size: 56px; margin-bottom: 12px; }
+.recipe-title { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 600; color: oklch(0.22 0.02 60); }
+.recipe-title-en { font-size: 13px; color: oklch(0.5 0.02 60); margin-bottom: 8px; }
+.recipe-stats { display: flex; gap: 20px; margin-bottom: 16px; }
+.recipe-stat { font-size: 13px; color: oklch(0.5 0.02 60); display: flex; align-items: center; gap: 4px; }
+.recipe-stat strong { color: oklch(0.22 0.02 60); }
+.serving-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 10px 14px; background: oklch(0.965 0.02 80); border-radius: 20px; }
+.serving-row label { font-size: 13px; color: oklch(0.22 0.02 60); font-weight: 500; }
+.serving-control { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.serving-btn { width: 26px; height: 26px; border-radius: 8px; border: 1px solid oklch(0.88 0.018 70); background: oklch(1 0 0); font-size: 14px; cursor: pointer; color: oklch(0.22 0.02 60); font-family: 'Inter', sans-serif; }
+.serving-val { font-size: 14px; font-weight: 600; color: oklch(0.22 0.02 60); min-width: 16px; text-align: center; }
+.section-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; color: oklch(0.22 0.02 60); margin-bottom: 12px; }
+.timeline { }
+.timeline-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.timeline-time { width: 52px; font-size: 11px; color: oklch(0.5 0.02 60); font-weight: 600; text-align: right; padding-top: 4px; flex-shrink: 0; }
+.timeline-bar { flex: 1; height: 28px; border-radius: 14px; background: oklch(0.62 0.14 38 / 0.1); display: flex; align-items: center; padding: 0 12px; }
+.timeline-bar.sage { background: oklch(0.58 0.06 145 / 0.15); }
+.timeline-bar .task { font-size: 12px; font-weight: 500; color: oklch(0.22 0.02 60); }
+.timeline-bar .time { font-size: 10px; color: oklch(0.5 0.02 60); margin-left: auto; }
+.ingredients { margin: 20px 0; }
+.ingredient-row { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid oklch(0.88 0.018 70); font-size: 13px; }
+.ingredient-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid oklch(0.88 0.018 70); margin-right: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; }
+.ingredient-check.done { background: oklch(0.58 0.06 145); border-color: oklch(0.58 0.06 145); }
+.ingredient-name { flex: 1; }
+.ingredient-qty { color: oklch(0.5 0.02 60); }
+.ingredient-row.missing .ingredient-name { color: oklch(0.62 0.14 38); }
+.ingredient-row.missing .ingredient-qty { color: oklch(0.62 0.14 38); }
+.shopping-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: oklch(0.94 0.015 80); border-radius: 20px; margin-top: 12px; }
+.shopping-bar span { font-size: 13px; color: oklch(0.22 0.02 60); font-weight: 500; }
+.shopping-bar button { padding: 8px 20px; border-radius: 999px; border: none; background: oklch(0.62 0.14 38); color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="content">
+    <div class="header">
+      <button class="back">←</button>
+      <div class="header-actions">
+        <button class="header-btn">♥</button>
+        <button class="header-btn">↗</button>
+      </div>
+    </div>
+    <div class="hero-img">🍜</div>
+    <div class="recipe-title">Phở gà</div>
+    <div class="recipe-title-en">Chicken pho · 2 servings</div>
+    <div class="recipe-stats">
+      <span class="recipe-stat">⏱ <strong>45 min</strong></span>
+      <span class="recipe-stat">🔥 <strong>420 kcal</strong></span>
+    </div>
+
+    <div class="serving-row">
+      <label>Servings</label>
+      <div class="serving-control">
+        <button class="serving-btn">−</button>
+        <span class="serving-val">2</span>
+        <button class="serving-btn">+</button>
+      </div>
+    </div>
+
+    <div class="section-title">Timeline</div>
+    <div class="timeline">
+      <div class="timeline-row">
+        <div class="timeline-time">0–5m</div>
+        <div class="timeline-bar"><span class="task">Prep</span><span class="time">5 min</span></div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-time">5–10m</div>
+        <div class="timeline-bar"><span class="task">Sauté garlic & chicken</span><span class="time">5 min</span></div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-time">10–20m</div>
+        <div class="timeline-bar"><span class="task">Add broth, simmer</span><span class="time">10 min</span></div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-time">5–15m</div>
+        <div class="timeline-bar sage"><span class="task">Boil noodles (parallel)</span><span class="time">10 min</span></div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-time">20–25m</div>
+        <div class="timeline-bar"><span class="task">Plate & serve</span><span class="time">5 min</span></div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:20px;">Ingredients</div>
+    <div class="ingredients">
+      <div class="ingredient-row">
+        <div class="ingredient-check done">✓</div>
+        <span class="ingredient-name">Chicken breast</span>
+        <span class="ingredient-qty">400 g</span>
+      </div>
+      <div class="ingredient-row">
+        <div class="ingredient-check done">✓</div>
+        <span class="ingredient-name">Broccoli</span>
+        <span class="ingredient-qty">200 g</span>
+      </div>
+      <div class="ingredient-row missing">
+        <div class="ingredient-check"></div>
+        <span class="ingredient-name">Soy sauce</span>
+        <span class="ingredient-qty">2 tbsp</span>
+      </div>
+      <div class="ingredient-row missing">
+        <div class="ingredient-check"></div>
+        <span class="ingredient-name">Oyster sauce</span>
+        <span class="ingredient-qty">1 tbsp</span>
+      </div>
+    </div>
+
+    <div class="shopping-bar">
+      <span>🛒 2 missing</span>
+      <button>Shopping list</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

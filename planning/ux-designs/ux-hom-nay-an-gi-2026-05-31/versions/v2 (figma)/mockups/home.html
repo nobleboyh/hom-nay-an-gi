@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Home (v2 Figma)</title>
+<!-- Based on UX_DESIGN_SPECIFICATION.md — Home Screen section -->
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #FFF8F0; display: flex; justify-content: center; padding: 20px; }
+.phone { width: 390px; background: #FFF8F0; border-radius: 44px; box-shadow: 0 0 0 1px rgba(141,111,71,0.15), 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 48px; background: #FFF8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1810; font-weight: 600; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 8px 24px 4px; }
+.header-left h1 { font-size: 28px; font-weight: 700; color: #2D1810; line-height: 1.2; }
+.header-left .sub { font-size: 14px; color: #7D6B5A; font-weight: 400; }
+.header .settings-btn { width: 40px; height: 40px; border: none; background: #F5E6D3; border-radius: 12px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #7D6B5A; }
+.content { padding: 16px 24px; }
+.surprise-btn {
+  width: 100%; height: 64px; border-radius: 12px; border: none;
+  background: linear-gradient(135deg, #D97036, #E8A87C); color: #fff;
+  font-size: 20px; font-weight: 700; display: flex; align-items: center;
+  justify-content: center; gap: 12px; margin-bottom: 24px; cursor: pointer;
+  box-shadow: 0 4px 12px rgba(217,112,54,0.3); font-family: inherit;
+}
+.surprise-btn span { font-size: 24px; }
+.nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.nav-card {
+  background: #FFFFFF; border: 1px solid rgba(141,111,71,0.15); border-radius: 16px;
+  padding: 20px; cursor: pointer; text-align: center; transition: 200ms ease;
+}
+.nav-card:hover { background: rgba(245,230,211,0.3); }
+.nav-card .icon { font-size: 32px; margin-bottom: 8px; }
+.nav-card .label { font-size: 15px; font-weight: 600; color: #2D1810; }
+.nav-card .desc { font-size: 12px; color: #7D6B5A; margin-top: 2px; }
+.stats { display: flex; gap: 16px; }
+.stat-card { flex: 1; background: #F5E6D3; border-radius: 16px; padding: 14px; text-align: center; }
+.stat-number { font-size: 24px; font-weight: 700; color: #2D1810; }
+.stat-label { font-size: 12px; color: #7D6B5A; margin-top: 2px; }
+.tab-bar { display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid rgba(141,111,71,0.15); align-items: center; margin-top: 12px; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: #7D6B5A; cursor: pointer; border: none; background: none; font-family: inherit; padding: 6px 0; }
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D97036; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header">
+    <div class="header-left">
+      <h1>Hôm Nay Ăn Gì</h1>
+      <div class="sub">What to Eat Today</div>
+    </div>
+    <button class="settings-btn">⚙</button>
+  </div>
+  <div class="content">
+    <button class="surprise-btn"><span>🎲</span> Surprise Me!</button>
+
+    <div class="nav-grid">
+      <div class="nav-card">
+        <div class="icon">🔍</div>
+        <div class="label">Ingredient Search</div>
+        <div class="desc">Find dishes by what you have</div>
+      </div>
+      <div class="nav-card">
+        <div class="icon">🌍</div>
+        <div class="label">Discover</div>
+        <div class="desc">Nearby & trending food</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number">127</div>
+        <div class="stat-label">Trending Dishes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">45</div>
+        <div class="stat-label">Nearby Restaurants</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item active"><span class="tab-icon">🏠</span><span>Home</span></button>
+    <button class="tab-item"><span class="tab-icon">🔍</span><span>Discover</span></button>
+    <button class="tab-item"><span class="tab-icon">❤️</span><span>Favorites</span></button>
+  </div>
+</div>
+</body>
+</html>

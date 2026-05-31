@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Ingredient Input (v2 Figma)</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #FFF8F0; display: flex; justify-content: center; padding: 20px; }
+.phone { width: 390px; background: #FFF8F0; border-radius: 44px; box-shadow: 0 0 0 1px rgba(141,111,71,0.15), 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 48px; background: #FFF8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1810; font-weight: 600; }
+.header { display: flex; align-items: center; gap: 16px; padding: 8px 24px 12px; }
+.header .back { width: 36px; height: 36px; border: none; background: none; font-size: 24px; cursor: pointer; color: #2D1810; }
+.header h2 { font-size: 20px; font-weight: 600; color: #2D1810; }
+.content { padding: 0 24px; }
+.input-wrapper { background: #FFFBF5; border: 1px solid rgba(141,111,71,0.15); border-radius: 12px; display: flex; align-items: center; padding: 0 12px; height: 48px; }
+.input-wrapper input { flex: 1; border: none; outline: none; font-size: 16px; color: #2D1810; background: transparent; font-family: inherit; }
+.input-wrapper input::placeholder { color: #7D6B5A; }
+.input-wrapper .icon-btn { width: 40px; height: 40px; border: none; background: none; font-size: 20px; cursor: pointer; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #7D6B5A; }
+.input-wrapper .icon-btn:hover { background: #F5E6D3; }
+.section-label { font-size: 13px; color: #7D6B5A; font-weight: 600; margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.ingredient-list { background: #FFFFFF; border: 1px solid rgba(141,111,71,0.15); border-radius: 16px; padding: 8px; }
+.ingredient-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 8px; border-bottom: 1px solid rgba(141,111,71,0.1); }
+.ingredient-row:last-child { border-bottom: none; }
+.ingredient-name { font-size: 15px; color: #2D1810; font-weight: 500; }
+.qty-control { display: flex; align-items: center; gap: 8px; }
+.qty-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid rgba(141,111,71,0.2); background: #FFFBF5; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #2D1810; font-family: inherit; }
+.qty-value { font-size: 15px; font-weight: 500; color: #2D1810; min-width: 20px; text-align: center; }
+.tag-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { height: 36px; padding: 0 16px; border-radius: 9999px; border: none; font-size: 14px; cursor: pointer; font-family: inherit; background: #F5E6D3; color: #7D6B5A; }
+.tag.active { background: #D97036; color: #fff; }
+.time-row { display: flex; gap: 8px; }
+.time-chip { height: 36px; padding: 0 16px; border-radius: 12px; border: 1px solid rgba(141,111,71,0.15); background: #FFFFFF; color: #7D6B5A; font-size: 14px; cursor: pointer; font-family: inherit; }
+.time-chip.active { background: #D97036; color: #fff; border-color: #D97036; }
+.search-btn { width: 100%; height: 48px; border-radius: 12px; border: none; background: #D97036; color: #fff; font-size: 16px; font-weight: 600; margin: 20px 0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
+.search-btn:disabled { background: #D4C4B0; cursor: not-allowed; }
+.tab-bar { display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid rgba(141,111,71,0.15); align-items: center; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: #7D6B5A; cursor: pointer; border: none; background: none; font-family: inherit; padding: 6px 0; }
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D97036; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header">
+    <button class="back">←</button>
+    <h2>Ingredient Search</h2>
+  </div>
+  <div class="content">
+    <div class="section-label">What do you have?</div>
+    <div class="input-wrapper">
+      <input type="text" placeholder="chicken, broccoli, eggs..." value="chicken, broccoli, eggs">
+      <button class="icon-btn">🎤</button>
+      <button class="icon-btn">📷</button>
+    </div>
+
+    <div class="section-label">Your Ingredients (3)</div>
+    <div class="ingredient-list">
+      <div class="ingredient-row">
+        <span class="ingredient-name">Chicken</span>
+        <div class="qty-control">
+          <button class="qty-btn">−</button>
+          <span class="qty-value">2</span>
+          <button class="qty-btn">+</button>
+        </div>
+      </div>
+      <div class="ingredient-row">
+        <span class="ingredient-name">Broccoli</span>
+        <div class="qty-control">
+          <button class="qty-btn">−</button>
+          <span class="qty-value">1</span>
+          <button class="qty-btn">+</button>
+        </div>
+      </div>
+      <div class="ingredient-row">
+        <span class="ingredient-name">Eggs</span>
+        <div class="qty-control">
+          <button class="qty-btn">−</button>
+          <span class="qty-value">3</span>
+          <button class="qty-btn">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Food Type</div>
+    <div class="tag-grid">
+      <button class="tag">Vegetarian</button>
+      <button class="tag active">Light</button>
+      <button class="tag">Rich</button>
+      <button class="tag active">Meat</button>
+      <button class="tag">Vietnamese</button>
+      <button class="tag">Chinese</button>
+      <button class="tag">Western</button>
+    </div>
+
+    <div class="section-label">Cooking Time</div>
+    <div class="time-row">
+      <button class="time-chip active">15 min</button>
+      <button class="time-chip">30 min</button>
+      <button class="time-chip">60 min</button>
+      <button class="time-chip">90+ min</button>
+    </div>
+
+    <button class="search-btn">🔍 Search Dishes</button>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item active"><span class="tab-icon">🏠</span><span>Home</span></button>
+    <button class="tab-item"><span class="tab-icon">🔍</span><span>Discover</span></button>
+    <button class="tab-item"><span class="tab-icon">❤️</span><span>Favorites</span></button>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Discover</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; background: #FFF8F0; display: flex; justify-content: center; padding: 20px; }
+.phone { width: 390px; background: #FFF8F0; border-radius: 44px; box-shadow: 0 0 0 1px #E8DED5, 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 54px; background: #FFF8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1F14; font-weight: 600; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 0 16px 8px; }
+.header h1 { font-size: 28px; font-weight: 700; color: #2D1F14; }
+.header .drawer-btn { width: 36px; height: 36px; border: none; background: none; font-size: 22px; color: #7A6A5A; cursor: pointer; }
+.content { padding: 0 16px; }
+.surprise-btn {
+  width: 100%; height: 56px; border-radius: 9999px; border: none;
+  background: #D4562A; color: #fff; font-size: 18px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 20px; cursor: pointer; font-family: inherit;
+}
+.surprise-btn span { font-size: 24px; }
+.section-label { font-size: 13px; color: #7A6A5A; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-chip { height: 32px; padding: 0 12px; border-radius: 9999px; background: #FFFFFF; border: 1px solid #E8DED5; color: #7A6A5A; font-size: 12px; display: inline-flex; align-items: center; cursor: pointer; font-family: inherit; }
+.filter-chip.active { background: #D4562A; color: #fff; border-color: #D4562A; }
+.price-row { display: flex; gap: 4px; margin-bottom: 16px; }
+.price-chip { flex: 1; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; border: 1px solid #E8DED5; background: #FFFFFF; color: #7A6A5A; font-size: 12px; cursor: pointer; font-family: inherit; }
+.price-chip.active { background: #D4562A; color: #fff; border-color: #D4562A; }
+.feed-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #E8DED5; cursor: pointer; }
+.feed-img { width: 72px; height: 72px; border-radius: 12px; background: #FDF0E9; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+.feed-info { flex: 1; }
+.feed-name { font-size: 15px; font-weight: 600; color: #2D1F14; }
+.feed-meta { font-size: 12px; color: #7A6A5A; margin-top: 3px; display: flex; gap: 12px; }
+.feed-source { font-size: 11px; color: #7A6A5A; margin-top: 2px; }
+.feed-rank { font-size: 11px; color: #D4562A; font-weight: 600; }
+.tab-bar { display: flex; height: 64px; background: #FFFFFF; border-top: 1px solid #E8DED5; margin-top: 12px; align-items: center; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: #B5A99E; cursor: pointer; border: none; background: none; font-family: inherit; padding: 6px 0; }
+.tab-item .tab-icon { font-size: 22px; }
+.tab-item.active { color: #D4562A; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #FDF0E9; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #D4562A; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header">
+    <h1>Discover</h1>
+    <button class="drawer-btn">☰</button>
+  </div>
+  <div class="content">
+    <button class="surprise-btn"><span>🎲</span> Surprise me!</button>
+
+    <div class="section-label">Distance</div>
+    <div class="filter-row">
+      <button class="filter-chip active">1 km</button>
+      <button class="filter-chip">2 km</button>
+      <button class="filter-chip">5 km</button>
+      <button class="filter-chip">10 km</button>
+    </div>
+
+    <div class="section-label">Price</div>
+    <div class="price-row">
+      <button class="price-chip">Low (~30k)</button>
+      <button class="price-chip active">Mid (30-80k)</button>
+      <button class="price-chip">High (80k+)</button>
+    </div>
+
+    <div class="section-label">Trending Near You</div>
+
+    <div class="feed-item">
+      <div class="feed-img">🍜</div>
+      <div class="feed-info">
+        <div class="feed-name">Phở gà</div>
+        <div class="feed-meta"><span>📍 350m</span><span>💰 45k</span><span>⭐ 4.5</span></div>
+        <div class="feed-source">Phở Hòa · Pasteur St</div>
+      </div>
+      <div class="feed-rank">#1</div>
+    </div>
+
+    <div class="feed-item">
+      <div class="feed-img">🥩</div>
+      <div class="feed-info">
+        <div class="feed-name">Bún thịt nướng</div>
+        <div class="feed-meta"><span>📍 1.2 km</span><span>💰 55k</span><span>⭐ 4.3</span></div>
+        <div class="feed-source">Bún Thịt Nướng Cô Hoa</div>
+      </div>
+      <div class="feed-rank">#2</div>
+    </div>
+
+    <div class="feed-item">
+      <div class="feed-img">🥗</div>
+      <div class="feed-info">
+        <div class="feed-name">Gỏi cuốn</div>
+        <div class="feed-meta"><span>📍 800m</span><span>💰 25k</span><span>⭐ 4.7</span></div>
+        <div class="feed-source">Quán Cô Mai</div>
+      </div>
+      <div class="feed-rank">#3</div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item"><span class="tab-icon">🏠</span><span>Home</span></button>
+    <button class="tab-item active"><span class="tab-icon">🔍</span><span>Discover</span></button>
+    <button class="tab-item"><span class="tab-icon">❤️</span><span>Favorites</span></button>
+    <button class="tab-item" style="flex:0.5;"><div class="avatar">M</div></button>
+  </div>
+</div>
+</body>
+</html>

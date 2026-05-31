@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Login</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; background: #FFF8F0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+.phone { width: 390px; background: #FFF8F0; border-radius: 44px; box-shadow: 0 0 0 1px #E8DED5, 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; }
+.status-bar { height: 54px; background: #FFF8F0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; color: #2D1F14; font-weight: 600; }
+.content { padding: 0 24px; text-align: center; }
+.header-bar { display: flex; align-items: center; padding: 8px 16px; }
+.header-bar .close { font-size: 24px; color: #7A6A5A; cursor: pointer; border: none; background: none; }
+.logo { font-size: 48px; margin: 32px 0 8px; }
+.app-name { font-size: 24px; font-weight: 700; color: #2D1F14; margin-bottom: 4px; }
+.app-desc { font-size: 14px; color: #7A6A5A; margin-bottom: 32px; }
+.auth-btn {
+  width: 100%; height: 48px; border-radius: 9999px; border: none;
+  font-size: 15px; font-weight: 600; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px;
+  font-family: inherit;
+}
+.auth-btn.google { background: #FFFFFF; border: 1px solid #E8DED5; color: #2D1F14; }
+.auth-btn.email { background: #D4562A; color: #fff; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: #B5A99E; font-size: 12px; }
+.divider-line { flex: 1; height: 1px; background: #E8DED5; }
+.skip-link { display: block; margin-top: 24px; color: #7A6A5A; font-size: 14px; text-decoration: none; cursor: pointer; padding-bottom: 40px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+  <div class="header-bar">
+    <button class="close">✕</button>
+  </div>
+  <div class="content">
+    <div class="logo">🍜</div>
+    <div class="app-name">Hôm Nay Ăn Gì</div>
+    <div class="app-desc">Save your favorites and get personalized suggestions</div>
+
+    <button class="auth-btn google">
+      <span style="font-size:18px;">G</span> Continue with Google
+    </button>
+    <button class="auth-btn email">
+      ✉️ Continue with Email
+    </button>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span>or</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <a class="skip-link">Continue without logging in</a>
+  </div>
+</div>
+</body>
+</html>
