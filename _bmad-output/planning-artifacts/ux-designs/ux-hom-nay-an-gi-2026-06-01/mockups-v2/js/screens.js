@@ -1,55 +1,41 @@
-(function() {
-  var toastContainer = document.getElementById('toast-container');
-  if (!toastContainer) {
-    toastContainer = document.createElement('div');
-    toastContainer.id = 'toast-container';
-    toastContainer.setAttribute('role', 'status');
-    toastContainer.setAttribute('aria-live', 'polite');
-    document.body.appendChild(toastContainer);
+function showToast(msg, duration = 2000) {
+  let t = document.querySelector('.toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.className = 'toast';
+    document.body.appendChild(t);
   }
-  window.showToast = function(msg) {
-    var el = document.createElement('div');
-    el.className = 'toast';
-    el.textContent = msg;
-    toastContainer.appendChild(el);
-    requestAnimationFrame(function() {
-      el.classList.add('show');
-    });
-    setTimeout(function() {
-      el.classList.remove('show');
-      setTimeout(function() { el.remove(); }, 300);
-    }, 4000);
-  };
-  // Collapsible sections
-  document.addEventListener('click', function(e) {
-    var header = e.target.closest('.collapsible-header');
-    if (header) {
-      header.parentElement.classList.toggle('open');
-      var isOpen = header.parentElement.classList.contains('open');
-      header.setAttribute('aria-expanded', isOpen);
-      var chevron = header.querySelector('span:last-child');
-      if (chevron) chevron.textContent = isOpen ? '▴' : '▾';
-    }
-  });
-  // Chip toggle
-  document.addEventListener('click', function(e) {
-    var chip = e.target.closest('.chip-row .chip');
-    if (chip) {
-      var isActive = chip.classList.contains('active');
-      // If single-select (cooking time chips), deactivate siblings
-      if (chip.closest('.chip-row') && !chip.closest('.chip-row').classList.contains('multi')) {
-        chip.closest('.chip-row').querySelectorAll('.chip.active').forEach(function(c) {
-          if (c !== chip) c.classList.remove('active');
-        });
-      }
-      chip.classList.toggle('active');
-    }
-  });
-  // Toggle list item checkbox
-  document.addEventListener('click', function(e) {
-    var check = e.target.closest('.list-item-check');
-    if (check) {
-      check.closest('.list-item').classList.toggle('checked');
-    }
-  });
-})();
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._hide);
+  t._hide = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function toggleCard(el) {
+  el.classList.toggle('expanded');
+}
+
+function toggleCollapsible(el) {
+  el.classList.toggle('open');
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+}
+
+function setActiveTab(tabId) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  const el = document.querySelector(`[data-tab="${tabId}"]`);
+  if (el) el.classList.add('active');
+}
+
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('.result-card');
+  if (card) toggleCard(card);
+  const coll = e.target.closest('.collapsible-header');
+  if (coll) toggleCollapsible(coll.parentElement);
+  const check = e.target.closest('.list-item-check');
+  if (check) toggleCheck(check.closest('.list-item'));
+  const chip = e.target.closest('.chip:not(.chip-filled)');
+  if (chip) chip.classList.toggle('active');
+});
