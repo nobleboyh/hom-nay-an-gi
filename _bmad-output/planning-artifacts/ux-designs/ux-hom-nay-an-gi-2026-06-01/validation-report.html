@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>UX Design Validation: Hôm Nay Ăn Gì</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+  header.report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .synthesis {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    font-size: 15.5px;
+  }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+  .dimension-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  section summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before {
+    content: "▸";
+    display: inline-block;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+  }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 {
+    display: inline;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .verdict-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: white;
+  }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .verdict-thin { background: var(--verdict-thin); }
+  .verdict-broken { background: var(--verdict-broken); }
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+  .findings-list { padding: 0 20px 4px; }
+  article.finding {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+  }
+  article.finding:first-child { border-top: none; }
+  article.finding header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+  .badge-sev-low { background: rgba(100, 116, 139, 0.12); color: var(--sev-low); }
+  .badge-sev-medium { background: rgba(202, 138, 4, 0.14); color: var(--sev-medium); }
+  .badge-sev-high { background: rgba(234, 88, 12, 0.14); color: var(--sev-high); }
+  .badge-sev-critical { background: rgba(220, 38, 38, 0.14); color: var(--sev-critical); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+  .reviewer-source {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .mechanical {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; color: var(--text); }
+  footer.report-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="report-header">
+      <div class="title">
+        <h1>Hôm Nay Ăn Gì — UX Design Validation Report</h1>
+        <div class="subtitle">DESIGN.md &middot; EXPERIENCE.md &middot; ux-hom-nay-an-gi-2026-06-01</div>
+      </div>
+    </header>
+
+    <div class="synthesis">
+      <p>Well-structured, internally consistent spine pair ready for architecture and story handoff with targeted remediation. The rubric walker rates the pair <strong>strong</strong> in 4 of 8 dimensions (flow coverage, visual reference coverage, bloat, shape fit) and <strong>adequate</strong> in 3 (token completeness, component coverage, inheritance discipline). Only <strong>state coverage</strong> rates <strong>thin</strong> — systemic loading/error/offline states are absent for every screen.</p>
+      <p>The accessibility and token-audit reviewers add 7 critical findings (9 critical total across all reviewers). The most impactful: <strong>3 WCAG AA contrast failures</strong> (muted text at 3.8:1, border at 1.28:1, accent on white at 4.1:1), <strong>5 undersized touch targets</strong>, and a <strong>spacing scale missing 7 commonly-used values</strong> (12px, 14px, 20px, 2px, 6px, 10px, 44px). These are token-level fixes, not architectural rework — darken 2–3 OKLCH values and add 3–4 spacing tokens. Patch the critical/high items before story-dev begins.</p>
+    </div>
+
+    <div class="dimension-summary">
+      <div class="dim-card">
+        <div class="dim-name">Flow coverage</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Token completeness</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Component coverage</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">State coverage</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Visual ref. coverage</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Bloat &amp; overspec.</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Inheritance discipline</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Shape fit</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+    </div>
+
+    <!-- 1. Flow coverage -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Flow coverage</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>4 KFs verified (KF-1 through KF-4), each mapping to a named UJ from the PRD or an account-creation flow. Every flow has a named protagonist, numbered steps, a clear climax beat, and resolution. Edges are called out explicitly.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">KF-4 missing edge for network failure during login</h3>
+              <span class="finding-location">EXPERIENCE.md KF-4</span>
+            </header>
+            <div class="finding-note">Edges cover empty-form validation and password masking, but no network failure during login attempt.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add a third edge noting current toast-based error and production requirement for retry/offline messaging.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">KF edges are forward-looking (production-oriented)</h3>
+              <span class="finding-location">EXPERIENCE.md KF-1, KF-2, KF-3</span>
+            </header>
+            <div class="finding-note">All edges describe production behaviors rather than v4 prototype failure handling. Acceptable pattern.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Downstream stories must implement the production behaviors described.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 2. Token completeness -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Token completeness</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>10 OKLCH color tokens defined in frontmatter with usage descriptions. Typography table has family, size, and weight for 10 roles. Three critical gaps: line-height absent, 3 tokens unused in component specs, spacing scale missing commonly-used values.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Line-height absent from every typography role</h3>
+              <span class="finding-location">DESIGN.md Typography table</span>
+            </header>
+            <div class="finding-note">Every row has family, size, weight — no line-height column. Forces implementation to guess or hardcode.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add line-height column (display: 1.2, body: 1.4, button: 1.3).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Three tokens defined but unused: --success, --warn, --danger</h3>
+              <span class="finding-location">DESIGN.md Colors + Components</span>
+            </header>
+            <div class="finding-note">They appear in the Colors table but no DESIGN.md component wires them. EXPERIENCE.md mentions missing ingredients with warning indicator but does not reference --warn.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Wire --warn to missing-ingredient styling, --success to Match Badge or checkbox checked, --danger to destructive button (or drop unused tokens).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Spacing scale missing 12px, 14px, 20px used in components</h3>
+              <span class="finding-location">DESIGN.md Spacing + Layout & Spacing</span>
+            </header>
+            <div class="finding-note">Current scale: xs(4), sm(8), md(16), lg(24), xl(32). Missing 12px (inter-item gap, ingredient chip padding), 14px (tag chip padding, input vertical padding), 20px (tab bar safe area).</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add spacing tokens or rationalise to 8px/4px grid.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Accent-on-white contrast borderline at 4.1:1</h3>
+              <span class="finding-location">DESIGN.md Colors</span>
+            </header>
+            <div class="finding-note">Match badge (12px, 600) and active tag (13px, 500) use accent on white — borderline for AA small text.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Verify with color tool; if failing, add --accent-strong token at higher lightness.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Dark mode deferred with no timeline</h3>
+              <span class="finding-location">DESIGN.md Colors</span>
+            </header>
+            <div class="finding-note">Explicitly deferred per [ASSUMPTION] tag. No target version or trigger specified.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add target version, e.g. "post-MVP v1.1".</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 3. Component coverage -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Component coverage</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>DESIGN.md lists 15 visual components. EXPERIENCE.md lists 40 behavioral component rows. Naming mismatches exist between files; 6 EXPERIENCE.md components lack visual specs.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Naming mismatch: "Tag Chip" vs 5 EXPERIENCE.md entries</h3>
+              <span class="finding-location">DESIGN.md vs EXPERIENCE.md Components</span>
+            </header>
+            <div class="finding-note">DESIGN.md "Tag Chip" maps to Ingredient chip, Food type chip row, Cuisine chip row, Cooking time chips, Mood tags — same visual, different behaviors.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Relabel "Tag Chip (base)" in DESIGN.md to signal it is the visual foundation reused by multiple behavioral components.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">6 EXPERIENCE.md components lack visual spec in DESIGN.md</h3>
+              <span class="finding-location">EXPERIENCE.md Component Patterns</span>
+            </header>
+            <div class="finding-note">Sort dropdown, Recipe hero, Status bar, Tip card, Benefits card, Registration link have no DESIGN.md entry. Some compose from existing primitives but Sort dropdown and Status bar are genuinely missing.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add Sort dropdown (select element styling) and Status bar to DESIGN.md Components.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Match Badge has no behavioral row in EXPERIENCE.md</h3>
+              <span class="finding-location">DESIGN.md Match Badge</span>
+            </header>
+            <div class="finding-note">Mentioned implicitly in Result card behavioral rules but lacks a dedicated EXPERIENCE.md row.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add Match Badge row to EXPERIENCE.md Component Patterns.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">"Dish Card" concept overlap across spines</h3>
+              <span class="finding-location">DESIGN.md + EXPERIENCE.md</span>
+            </header>
+            <div class="finding-note">DESIGN.md "Dish Card" maps to EXPERIENCE.md "Trending dish grid" and "Favorite item" — concept overlap but no single behavioral row.</div>
+            <div class="finding-fix"><strong>Fix:</strong> No action needed for now.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 4. State coverage — thin, default open -->
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>State coverage</h2>
+          <span class="verdict-pill verdict-thin">thin</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>The State Patterns table covers 19 interaction-specific states across 7 screens. However, systemic states (loading, error, offline) are almost entirely missing across every screen. This is the weakest dimension.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">No screen covers loading/error/offline states</h3>
+              <span class="finding-location">EXPERIENCE.md State Patterns</span>
+            </header>
+            <div class="finding-note">Results has an assumption note for skeleton cards. Discover, Recipe, Shopping List, Home, Favorites have zero mention of loading or error states. Login has no rate-limit state. Every screen needs a cold-load, network-error, and offline treatment.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add rows for each screen's Loading (skeleton/spinner), Network error (retry prompt), and Offline (cached content fallback) states.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Favorites empty vs search-no-results use same visual</h3>
+              <span class="finding-location">EXPERIENCE.md State Patterns</span>
+            </header>
+            <div class="finding-note">Noted as [ASSUMPTION]. Story-dev must differentiate these two states.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add separate "Search no results" row with distinct copy ("Không tìm thấy món nào").</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Discover has no Empty state row</h3>
+              <span class="finding-location">EXPERIENCE.md State Patterns</span>
+            </header>
+            <div class="finding-note">Zero results from filters — no defined treatment.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add empty state for Discover (zero results across all filters).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Shopping List has no empty state</h3>
+              <span class="finding-location">EXPERIENCE.md State Patterns</span>
+            </header>
+            <div class="finding-note">List with zero items (e.g., from a recipe with no ingredients).</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add row.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Login has no rate-limited state</h3>
+              <span class="finding-location">EXPERIENCE.md State Patterns</span>
+            </header>
+            <div class="finding-note">Too many failed login attempts — no treatment defined.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add row.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 5. Visual reference coverage -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Visual reference coverage</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>All 7 mockup HTML files exist (01 through 07). Frontmatter lists all 7 by name. EXPERIENCE.md references them. Spines-win-on-conflict declared explicitly. Every IA screen has a corresponding mockup. Zero findings.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- 6. Bloat & overspecification -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Bloat &amp; overspecification</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Both files are lean. DESIGN.md Brand & Style carries acceptable editorial voice (3 paragraphs). EXPERIENCE.md uses tables and brief prose throughout. Anti-patterns section is justifiable as a design-constraint record.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Anti-patterns items 4-5 duplicate DESIGN.md Do's & Don'ts</h3>
+              <span class="finding-location">EXPERIENCE.md Inspiration & Anti-patterns</span>
+            </header>
+            <div class="finding-note">Items 4 (cold greys) and 5 (modal dialogs) restate rules already in DESIGN.md Do's & Don'ts.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Focus anti-patterns on UX/interaction patterns only (swipe, gamification, social feeds); drop color/modal redundancies.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Decision log + reconcile creates 3 places for context</h3>
+              <span class="finding-location">.decision-log.md + reconcile-inputs.md</span>
+            </header>
+            <div class="finding-note">Thorough but downstream readers must look in 3 places for context. Acceptable for v4 handoff.</div>
+            <div class="finding-fix"><strong>Fix:</strong> No action needed.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 7. Inheritance discipline -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Inheritance discipline</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Sources frontmatter (10 files) all resolve to disk. UJ references (UJ-1, UJ-2, UJ-3) appear verbatim in KF headers. Token names consistent across both files. Component name mismatches and one typo.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Component name mismatch: "Card (result card)" vs "Result card (compact/expanded)"</h3>
+              <span class="finding-location">DESIGN.md vs EXPERIENCE.md Components</span>
+            </header>
+            <div class="finding-note">Same component referred to by different base names across spines.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Use consistent base name — "Result Card" in both spines with variant suffixes.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">"Tag Chip" visual parent not cross-referenced</h3>
+              <span class="finding-location">DESIGN.md vs EXPERIENCE.md</span>
+            </header>
+            <div class="finding-note">DESIGN.md "Tag Chip" is the visual parent of 5 EXPERIENCE.md chip components. No cross-reference note exists.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add comment in DESIGN.md: "Tag Chip is the base style reused by Food type, Cuisine, Cooking time, and Mood-tag chips (see EXPERIENCE.md for behavioral differences)."</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Typo: "ASSUPMPTION"</h3>
+              <span class="finding-location">EXPERIENCE.md:181</span>
+            </header>
+            <div class="finding-note">"ASSUPMPTION" → "ASSUMPTION".</div>
+            <div class="finding-fix"><strong>Fix:</strong> Fix typo.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 8. Shape fit -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Shape fit</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>DESIGN.md sections in canonical order. EXPERIENCE.md has all required defaults plus both optional sections (Responsive & Platform, Inspiration & Anti-patterns). No invented sections. One low-severity cross-reference issue.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Accessibility Floor cross-reference to missing DESIGN.md section</h3>
+              <span class="finding-location">EXPERIENCE.md Accessibility Floor + DESIGN.md</span>
+            </header>
+            <div class="finding-note">EXPERIENCE.md says "Visual contrast in DESIGN.md" but DESIGN.md has no dedicated accessibility section. Contrast is an emergent property of color tokens.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Either add an "Accessibility" subsection under DESIGN.md Colors with explicit contrast ratio commitments, or remove the cross-reference text.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Accessibility reviewer section -->
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>Accessibility review</h2>
+          <span class="reviewer-source">review-accessibility.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p><strong>Does not meet WCAG 2.1 AA.</strong> The design system has systemic contrast failures (muted text at 3.8:1, borders at 1.28:1) and pervasive undersizing of tap targets. The Accessibility Floor section in EXPERIENCE.md shows awareness but lacks concrete implementation specifications. 7 critical, 4 high, 5 medium, 4 low findings.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">--muted text fails WCAG 1.4.3 contrast (3.8:1)</h3>
+              <span class="finding-location">DESIGN.md Colors, Typography</span>
+            </header>
+            <div class="finding-note">--muted (oklch 50% 0.018 240) on --bg and --surface achieves ~3.8-4.07:1. Below 4.5:1 for normal text. Used for secondary text, timestamps, placeholders everywhere.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Darken to oklch(42% 0.022 240) for ~4.6:1, or prohibit for text <18px.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">--border fails WCAG 1.4.11 non-text contrast (1.4:1)</h3>
+              <span class="finding-location">DESIGN.md Colors, Input Field, Card, Tab Bar</span>
+            </header>
+            <div class="finding-note">--border (oklch 90% 0.006 240) on white = ~1.4:1. Required 3:1 for non-text content. Affects input borders, card borders, dividers.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Darken to oklch(78% 0.012 240) or replace card borders with card-flat shadow.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">Multiple touch targets undersized (&lt;44px)</h3>
+              <span class="finding-location">DESIGN.md Tab Bar, Tag Chip, Button</span>
+            </header>
+            <div class="finding-note">Tab items ~38-42px, tag chips ~34px, standard button ~43.5px, ingredient chip remove glyph at 16px.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add padding: 13px 14px to tags, 14px 24px to buttons, flex:1 to tab items. Remove target needs 44px pseudo-element.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">No keyboard model for click-delegated components</h3>
+              <span class="finding-location">EXPERIENCE.md Interaction Primitives</span>
+            </header>
+            <div class="finding-note">Global click delegation for card expand, collapsible sections, checkbox/chip toggle. No role, tabindex, or keyboard event handling.</div>
+            <div class="finding-fix"><strong>Fix:</strong> All clickable components must be &lt;button&gt; elements. If delegation, add role="button" + tabindex="0" + onkeydown for Enter/Space.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Toast-only form errors lack persistent announcement</h3>
+              <span class="finding-location">EXPERIENCE.md State Patterns, Toast</span>
+            </header>
+            <div class="finding-note">Login errors, ingredient limits use 2-second toasts. No aria-live region, no aria-invalid on fields.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add aria-live="polite" + role="status" to toast container. Apply aria-invalid to form fields. Increase dismiss to 4s.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">lang="vi" specification too vague for bilingual app</h3>
+              <span class="finding-location">EXPERIENCE.md Accessibility Floor</span>
+            </header>
+            <div class="finding-note">"Vietnamese content uses lang='vi'" without scope. Bilingual content needs language wrapping at phrase level.</div>
+            <div class="finding-fix"><strong>Fix:</strong> lang="vi" on &lt;html&gt;. English phrases wrapped in &lt;span lang="en"&gt;. Add language-switching utility spec.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Focus indicator insufficient: 1px color change only</h3>
+              <span class="finding-location">DESIGN.md Input Field, EXPERIENCE.md Accessibility</span>
+            </header>
+            <div class="finding-note">1px border change from --border (1.4:1) to --accent (5.9:1). Minimal visual change — may not be visible to users with low vision.</div>
+            <div class="finding-fix"><strong>Fix:</strong> outline: 2px solid --accent; outline-offset: 2px on all interactive elements.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">No skip-navigation link</h3>
+              <span class="finding-location">EXPERIENCE.md Layout, Navigation</span>
+            </header>
+            <div class="finding-note">Fixed top bar + bottom tab bar — keyboard users must tab through everything before reaching content.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add visually-hidden skip link as first focusable element + landmark roles.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Emoji-as-icons lack alt/aria spec</h3>
+              <span class="finding-location">EXPERIENCE.md Voice and Tone</span>
+            </header>
+            <div class="finding-note">Screen readers announce Unicode descriptions (e.g., "camera with flash" for 📸).</div>
+            <div class="finding-fix"><strong>Fix:</strong> Wrap in &lt;span aria-hidden="true"&gt; with visible text label.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">px-based font sizes may not respect system text size</h3>
+              <span class="finding-location">DESIGN.md Typography</span>
+            </header>
+            <div class="finding-note">All sizes in px. Not responsive to iOS Dynamic Type or Windows Ease of Access.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Use rem or clamp() for font sizes: clamp(12px, 0.75rem, 16px) for meta.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Toast feedback needs aria-live specification</h3>
+              <span class="finding-location">EXPERIENCE.md Toast, State Patterns</span>
+            </header>
+            <div class="finding-note">All transient feedback uses toast but no aria-live region specified.</div>
+            <div class="finding-fix"><strong>Fix:</strong> role="status" and aria-live="polite" on toast container. Minimum 4s dismiss.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Token Audit reviewer section -->
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>Design token audit</h2>
+          <span class="reviewer-source">review-token-audit.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>The token system is well-structured with semantic OKLCH tokens and a clean spacing/rounded scale, but has significant gaps. ~25% of component dimensions use hardcoded values not covered by the spacing scale; the border token fails WCAG non-text contrast; and several critical token categories (transitions, z-index, shadows, breakpoints, line-height) are entirely absent. 2 critical, 5 high, 14 medium, 5 low findings.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">--border on --surface fails WCAG 1.4.11 (1.28:1)</h3>
+              <span class="finding-location">DESIGN.md Colors</span>
+            </header>
+            <div class="finding-note">--border (oklch 90% 0.006 240) on white = ~1.28:1. Required 3:1 for non-text contrast. Card borders, dividers, hairline rules nearly invisible.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Darken to oklch(80% 0.01 240) ≈ #C8C5C0 for ~3:1 against white.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Spacing scale omits 12px, 14px, 20px, 2px, 6px, 10px, 44px</h3>
+              <span class="finding-location">DESIGN.md Spacing + Components</span>
+            </header>
+            <div class="finding-note">12px alone appears in button padding, toast padding, inter-item gap, ingredient-chip horizontal padding, timeline dot size. Current scale only has 4/8/16/24/32px.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Extend spacing scale or rationalise components to use existing tokens.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">No shadow/elevation token scale</h3>
+              <span class="finding-location">DESIGN.md Elevation & Depth</span>
+            </header>
+            <div class="finding-note">Three elevation levels with inline shadow values. No --shadow-sm/md/lg tokens.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Define shadow tokens matching the 3 elevation levels.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">No line-height tokens defined</h3>
+              <span class="finding-location">DESIGN.md Typography</span>
+            </header>
+            <div class="finding-note">Font sizes listed (10-28px) but no line-height values. Implementation will produce inconsistent vertical rhythm.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add --leading-tight (1.2), --leading-normal (1.4), --leading-relaxed (1.6) or per-role line-heights.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">No transition/duration tokens</h3>
+              <span class="finding-location">DESIGN.md Components</span>
+            </header>
+            <div class="finding-note">Three durations hardcoded: 0.15s, 0.2s, 0.3s.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Define --duration-fast (150ms), --duration-normal (200ms), --duration-slow (300ms).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">No z-index token scale</h3>
+              <span class="finding-location">DESIGN.md Toast</span>
+            </header>
+            <div class="finding-note">Toast z-index 200 hardcoded with no token scale.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Define --z-toast (200), --z-tab-bar (100), --z-dropdown (50), --z-base (1).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">10 of 18 components use hardcoded spacing not in token scale</h3>
+              <span class="finding-location">DESIGN.md Components</span>
+            </header>
+            <div class="finding-note">Tag Chip (14px), Ingredient Chip (6/12/14px), Input Field (14px), Button (12px), Tab Bar (20px), Toast (12px), Match Badge (2/10px), inter-item gap (12px), Timeline (44px).</div>
+            <div class="finding-fix"><strong>Fix:</strong> Extend spacing scale or switch components to existing token values.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <div class="mechanical">
+      <h3>Mechanical notes</h3>
+      <ul>
+        <li>Both spines have status: final — consistent with decision-log finalization entry.</li>
+        <li>.decision-log.md has 15 decisions, all dated 2026-06-01.</li>
+        <li>5 open questions logged; 4 flagged with ASSUMPTION tags in spines.</li>
+        <li>reconcile-inputs.md covers 4 versions (v1–v4) — useful provenance.</li>
+        <li><strong>Typo:</strong> EXPERIENCE.md:181 "ASSUPMPTION" → "ASSUMPTION".</li>
+        <li><strong>Typo/syntax:</strong> EXPERIENCE.md:265 unmatched parenthesis.</li>
+        <li>All 10 source files in EXPERIENCE.md frontmatter verified on disk.</li>
+        <li>DESIGN.md has no dark color tokens — consistent with deferral decision.</li>
+      </ul>
+    </div>
+
+    <footer class="report-footer">
+      <div class="meta">
+        <span>Rubric: review-rubric.md</span>
+        <span>Accessibility: review-accessibility.md</span>
+        <span>Token Audit: review-token-audit.md</span>
+        <span>Generated: 2026-06-01</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

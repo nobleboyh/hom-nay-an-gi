@@ -12,10 +12,11 @@ sources:
   - imports/v4-open-design/screens/05-favorites.html
   - imports/v4-open-design/screens/06-shopping-list.html
   - imports/v4-open-design/screens/07-login.html
+design: DESIGN.md
 updated: 2026-06-01
 ---
 
-> **Key-screen HTML mocks:** See `mockups/01-home.html` through `mockups/07-login.html`. These are 1:1 behavioral and visual references implementing the design system defined in `DESIGN.md`. Spine tables win on any conflict with mockups.
+> **Key-screen HTML mocks:** See `mockups-v2/01-home.html` through `mockups-v2/07-login.html`. These are 1:1 behavioral and visual references implementing the design system defined in `DESIGN.md`. Spine tables win on any conflict with mockups.
 
 # Hôm Nay Ăn Gì — Experience Spine
 
@@ -27,7 +28,7 @@ updated: 2026-06-01
 
 **Primary input modalities:** Text (keyboard), voice (microphone), camera (barcode + object recognition). Text is the default; voice and camera are supplementary triggers in the input field.
 
-**Navigation:** Fixed 4-tab bottom bar — **Trang chủ** (Home), **Khám phá** (Discover), **Yêu thích** (Favorites), **Cá nhân** (Profile/Login). Tab bar is present on root-level screens; absent during login flow (single-purpose screen).
+**Navigation:** Fixed 4-tab bottom bar — **Trang chủ** (Home), **Khám phá** (Discover), **Yêu thích** (Favorites), **Cá nhân** (Profile/Login). Tab bar is present on all root-level screens including the login/profile surface (tab 4 active on login).
 
 ## Information Architecture
 
@@ -90,15 +91,16 @@ Login (profile tab, or prompted at bookmark)
 | Component | Surface(s) | Behavioral rules |
 |-----------|------------|-----------------|
 | Ingredient input | Home | Text field with mic icon (left) and camera icon (right) inset. Comma-separated parsing. Max 20 ingredients. Entered ingredients render as removable chips below the field. |
-| Ingredient chip | Home | Appears below input as user types/completes ingredients. Each chip has a ✕ remove button. Clicking ✕ removes the chip from the list. |
-| Food type chip row | Home | Horizontal scrollable row. Toggleable (tap to select/deselect). Multiple simultaneous (AND logic). Active: `--accent-dim` background. Always-visible. |
-| Cuisine chip row | Home | Below food type. Same toggle behavior. Default: Việt Nam active. |
-| Mood tags | Home | Expandable collapsible section ("Cảm giác thèm"). Hidden by default. Tap the header to expand/collapse. Chevron indicator rotates on toggle. |
-| Cooking time chips | Home | Preset chips: 15 / 30 / 60 / 90+ phút. Single-select (range). Default: 30 phút active. |
+| Ingredient chip | Home | Appears below input as user types/completes ingredients. Each chip has a ✕ remove target (44px tap area). Clicking ✕ removes the chip. |
+| Food type chip row (Tag Chip base) | Home | Horizontal scrollable row. Toggleable (tap to select/deselect). Multiple simultaneous (AND logic). Active: `--accent-dim` background. Always-visible. |
+| Cuisine chip row (Tag Chip base) | Home | Below food type. Same toggle behavior. Default: Việt Nam active. |
+| Mood tags (Tag Chip base) | Home | Expandable collapsible section ("Cảm giác thèm"). Hidden by default. Tap the header to expand/collapse. Chevron indicator rotates on toggle. |
+| Cooking time chips (Tag Chip base) | Home | Preset chips: 15 / 30 / 60 / 90+ phút. Single-select (range). Default: 30 phút active. |
 | Search button | Home | Full-width primary button. Disabled when 0 ingredients. Tap navigates to Results. |
 | Surprise Me button | Home | Secondary button next to Search. Tap navigates to Results with a random dish query. |
-| Result card (compact) | Results | Tap to expand in place. Shows dish name + match badge + cook time + calories. Only one card expanded at a time (accordion behavior). |
-| Result card (expanded) | Results | Reveals photo placeholder, cuisine chips, action buttons (View Recipe, Shopping, Save). Tap again or tap another card to collapse. |
+| Result Card (compact) | Results | Tap to expand in place. Shows dish name + match badge + cook time + calories. Only one card expanded at a time (accordion behavior). Expand/collapse via `<button>` element. |
+| Result Card (expanded) | Results | Reveals photo placeholder, cuisine chips, action buttons (View Recipe, Shopping, Save). Tap again or tap another card to collapse. |
+| Match Badge | Results | Displayed on result cards. Shows match percentage (0-100%) as numeric text. Background `--accent-dim`, text `--accent-strong`. |
 | Sort dropdown | Results | Inline select element. Options: Best match (default), Lowest cal, Fastest, Dish type. Re-sorts list in place. |
 | Recipe hero | Recipe | Full-width 16:9 image placeholder, dish name, cook time, calorie display, cuisine chips, save button. |
 | Serving adjuster | Recipe | − / + buttons flanking a numeric display. Range: 1–10. Default: 2. Scales ingredient quantities and calorie count in real time. |
@@ -127,7 +129,7 @@ Login (profile tab, or prompted at bookmark)
 | Registration link | Login | "Đăng ký" text link below form. Currently shows toast: coming soon. |
 | Tab bar | All root screens | 4 fixed tabs. Active tab uses `--accent` color. Tap navigates to the corresponding screen. |
 | Back button | Results, Recipe, Shopping List, Login | "‹" character in top bar. Navigates to previous screen. |
-| Status bar | All screens | Simulated iOS status bar: time left, signal/battery icons right. Fixed at top. Styling only (no interaction). |
+| Status bar (simulated) | All screens | Simulated iOS status bar: time left, signal/battery icons right. Fixed at top. Font: `--font-mono`, 12px, `--muted`. Styling only (no interaction). |
 | Toast | All screens | Transient feedback for save, copy, login, guest, voice, camera actions. Auto-dismiss after 2 seconds. Fade in/out. |
 
 ## State Patterns
@@ -163,13 +165,37 @@ Login (profile tab, or prompted at bookmark)
 | Shopping list save | Shopping List | Toast "✅ Đã lưu danh sách mua sắm" |
 | Recipe copy | Recipe | Toast "📋 Đã sao chép công thức" |
 | Shopping list copy | Shopping List | Toast "📋 Đã sao chép danh sách" |
+| Home loading | Home | Skeleton placeholder for input area and chips (2-3 chip bars, 1 button skeleton). `aria-busy="true"`. |
+| Home error | Home | Toast "⚠️ Không thể tải dữ liệu" with retry. |
+| Home offline | Home | Toast "🌐 Mất kết nối" with cached/fallback data if available. |
+| Results loading | Results | 3-4 skeleton result cards (shimmer animation). `aria-busy="true"`. |
+| Results error | Results | Toast "⚠️ Không thể tìm món" with retry button. |
+| Results offline | Results | Cached results if available, else "🌐 Mất kết nối" empty state. |
+| Recipe loading | Recipe | Skeleton for hero image, timeline (3-4 step bars), ingredient list (4-5 item bars). |
+| Recipe error | Recipe | Toast "⚠️ Không thể tải công thức" with back navigation. |
+| Recipe offline | Recipe | Cached recipe if previously viewed, else "🌐 Mất kết nối" state. |
+| Discover loading | Discover | 2-column skeleton grid (4-6 card placeholders). GPS loading spinner. |
+| Discover error | Discover | Toast "⚠️ Không thể tải danh sách" with retry. |
+| Discover offline | Discover | Cached trending data if available, else empty state with retry. |
+| Discover zero results | Discover | Empty state: "Không có món nào phù hợp" with "Xoá bộ lọc" CTA. |
+| Favorites loading | Favorites | 3-4 skeleton cards. `aria-busy="true"`. |
+| Favorites error | Favorites | Toast "⚠️ Không thể tải danh sách yêu thích" with retry. |
+| Favorites search no results | Favorites | Distinct empty state: "Không tìm thấy món nào" (different from "no favorites" empty state). |
+| Shopping List loading | Shopping List | Skeleton for header + 4-5 item bars. |
+| Shopping List error | Shopping List | Toast "⚠️ Không thể tải danh sách mua sắm" with back navigation. |
+| Shopping List empty | Shopping List | "Không có nguyên liệu nào" empty state with CTA to Results. |
+| Login loading | Login | Button disabled with spinner. `aria-busy="true"`. |
+| Login error | Login | Persistent inline error (not just toast): "Email hoặc mật khẩu không đúng". `aria-invalid` on fields. |
+| Login rate-limited | Login | "Quá nhiều lần thử. Vui lòng thử lại sau 5 phút." Toast + button disabled for 5 min. |
+| Login offline | Login | "🌐 Cần kết nối internet để đăng nhập" inline message. |
 
 ## Interaction Primitives
 
 - **Tap** to select, navigate, toggle, expand.
 - **Tap to expand/collapse** on result cards (accordion: one open at a time).
+- **Keyboard activation**: all tap targets are native `<button>` elements or have `role="button"` + `tabindex="0"` + Enter/Space `onkeydown`. No interactive element is keyboard-inaccessible.
 - **Tap to toggle** on tag chips, list item checkboxes, collapsible sections.
-- **Global click delegation** (`document.addEventListener('click', ...)`) handles:
+- **Global click delegation** on `<button>` elements (`document.addEventListener('click', ...)`) handles:
   - Result card expand/collapse
   - Collapsible section toggle
   - List item checkbox toggle
@@ -177,7 +203,7 @@ Login (profile tab, or prompted at bookmark)
 - **Toast** for all transient feedback: saves, copies, errors, confirmations.
 - **Back navigation** via "‹" button in top bar (prevents browser back confusion in-workspace).
 - **Tab navigation** via direct `window.location.href` assignment (prototype uses page loads; production should use client-side routing).
-- **No infinite scroll** in v4 prototype. [ASSUPMPTION: Production should implement infinite scroll or pagination for non-trivial result sets.]
+- **No infinite scroll** in v4 prototype. [ASSUMPTION: Production should implement infinite scroll or pagination for non-trivial result sets.]
 - **No pull-to-refresh** in v4 prototype. [ASSUMPTION: Production should add pull-to-refresh on Results and Discover.]
 
 ### Banned interactions
@@ -190,16 +216,59 @@ Login (profile tab, or prompted at bookmark)
 
 ## Accessibility Floor
 
-Behavioral. Visual contrast in `DESIGN.md`.
+Behavioral. Visual contrast and color tokens in `DESIGN.md.Colors` — contrast ratios annotated inline.
 
-- **Screen readers:** All interactive elements should have `aria-label` where icon-only. Vietnamese content uses `lang="vi"`. System fonts respect dynamic type settings.
-- **Tap targets:** Minimum 44×44pt for all interactive elements (tab items, chips, buttons, checkboxes). Ingredient chip remove (✕) is at least 16px with ample surrounding padding.
-- **Focus indicators:** Input fields use border-color `--accent` on focus. Tab items have visible active state. Buttons have hover states.
-- **Color independence:** Tag selected state = filled background + bold text + border change (not color alone). Checkbox checked = background fill + line-through + color change.
-- **Reduce Motion:** Card expansion, chip add, toast, and favorite remove animations should respect `prefers-reduced-motion`. Replace scale/translate with opacity-only.
-- **Camera permission:** Explain why camera is needed before triggering OS permission dialog (handled via toast and fallback-to-text behavior in v4 prototype).
-- **VoiceOver / TalkBack:** Every button labeled. Input has placeholder. Results announce match percentage and dish name.
-- **Dynamic type:** System fonts used throughout. UI must remain legible at largest accessibility text size.
+### Screen readers & semantics
+- All interactive elements must be native `<button>`, `<a>`, or `<input>` elements. If using custom clickable elements (e.g., `<div>` with click delegation), specify `role="button"`, `tabindex="0"`, and `onkeydown` handler for Enter/Space.
+- Icon-only elements: `aria-label` on the parent button.
+- Vietnamese content: `lang="vi"` on the `<html>` element. English-only phrases (e.g., "Surprise Me!", "Shopping", "Copy") wrapped in `<span lang="en">`. Provide a language-switching utility that handles wrapping.
+- Toast container: `role="status"` and `aria-live="polite"`. Auto-dismiss after 4s minimum.
+- Empty state containers: `role="status"`.
+- Emoji used as UI icons: wrapped in `<span aria-hidden="true">` with a visible text label or `aria-label` on the parent.
+- Match badge: percentage conveyed via numeric text (not color alone). `--success` is decorative reinforcement.
+- Shopping list checkboxes: `<input type="checkbox">` with associated `<label>` via `for`/`id`.
+- Cooking timeline: rendered as `<ol>` with `<li>` for each step.
+- Bottom tab bar: active tab has `aria-current="page"`.
+- Loading states (skeletons/spinners): parent region has `aria-busy="true"`, spinner has `aria-label="Đang tải..."`.
+- External links (GrabFood in production): `rel="noopener noreferrer"`, external-link icon, `aria-label="Mở GrabFood (liên kết ngoài)"`.
+- Form validation: `aria-invalid="true"` on offending input, error message associated via `aria-describedby`. Persistent inline error (not only toast).
+
+### Skip navigation & landmarks
+- First focusable element on every screen: visually-hidden skip link "Bỏ qua điều hướng → #main-content".
+- Landmark roles: `role="banner"` (top bar), `role="navigation"` (tab bar), `main` or `id="main-content"` on screen content container.
+- Logical heading hierarchy: one `h1` per screen, follow with `h2`/`h3`.
+
+### Tap targets
+- Minimum 44×44pt for all interactive elements: tab items, chips, buttons, checkboxes, icon-only buttons.
+- Design token sizing meets this: Tag Chip padding 13px 14px, Button padding 14px 24px, Tab items `flex: 1` distributes bar height.
+- Ingredient chip remove (✕): `::after` pseudo-element with `min-width: 44px; min-height: 44px` centered on the 16px glyph.
+- Ghost buttons (back, mic, camera): `min-width: 44px; min-height: 44px` with icon centered.
+
+### Focus indicators
+- All interactive elements: `outline: 2px solid --accent; outline-offset: 2px` (or `-2px` for tab bar).
+- Input fields: `border-color: --accent` on focus + outline ring.
+- Specify `:focus-visible` for keyboard-only focus indicators (not mouse clicks).
+
+### Color independence
+- Tag selected state: filled background + bold text + border change (not color alone).
+- Checkbox checked: background fill + line-through + color change.
+- Match badge: numeric text is sufficient; `--success` color is decorative.
+
+### Reduce Motion
+- All animations respect `prefers-reduced-motion: reduce`.
+- Card expansion: opacity + height transition only (no scale).
+- Favorite remove: opacity 1→0 over 100ms (no scale/translate).
+- Toast: opacity-only fade (no slide/translate).
+- Page transitions: disable slide; use instant swap or opacity cross-fade.
+
+### Camera & permissions
+- Explain why camera is needed before triggering OS permission dialog (toast + fallback-to-text behavior).
+- Permission-denied: toast "📷 Không có quyền truy cập máy ảnh" with fallback to text input.
+
+### Dynamic type
+- System fonts used throughout (`--font-body` = SF Pro Text / system-ui).
+- Font sizes in `clamp()` or `rem` for OS-level text size scaling. Minimum: 12px meta, 10px micro only for non-actionable data.
+- UI must remain legible at largest accessibility text size on iOS and Android.
 
 ## Key Flows
 
@@ -262,7 +331,7 @@ Behavioral. Visual contrast in `DESIGN.md`.
 1. Opens app → taps **Cá nhân** tab → sees Login screen.
 2. Reads the benefits card: sync favorites, smarter suggestions, saved shopping lists.
 3. Instead of logging in, taps "Tiếp tục mà không đăng nhập" → toast + redirect to Home.
-4. Later, taps ♡ on a dish → (in production) sees login prompt → returns to Cá nhân tab.
+4. Later, taps ♡ on a dish → in production, sees login prompt → returns to Cá nhân tab.
 5. **Climax:** Enters email + password. Taps "Đăng nhập". Form validates → toast "✅ Đăng nhập thành công!" → redirects to Home.
 6. **Resolution:** Now authenticated, bookmark actions persist and sync.
 

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hôm Nay Ăn Gì — Kết quả</title>
+<link rel="stylesheet" href="./css/system.css">
+</head>
+<body>
+<a href="#main-content" class="skip-link">Bỏ qua điều hướng → Nội dung chính</a>
+<div class="app-shell">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span style="display:flex;gap:4px;align-items:center" aria-hidden="true">
+      <svg width="16" height="12" viewBox="0 0 16 12"><rect x="0" y="1" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2" y="3" width="10" height="6" rx="1" fill="currentColor"/></svg>
+      <svg width="14" height="12" viewBox="0 0 14 12"><path d="M7 0C3.5 0 0 3 0 6s3.5 6 7 6 7-3 7-6-3.5-6-7-6zm0 10c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z" fill="currentColor"/></svg>
+      <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="0" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2" y="2" width="14" height="8" rx="1" fill="currentColor"/><rect x="14" y="4" width="2" height="4" rx="0.5" fill="currentColor"/></svg>
+    </span>
+  </div>
+
+  <main id="main-content" class="screen-content">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="btn-back" onclick="window.location.href='./01-home.html'" aria-label="Quay lại">‹</button>
+        <span class="top-bar-title">Kết quả</span>
+      </div>
+      <span class="text-sm">gà, bông cải, trứng</span>
+    </div>
+
+    <div class="flex items-center justify-between p-md" style="padding-bottom:8px">
+      <span class="text-sm" role="status" aria-live="polite">Tìm thấy 8 món phù hợp</span>
+      <select class="input-field" style="width:auto;padding:10px 16px;font-size:13px;border-radius:100px;min-height:44px" aria-label="Sắp xếp theo">
+        <option>Phù hợp nhất</option>
+        <option>Ít calo nhất</option>
+        <option>Nấu nhanh nhất</option>
+        <option>Loại món</option>
+      </select>
+    </div>
+
+    <div class="section" style="padding-top:0;display:flex;flex-direction:column;gap:12px">
+      <div class="result-card expanded">
+        <button class="result-card-header" onclick="var p=this.parentElement;p.classList.toggle('expanded');this.setAttribute('aria-expanded',p.classList.contains('expanded'))" aria-expanded="true" style="width:100%;border:none;background:none;cursor:pointer;font-family:var(--font-body);text-align:left" tabindex="0">
+          <div>
+            <div style="font-weight:600;font-size:16px;line-height:1.3">Gà xào bông cải</div>
+            <div class="text-sm" style="margin-top:2px">Việt Nam • 25 phút • 380 kcal</div>
+          </div>
+          <span class="match-badge" aria-label="Phù hợp 95%">95%</span>
+        </button>
+        <div class="result-card-body" role="region" aria-label="Chi tiết món Gà xào bông cải">
+          <div class="placeholder-img mb-sm" aria-hidden="true">
+            <span>📸 Ảnh món Gà xào bông cải</span>
+          </div>
+          <div class="flex items-center justify-between mb-sm">
+            <div class="flex gap-sm items-center" role="group" aria-label="Phân loại món">
+              <span class="chip chip-filled" style="padding:8px 14px;min-height:auto">Việt Nam</span>
+              <span class="chip" style="padding:8px 14px;min-height:auto">Có thịt</span>
+              <span class="chip" style="padding:8px 14px;min-height:auto">Mặn</span>
+            </div>
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-primary flex-1" onclick="window.location.href='./03-recipe.html'">Xem công thức</button>
+            <button class="btn btn-secondary flex-1" onclick="window.location.href='./06-shopping-list.html'">Mua sắm</button>
+            <button class="btn btn-ghost" onclick="showToast('✅ Đã lưu vào Yêu thích')" aria-label="Lưu vào yêu thích">♡</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <button class="result-card-header" onclick="var p=this.parentElement;p.classList.toggle('expanded');this.setAttribute('aria-expanded',p.classList.contains('expanded'))" aria-expanded="false" style="width:100%;border:none;background:none;cursor:pointer;font-family:var(--font-body);text-align:left" tabindex="0">
+          <div>
+            <div style="font-weight:600;font-size:16px;line-height:1.3">Cơm rang trứng gà</div>
+            <div class="text-sm" style="margin-top:2px">Việt Nam • 15 phút • 450 kcal</div>
+          </div>
+          <span class="match-badge" aria-label="Phù hợp 88%">88%</span>
+        </button>
+        <div class="result-card-body" role="region" aria-label="Chi tiết món Cơm rang trứng gà">
+          <div class="placeholder-img mb-sm" aria-hidden="true"><span>📸 Ảnh món Cơm rang trứng gà</span></div>
+          <div class="flex items-center justify-between mb-sm">
+            <div class="flex gap-sm items-center" role="group" aria-label="Phân loại món">
+              <span class="chip chip-filled" style="padding:8px 14px;min-height:auto">Việt Nam</span>
+              <span class="chip" style="padding:8px 14px;min-height:auto">Nhanh</span>
+            </div>
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-primary flex-1" onclick="window.location.href='./03-recipe.html'">Xem công thức</button>
+            <button class="btn btn-secondary flex-1" onclick="window.location.href='./06-shopping-list.html'">Mua sắm</button>
+            <button class="btn btn-ghost" onclick="showToast('✅ Đã lưu vào Yêu thích')" aria-label="Lưu vào yêu thích">♡</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <button class="result-card-header" onclick="var p=this.parentElement;p.classList.toggle('expanded');this.setAttribute('aria-expanded',p.classList.contains('expanded'))" aria-expanded="false" style="width:100%;border:none;background:none;cursor:pointer;font-family:var(--font-body);text-align:left" tabindex="0">
+          <div>
+            <div style="font-weight:600;font-size:16px;line-height:1.3">Súp gà trứng non</div>
+            <div class="text-sm" style="margin-top:2px">Việt Nam • 30 phút • 220 kcal</div>
+          </div>
+          <span class="match-badge" aria-label="Phù hợp 82%">82%</span>
+        </button>
+        <div class="result-card-body" role="region" aria-label="Chi tiết món Súp gà trứng non">
+          <div class="placeholder-img mb-sm" aria-hidden="true"><span>📸 Ảnh món Súp gà trứng non</span></div>
+          <div class="flex items-center justify-between mb-sm">
+            <div class="flex gap-sm items-center" role="group" aria-label="Phân loại món">
+              <span class="chip chip-filled" style="padding:8px 14px;min-height:auto">Việt Nam</span>
+              <span class="chip" style="padding:8px 14px;min-height:auto">Nhẹ</span>
+            </div>
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-primary flex-1" onclick="window.location.href='./03-recipe.html'">Xem công thức</button>
+            <button class="btn btn-secondary flex-1" onclick="window.location.href='./06-shopping-list.html'">Mua sắm</button>
+            <button class="btn btn-ghost" onclick="showToast('✅ Đã lưu vào Yêu thích')" aria-label="Lưu vào yêu thích">♡</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <button class="result-card-header" onclick="var p=this.parentElement;p.classList.toggle('expanded');this.setAttribute('aria-expanded',p.classList.contains('expanded'))" aria-expanded="false" style="width:100%;border:none;background:none;cursor:pointer;font-family:var(--font-body);text-align:left" tabindex="0">
+          <div>
+            <div style="font-weight:600;font-size:16px;line-height:1.3">Bông cải xào tỏi + trứng</div>
+            <div class="text-sm" style="margin-top:2px">Việt Nam • 10 phút • 180 kcal</div>
+          </div>
+          <span class="match-badge" aria-label="Phù hợp 76%">76%</span>
+        </button>
+        <div class="result-card-body" role="region" aria-label="Chi tiết món Bông cải xào tỏi">
+          <div class="placeholder-img mb-sm" aria-hidden="true"><span>📸 Ảnh món Bông cải xào tỏi</span></div>
+          <div class="flex items-center justify-between mb-sm">
+            <div class="flex gap-sm items-center" role="group" aria-label="Phân loại món">
+              <span class="chip chip-filled" style="padding:8px 14px;min-height:auto">Việt Nam</span>
+              <span class="chip" style="padding:8px 14px;min-height:auto">Chay</span>
+            </div>
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-primary flex-1" onclick="window.location.href='./03-recipe.html'">Xem công thức</button>
+            <button class="btn btn-secondary flex-1" onclick="window.location.href='./06-shopping-list.html'">Mua sắm</button>
+            <button class="btn btn-ghost" onclick="showToast('✅ Đã lưu vào Yêu thích')" aria-label="Lưu vào yêu thích">♡</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center text-sm" style="padding:16px">Không còn món nào để hiển thị</div>
+    </div>
+  </main>
+
+  <nav class="tab-bar" role="navigation" aria-label="Điều hướng chính">
+    <button class="tab-item active" data-tab="home" onclick="window.location.href='./01-home.html'" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      <span>Trang chủ</span>
+    </button>
+    <button class="tab-item" data-tab="discover" onclick="window.location.href='./04-discover.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <span>Khám phá</span>
+    </button>
+    <button class="tab-item" data-tab="favorites" onclick="window.location.href='./05-favorites.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+      <span>Yêu thích</span>
+    </button>
+    <button class="tab-item" data-tab="profile" onclick="window.location.href='./07-login.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      <span>Cá nhân</span>
+    </button>
+  </nav>
+</div>
+<script src="./js/screens.js"></script>
+</body>
+</html>
