@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hôm Nay Ăn Gì — App prototype</title>
+<link rel="stylesheet" href="css/system.css">
+<style>
+:root {
+  --bg:      oklch(98% 0.004 240);
+  --surface: oklch(100% 0 0);
+  --fg:      oklch(20% 0.02 240);
+  --muted:   oklch(50% 0.018 240);
+  --border:  oklch(90% 0.006 240);
+  --accent:  oklch(55% 0.18 35);
+  --accent-dim: oklch(55% 0.18 35 / 0.1);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  background: oklch(94% 0.005 240);
+  color: var(--fg);
+  margin: 0;
+  padding: 0;
+}
+
+.page-header {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 16px;
+}
+
+.page-header h1 {
+  font-family: 'Söhne', 'Avenir Next', -apple-system, system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.page-header p {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.screen-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 24px 48px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.screen-card {
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all 0.15s;
+}
+
+.screen-card:hover {
+  box-shadow: 0 4px 12px oklch(0 0 0 / 0.08);
+}
+
+.phone-frame {
+  width: 100%;
+  aspect-ratio: 390 / 844;
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+
+.phone-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.screen-info {
+  padding: 12px 16px;
+}
+
+.screen-info h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.screen-info p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+
+.screen-links {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 14px;
+}
+
+.screen-links a {
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.screen-links a:hover { text-decoration: underline; }
+
+.project-summary {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.summary-table th, .summary-table td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-table th {
+  font-weight: 600;
+  color: var(--muted);
+  width: 120px;
+}
+</style>
+</head>
+<body>
+<div class="page-header">
+  <h1>🥘 Hôm Nay Ăn Gì</h1>
+  <p>Wireframe prototype — 7 screens · Vietnamese food discovery app</p>
+</div>
+
+<div class="project-summary">
+  <table class="summary-table">
+    <tr><th>Flow</th><td>UJ-1: Ingredient → Results → Recipe → Shopping List</td></tr>
+    <tr><th>Flow</th><td>UJ-2: Discover → Trending → External link</td></tr>
+    <tr><th>Flow</th><td>UJ-3: Browse → Bookmark → Login → Favorites</td></tr>
+    <tr><th>Design</th><td>Human/approachable · Warm accent (phở-red) · Vietnamese-first</td></tr>
+  </table>
+</div>
+
+<div class="screen-grid">
+  <div class="screen-card">
+    <div class="phone-frame">
+      <iframe src="screens/01-home.html" loading="lazy"></iframe>
+    </div>
+    <div class="screen-info">
+      <h3>01 — Trang chủ / Nhập liệu</h3>
+      <p>Ingredient input (text/voice/camera), food-type chips, cuisine filter, cook time, Surprise Me</p>
+    </div>
+    <div class="screen-links">
+      <a href="screens/01-home.html" target="_blank">Mở to →</a>
+    </div>
+  </div>
+
+  <div class="screen-card">
+    <div class="phone-frame">
+      <iframe src="screens/02-results.html" loading="lazy"></iframe>
+    </div>
+    <div class="screen-info">
+      <h3>02 — Kết quả</h3>
+      <p>Collapsible result cards with match %, cook time, calories. Sortable. Tap to expand → recipe, shopping, save</p>
+    </div>
+    <div class="screen-links">
+      <a href="screens/02-results.html" target="_blank">Mở to →</a>
+    </div>
+  </div>
+
+  <div class="screen-card">
+    <div class="phone-frame">
+      <iframe src="screens/03-recipe.html" loading="lazy"></iframe>
+    </div>
+    <div class="screen-info">
+      <h3>03 — Công thức + Timeline</h3>
+      <p>Dish photo, serving adjuster (scales ingredients + calories), visual cooking timeline, missing-ingredient callout</p>
+    </div>
+    <div class="screen-links">
+      <a href="screens/03-recipe.html" target="_blank">Mở to →</a>
+    </div>
+  </div>
+
+  <div class="screen-card">
+    <div class="phone-frame">
+      <iframe src="screens/04-discover.html" loading="lazy"></iframe>
+    </div>
+    <div class="screen-info">
+      <h3>04 — Khám phá</h3>
+      <p>Location-aware trending dishes, 2km radius, price &amp; cuisine filters, restaurant cards with ratings</p>
+    </div>
+    <div class="screen-links">
+      <a href="screens/04-discover.html" target="_blank">Mở to →</a>
+    </div>
+  </div>
+
+  <div class="screen-card">
+    <div class="phone-frame">
+      <iframe src="screens/05-favorites.html" loading="lazy"></iframe>
+    </div>
+    <div class="screen-info">
+      <h3>05 — Yêu thích</h3>
+      <p>Saved dishes list with search, remove action, empty state with CTA to discover</p>
+    </div>
+    <div class="screen-links">
+      <a href="screens/05-favorites.html" target="_blank">Mở to →</a>
+    </div>
+  </div>
+
+  <div class="screen-card">
+    <div class="phone-frame">
+      <iframe src="screens/06-shopping-list.html" loading="lazy"></iframe>
+    </div>
+    <div class="screen-info">
+      <h3>06 — Danh sách mua sắm</h3>
+      <p>Checked-off owned ingredients, missing-items list with checkable rows, tip card, save/copy actions</p>
+    </div>
+    <div class="screen-links">
+      <a href="screens/06-shopping-list.html" target="_blank">Mở to →</a>
+    </div>
+  </div>
+
+  <div class="screen-card">
+    <div class="phone-frame">
+      <iframe src="screens/07-login.html" loading="lazy"></iframe>
+    </div>
+    <div class="screen-info">
+      <h3>07 — Đăng nhập</h3>
+      <p>Email/password login, guest-mode skip, benefits of registration card</p>
+    </div>
+    <div class="screen-links">
+      <a href="screens/07-login.html" target="_blank">Mở to →</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>
