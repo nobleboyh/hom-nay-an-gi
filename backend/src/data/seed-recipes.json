@@ -1,0 +1,1114 @@
+[
+  {
+    "dishId": "768f269f-e9ba-499a-b26b-acaf74253aca",
+    "name": "Phở bò",
+    "nameEn": "Beef Pho",
+    "cuisine": "Miền Bắc",
+    "ingredients": [
+      { "name": "Bánh phở", "quantity": 500, "unit": "g" },
+      { "name": "Thịt bò thăn", "quantity": 300, "unit": "g" },
+      { "name": "Xương bò", "quantity": 1000, "unit": "g" },
+      { "name": "Hành tây", "quantity": 2, "unit": "củ" },
+      { "name": "Gừng", "quantity": 1, "unit": "củ" },
+      { "name": "Hoa hồi", "quantity": 3, "unit": "cánh" },
+      { "name": "Quế", "quantity": 1, "unit": "thanh" },
+      { "name": "Nước mắm", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Hành lá", "quantity": 50, "unit": "g" },
+      { "name": "Rau thơm các loại", "quantity": 100, "unit": "g" },
+      { "name": "Giá đỗ", "quantity": 100, "unit": "g" },
+      { "name": "Chanh", "quantity": 2, "unit": "quả" },
+      { "name": "Ớt tươi", "quantity": 2, "unit": "quả" }
+    ],
+    "steps": [
+      {
+        "label": "Nướng hành tây và gừng cho thơm",
+        "durationMinutes": 10,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Rang hoa hồi và quế cho thơm",
+        "durationMinutes": 3,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Rửa sạch xương bò, chần qua nước sôi",
+        "durationMinutes": 10,
+        "parallelGroup": "bone"
+      },
+      {
+        "label": "Ninh xương bò với hành, gừng, hoa hồi, quế",
+        "durationMinutes": 60
+      },
+      {
+        "label": "Lọc lấy nước dùng, nêm nước mắm vừa ăn",
+        "durationMinutes": 5
+      },
+      {
+        "label": "Thái thịt bò mỏng",
+        "durationMinutes": 5,
+        "parallelGroup": "serve"
+      },
+      {
+        "label": "Chần bánh phở qua nước sôi",
+        "durationMinutes": 2,
+        "parallelGroup": "serve"
+      },
+      {
+        "label": "Xếp bánh phở, thịt bò vào tô, chan nước dùng",
+        "durationMinutes": 3,
+        "parallelGroup": "serve"
+      },
+      {
+        "label": "Thêm hành lá, rau thơm, giá đỗ",
+        "durationMinutes": 2,
+        "parallelGroup": "serve"
+      }
+    ],
+    "totalCookTimeMinutes": 75,
+    "caloriesPerServing": 450,
+    "tags": ["Việt Nam", "Miền Bắc", "Có thịt", "Món nước", "Đậm đà"],
+    "imageDescription": "Tô phở bò nóng hổi với nước dùng trong, thịt bò thái mỏng, hành lá xanh và rau thơm tươi"
+  },
+  {
+    "dishId": "71f05f5d-9435-4ae8-a498-5b0ee42f8342",
+    "name": "Bún chả Hà Nội",
+    "nameEn": "Hanoi Grilled Pork with Vermicelli",
+    "cuisine": "Miền Bắc",
+    "ingredients": [
+      { "name": "Thịt ba chỉ", "quantity": 300, "unit": "g" },
+      { "name": "Thịt nạc vai xay", "quantity": 200, "unit": "g" },
+      { "name": "Bún", "quantity": 500, "unit": "g" },
+      { "name": "Nước mắm", "quantity": 5, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Tỏi", "quantity": 5, "unit": "tép" },
+      { "name": "Chanh", "quantity": 2, "unit": "quả" },
+      { "name": "Ớt", "quantity": 2, "unit": "quả" },
+      { "name": "Dưa góp", "quantity": 100, "unit": "g" },
+      { "name": "Rau sống các loại", "quantity": 150, "unit": "g" },
+      { "name": "Hành khô", "quantity": 3, "unit": "củ" }
+    ],
+    "steps": [
+      {
+        "label": "Ướp thịt ba chỉ với nước mắm, đường, tỏi băm, hành khô",
+        "durationMinutes": 5,
+        "parallelGroup": "marinate"
+      },
+      {
+        "label": "Ướp thịt xay với nước mắm, hành, tỏi, nặn thành viên",
+        "durationMinutes": 5,
+        "parallelGroup": "marinate"
+      },
+      { "label": "Để thịt thấm gia vị", "durationMinutes": 20 },
+      {
+        "label": "Pha nước chấm: nước mắm, đường, chanh, tỏi, ớt",
+        "durationMinutes": 5,
+        "parallelGroup": "grill"
+      },
+      {
+        "label": "Nướng thịt ba chỉ và chả viên trên than hoa",
+        "durationMinutes": 15,
+        "parallelGroup": "grill"
+      },
+      {
+        "label": "Chần bún qua nước sôi, để ráo",
+        "durationMinutes": 3,
+        "parallelGroup": "grill"
+      },
+      {
+        "label": "Xếp bún, thịt nướng, chả viên, rau sống ra đĩa",
+        "durationMinutes": 3
+      }
+    ],
+    "totalCookTimeMinutes": 48,
+    "caloriesPerServing": 520,
+    "tags": ["Việt Nam", "Miền Bắc", "Có thịt", "Món nướng", "Đậm đà"],
+    "imageDescription": "Đĩa bún chả với thịt ba chỉ nướng thơm lừng, chả viên vàng ruộm, rau sống tươi xanh và chén nước chấm đậm đà"
+  },
+  {
+    "dishId": "a4957b42-fb54-4b7e-ac50-d7e8192f4202",
+    "name": "Bún bò Huế",
+    "nameEn": "Hue Beef Noodle Soup",
+    "cuisine": "Miền Trung",
+    "ingredients": [
+      { "name": "Bún sợi to", "quantity": 500, "unit": "g" },
+      { "name": "Thịt bò bắp", "quantity": 400, "unit": "g" },
+      { "name": "Chân giò", "quantity": 300, "unit": "g" },
+      { "name": "Xương bò", "quantity": 800, "unit": "g" },
+      { "name": "Sả", "quantity": 5, "unit": "cây" },
+      { "name": "Mắm ruốc Huế", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Màu điều", "quantity": 1, "unit": "muỗng canh" },
+      { "name": "Ớt bột", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Rau răm", "quantity": 50, "unit": "g" },
+      { "name": "Giá đỗ", "quantity": 100, "unit": "g" },
+      { "name": "Bắp chuối bào", "quantity": 100, "unit": "g" },
+      { "name": "Chanh", "quantity": 2, "unit": "quả" }
+    ],
+    "steps": [
+      {
+        "label": "Chần xương bò và chân giò qua nước sôi, rửa sạch",
+        "durationMinutes": 10,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Băm nhuyễn sả để ướp thịt bò bắp",
+        "durationMinutes": 3,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Ninh xương bò và chân giò với sả đập dập",
+        "durationMinutes": 60
+      },
+      {
+        "label": "Ướp thịt bò bắp với sả, màu điều, ớt bột",
+        "durationMinutes": 10
+      },
+      {
+        "label": "Cho thịt bò bắp vào nồi nước dùng ninh cùng",
+        "durationMinutes": 20
+      },
+      {
+        "label": "Hòa mắm ruốc vào nước dùng, nêm vừa ăn",
+        "durationMinutes": 3
+      },
+      {
+        "label": "Thái thịt bò bắp và chân giò thành lát mỏng",
+        "durationMinutes": 5,
+        "parallelGroup": "serve"
+      },
+      {
+        "label": "Chần bún, xếp thịt, chan nước dùng, thêm rau",
+        "durationMinutes": 3,
+        "parallelGroup": "serve"
+      }
+    ],
+    "totalCookTimeMinutes": 100,
+    "caloriesPerServing": 480,
+    "tags": ["Việt Nam", "Miền Trung", "Có thịt", "Món nước", "Cay"],
+    "imageDescription": "Tô bún bò Huế đỏ au với thịt bò thái lát, chân giò mềm, sợi bún to, rau răm và ớt tươi"
+  },
+  {
+    "dishId": "1a31e58d-1fb4-4ca4-b536-73e46b7daa25",
+    "name": "Bánh xèo",
+    "nameEn": "Vietnamese Crispy Pancake",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Bột bánh xèo", "quantity": 300, "unit": "g" },
+      { "name": "Nước cốt dừa", "quantity": 200, "unit": "ml" },
+      { "name": "Tôm", "quantity": 200, "unit": "g" },
+      { "name": "Thịt ba chỉ", "quantity": 150, "unit": "g" },
+      { "name": "Giá đỗ", "quantity": 200, "unit": "g" },
+      { "name": "Hành lá", "quantity": 30, "unit": "g" },
+      { "name": "Bột nghệ", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Rau sống các loại", "quantity": 200, "unit": "g" },
+      { "name": "Nước mắm", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Chanh", "quantity": 1, "unit": "quả" }
+    ],
+    "steps": [
+      {
+        "label": "Pha bột với nước, nước cốt dừa, bột nghệ, hành lá thái nhỏ",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Sơ chế tôm bóc vỏ, thịt ba chỉ thái mỏng",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Pha nước chấm chua ngọt",
+        "durationMinutes": 3,
+        "parallelGroup": "prep"
+      },
+      { "label": "Để bột nghỉ", "durationMinutes": 15 },
+      {
+        "label": "Xào tôm và thịt ba chỉ trong chảo cho chín",
+        "durationMinutes": 5,
+        "parallelGroup": "cook"
+      },
+      {
+        "label": "Đổ bột vào chảo nóng, tráng mỏng",
+        "durationMinutes": 1,
+        "parallelGroup": "cook"
+      },
+      {
+        "label": "Cho tôm, thịt, giá đỗ lên một nửa mặt bánh, đậy nắp",
+        "durationMinutes": 3,
+        "parallelGroup": "cook"
+      },
+      {
+        "label": "Gập bánh, lấy ra đĩa",
+        "durationMinutes": 1,
+        "parallelGroup": "cook"
+      },
+      {
+        "label": "Lặp lại cho đến khi hết bột",
+        "durationMinutes": 12,
+        "parallelGroup": "cook"
+      }
+    ],
+    "totalCookTimeMinutes": 40,
+    "caloriesPerServing": 380,
+    "tags": ["Việt Nam", "Miền Nam", "Có thịt", "Món chiên", "Đậm đà"],
+    "imageDescription": "Bánh xèo vàng giòn gập đôi, nhân tôm thịt giá đỗ đầy đặn, ăn kèm rau sống xanh mát"
+  },
+  {
+    "dishId": "f061859d-03fa-46fe-9c6b-1e7b7c82f39d",
+    "name": "Gỏi cuốn",
+    "nameEn": "Fresh Spring Rolls",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Bánh tráng", "quantity": 12, "unit": "cái" },
+      { "name": "Tôm", "quantity": 200, "unit": "g" },
+      { "name": "Thịt ba chỉ luộc", "quantity": 150, "unit": "g" },
+      { "name": "Bún", "quantity": 200, "unit": "g" },
+      { "name": "Xà lách", "quantity": 100, "unit": "g" },
+      { "name": "Rau thơm các loại", "quantity": 50, "unit": "g" },
+      { "name": "Hẹ", "quantity": 30, "unit": "g" },
+      { "name": "Tương đen Hoisin", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Đậu phộng rang", "quantity": 50, "unit": "g" },
+      { "name": "Tỏi", "quantity": 2, "unit": "tép" }
+    ],
+    "steps": [
+      {
+        "label": "Luộc tôm chín, bóc vỏ, bổ đôi",
+        "durationMinutes": 5,
+        "parallelGroup": "cook"
+      },
+      {
+        "label": "Luộc thịt ba chỉ, thái mỏng",
+        "durationMinutes": 15,
+        "parallelGroup": "cook"
+      },
+      {
+        "label": "Chần bún qua nước sôi, để ráo",
+        "durationMinutes": 2,
+        "parallelGroup": "cook"
+      },
+      {
+        "label": "Pha tương chấm: Hoisin + đậu phộng + tỏi phi",
+        "durationMinutes": 5,
+        "parallelGroup": "cook"
+      },
+      {
+        "label": "Nhúng bánh tráng qua nước, trải ra đĩa phẳng",
+        "durationMinutes": 2,
+        "parallelGroup": "roll"
+      },
+      {
+        "label": "Xếp xà lách, bún, thịt, tôm, rau thơm, hẹ lên bánh tráng",
+        "durationMinutes": 3,
+        "parallelGroup": "roll"
+      },
+      {
+        "label": "Cuộn chặt tay từ dưới lên trên, gập hai mép",
+        "durationMinutes": 8,
+        "parallelGroup": "roll"
+      }
+    ],
+    "totalCookTimeMinutes": 25,
+    "caloriesPerServing": 250,
+    "tags": ["Việt Nam", "Miền Nam", "Có thịt", "Thanh đạm", "Món hấp"],
+    "imageDescription": "Những cuốn gỏi cuốn trong suốt, tôm đỏ hồng và rau xanh ẩn hiện bên trong lớp bánh tráng mỏng"
+  },
+  {
+    "dishId": "69cc018a-0b64-4d12-a3a2-963b315b3e07",
+    "name": "Cơm tấm sườn nướng",
+    "nameEn": "Broken Rice with Grilled Pork Chop",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Gạo tấm", "quantity": 300, "unit": "g" },
+      { "name": "Sườn cốt lết", "quantity": 3, "unit": "miếng" },
+      { "name": "Trứng gà", "quantity": 2, "unit": "quả" },
+      { "name": "Nước mắm", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Tỏi", "quantity": 3, "unit": "tép" },
+      { "name": "Hành phi", "quantity": 20, "unit": "g" },
+      { "name": "Mỡ hành", "quantity": 30, "unit": "g" },
+      { "name": "Đồ chua", "quantity": 100, "unit": "g" },
+      { "name": "Dưa leo", "quantity": 1, "unit": "quả" },
+      { "name": "Cà chua", "quantity": 1, "unit": "quả" }
+    ],
+    "steps": [
+      {
+        "label": "Ướp sườn với nước mắm, đường, tỏi băm, để thấm",
+        "durationMinutes": 20
+      },
+      {
+        "label": "Nấu cơm tấm",
+        "durationMinutes": 15,
+        "parallelGroup": "side"
+      },
+      {
+        "label": "Chiên trứng ốp la",
+        "durationMinutes": 3,
+        "parallelGroup": "side"
+      },
+      {
+        "label": "Làm mỡ hành: phi hành trong dầu nóng",
+        "durationMinutes": 2,
+        "parallelGroup": "side"
+      },
+      {
+        "label": "Nướng sườn trên bếp than hoặc lò nướng",
+        "durationMinutes": 12,
+        "parallelGroup": "grill"
+      },
+      {
+        "label": "Xới cơm ra đĩa, xếp sườn, trứng, đồ chua, dưa leo, cà chua",
+        "durationMinutes": 3
+      },
+      { "label": "Rưới mỡ hành và nước mắm lên trên", "durationMinutes": 1 }
+    ],
+    "totalCookTimeMinutes": 45,
+    "caloriesPerServing": 550,
+    "tags": ["Việt Nam", "Miền Nam", "Có thịt", "Món nướng", "Đậm đà"],
+    "imageDescription": "Đĩa cơm tấm đầy đủ với sườn nướng vàng óng, trứng ốp la, mỡ hành, đồ chua và dưa leo tươi"
+  },
+  {
+    "dishId": "86011131-a240-4fb2-9988-9e005343d76b",
+    "name": "Chả giò",
+    "nameEn": "Fried Spring Rolls",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Bánh tráng cuốn chả giò", "quantity": 20, "unit": "cái" },
+      { "name": "Thịt heo xay", "quantity": 300, "unit": "g" },
+      { "name": "Tôm", "quantity": 100, "unit": "g" },
+      { "name": "Miến", "quantity": 50, "unit": "g" },
+      { "name": "Nấm mèo", "quantity": 20, "unit": "g" },
+      { "name": "Cà rốt", "quantity": 1, "unit": "củ" },
+      { "name": "Hành tây", "quantity": 1, "unit": "củ" },
+      { "name": "Trứng gà", "quantity": 1, "unit": "quả" },
+      { "name": "Dầu ăn", "quantity": 500, "unit": "ml" },
+      { "name": "Nước mắm", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Tiêu", "quantity": 1, "unit": "muỗng cà phê" }
+    ],
+    "steps": [
+      {
+        "label": "Ngâm miến và nấm mèo cho nở, cắt nhỏ",
+        "durationMinutes": 10,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Băm nhuyễn tôm, cà rốt bào sợi, hành tây thái nhỏ",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Trộn nhân: thịt xay, tôm, miến, nấm mèo, cà rốt, hành tây, trứng, gia vị",
+        "durationMinutes": 5
+      },
+      {
+        "label": "Cuốn chả giò: trải bánh tráng, cho nhân, cuốn chặt",
+        "durationMinutes": 15
+      },
+      {
+        "label": "Đun nóng dầu trong chảo sâu lòng",
+        "durationMinutes": 3,
+        "parallelGroup": "fry"
+      },
+      {
+        "label": "Chiên chả giò vàng đều hai mặt",
+        "durationMinutes": 8,
+        "parallelGroup": "fry"
+      },
+      { "label": "Vớt ra, để ráo dầu trên giấy thấm", "durationMinutes": 2 }
+    ],
+    "totalCookTimeMinutes": 40,
+    "caloriesPerServing": 320,
+    "tags": ["Việt Nam", "Miền Nam", "Có thịt", "Món chiên", "Đậm đà"],
+    "imageDescription": "Những cuốn chả giò vàng giòn rụm xếp trên đĩa, cắt đôi để lộ nhân thịt tôm rau củ đầy màu sắc"
+  },
+  {
+    "dishId": "dc2bba72-87c0-41fc-a077-a6106dd86c74",
+    "name": "Bánh mì thịt",
+    "nameEn": "Vietnamese Baguette Sandwich",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Bánh mì", "quantity": 4, "unit": "ổ" },
+      { "name": "Thịt nguội", "quantity": 150, "unit": "g" },
+      { "name": "Chả lụa", "quantity": 100, "unit": "g" },
+      { "name": "Pate gan", "quantity": 50, "unit": "g" },
+      { "name": "Dưa leo", "quantity": 2, "unit": "quả" },
+      { "name": "Cà rốt", "quantity": 1, "unit": "củ" },
+      { "name": "Củ cải trắng", "quantity": 1, "unit": "củ" },
+      { "name": "Rau mùi", "quantity": 20, "unit": "g" },
+      { "name": "Ớt tươi", "quantity": 2, "unit": "quả" },
+      { "name": "Nước tương", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Giấm", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 1, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      {
+        "label": "Làm đồ chua: cà rốt và củ cải bào sợi, ngâm giấm đường",
+        "durationMinutes": 10,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Thái dưa leo lát mỏng dọc, thái ớt lát",
+        "durationMinutes": 3,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Nướng bánh mì giòn trong lò",
+        "durationMinutes": 5,
+        "parallelGroup": "assembly"
+      },
+      {
+        "label": "Phết pate và sốt vào trong bánh mì",
+        "durationMinutes": 2,
+        "parallelGroup": "assembly"
+      },
+      {
+        "label": "Xếp thịt nguội, chả lụa, đồ chua, dưa leo, rau mùi, ớt",
+        "durationMinutes": 3,
+        "parallelGroup": "assembly"
+      },
+      {
+        "label": "Rưới nước tương, gập bánh lại",
+        "durationMinutes": 1,
+        "parallelGroup": "assembly"
+      }
+    ],
+    "totalCookTimeMinutes": 20,
+    "caloriesPerServing": 420,
+    "tags": ["Việt Nam", "Miền Nam", "Có thịt", "Đậm đà"],
+    "imageDescription": "Ổ bánh mì giòn rụm nhân đầy đặn với thịt nguội, chả lụa, pate, đồ chua và rau mùi xanh tươi"
+  },
+  {
+    "dishId": "d941bd15-7b03-44ca-9d25-97ccc6940ba8",
+    "name": "Cá kho tộ",
+    "nameEn": "Caramelized Fish in Clay Pot",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Cá basa", "quantity": 500, "unit": "g" },
+      { "name": "Nước mắm", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Nước dừa tươi", "quantity": 200, "unit": "ml" },
+      { "name": "Hành tím", "quantity": 3, "unit": "củ" },
+      { "name": "Tỏi", "quantity": 3, "unit": "tép" },
+      { "name": "Ớt tươi", "quantity": 2, "unit": "quả" },
+      { "name": "Tiêu", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Hành lá", "quantity": 20, "unit": "g" },
+      { "name": "Dầu ăn", "quantity": 2, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      {
+        "label": "Cá rửa sạch, cắt khúc, để ráo",
+        "durationMinutes": 3,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Băm nhỏ hành tím và tỏi",
+        "durationMinutes": 2,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Thắng nước màu: cho đường vào nồi đất, đun đến khi chuyển màu cánh gián",
+        "durationMinutes": 5
+      },
+      { "label": "Phi thơm hành tỏi với dầu ăn", "durationMinutes": 2 },
+      {
+        "label": "Xếp cá vào nồi, thêm nước mắm, nước dừa, ớt, tiêu",
+        "durationMinutes": 3
+      },
+      {
+        "label": "Kho lửa nhỏ đến khi cá thấm gia vị và nước sánh lại",
+        "durationMinutes": 20
+      },
+      { "label": "Rắc hành lá và tiêu lên trên, tắt bếp", "durationMinutes": 1 }
+    ],
+    "totalCookTimeMinutes": 35,
+    "caloriesPerServing": 350,
+    "tags": ["Việt Nam", "Miền Nam", "Có thịt", "Món kho", "Đậm đà"],
+    "imageDescription": "Nồi cá kho tộ đất nung với những khúc cá màu nâu cánh gián, nước sốt sánh đặc, ớt đỏ và hành lá xanh"
+  },
+  {
+    "dishId": "0026631b-c831-4ca7-b078-e8aac4844256",
+    "name": "Canh chua cá",
+    "nameEn": "Sour Fish Soup",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Cá basa", "quantity": 400, "unit": "g" },
+      { "name": "Me chín", "quantity": 50, "unit": "g" },
+      { "name": "Cà chua", "quantity": 3, "unit": "quả" },
+      { "name": "Dứa", "quantity": 1, "unit": "miếng" },
+      { "name": "Giá đỗ", "quantity": 100, "unit": "g" },
+      { "name": "Đậu bắp", "quantity": 100, "unit": "g" },
+      { "name": "Bạc hà dọc mùng", "quantity": 100, "unit": "g" },
+      { "name": "Rau om", "quantity": 20, "unit": "g" },
+      { "name": "Ngò gai", "quantity": 20, "unit": "g" },
+      { "name": "Ớt", "quantity": 2, "unit": "quả" },
+      { "name": "Tỏi", "quantity": 3, "unit": "tép" },
+      { "name": "Nước mắm", "quantity": 3, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      {
+        "label": "Sơ chế cá: rửa sạch, cắt khúc",
+        "durationMinutes": 3,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Sơ chế rau củ: cà chua bổ múi cau, dứa thái miếng, đậu bắp cắt khúc",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Dầm me với nước ấm, lọc lấy nước cốt",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Phi thơm tỏi, xào cà chua với dứa cho mềm",
+        "durationMinutes": 5
+      },
+      {
+        "label": "Đổ nước vào nồi, đun sôi, cho cá vào nấu chín",
+        "durationMinutes": 8
+      },
+      { "label": "Cho nước cốt me, nêm nước mắm vừa ăn", "durationMinutes": 2 },
+      {
+        "label": "Thêm đậu bắp, bạc hà, giá đỗ, nấu thêm 2 phút",
+        "durationMinutes": 2
+      },
+      { "label": "Rắc rau om, ngò gai, ớt, tắt bếp", "durationMinutes": 1 }
+    ],
+    "totalCookTimeMinutes": 30,
+    "caloriesPerServing": 280,
+    "tags": ["Việt Nam", "Miền Nam", "Có thịt", "Thanh đạm", "Món canh"],
+    "imageDescription": "Tô canh chua nóng hổi với cá trắng, cà chua đỏ, dứa vàng, rau xanh và nước dùng chua ngọt đậm đà"
+  },
+  {
+    "dishId": "9c652549-07e6-4544-92f3-3880f7266a11",
+    "name": "Thịt kho tàu",
+    "nameEn": "Vietnamese Braised Pork with Eggs",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Thịt ba chỉ", "quantity": 500, "unit": "g" },
+      { "name": "Trứng gà", "quantity": 5, "unit": "quả" },
+      { "name": "Nước dừa tươi", "quantity": 400, "unit": "ml" },
+      { "name": "Nước mắm", "quantity": 4, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Hành tím", "quantity": 3, "unit": "củ" },
+      { "name": "Tỏi", "quantity": 3, "unit": "tép" },
+      { "name": "Tiêu", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Ớt hiểm", "quantity": 2, "unit": "quả" }
+    ],
+    "steps": [
+      {
+        "label": "Thịt ba chỉ cắt miếng vuông, chần qua nước sôi",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Luộc trứng chín, bóc vỏ",
+        "durationMinutes": 10,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Thắng nước màu: đường + dầu đến màu cánh gián",
+        "durationMinutes": 5
+      },
+      { "label": "Phi hành tỏi, xào thịt cho săn", "durationMinutes": 5 },
+      { "label": "Đổ nước dừa, nước mắm, tiêu vào nồi", "durationMinutes": 2 },
+      {
+        "label": "Kho lửa nhỏ đến khi thịt mềm, nước sánh",
+        "durationMinutes": 45
+      },
+      {
+        "label": "Thả trứng vào nồi, kho thêm 10 phút cho thấm",
+        "durationMinutes": 10
+      }
+    ],
+    "totalCookTimeMinutes": 75,
+    "caloriesPerServing": 580,
+    "tags": ["Việt Nam", "Miền Nam", "Có thịt", "Món kho", "Đậm đà"],
+    "imageDescription": "Nồi thịt kho tàu với những miếng thịt ba chỉ vàng nâu bóng bẩy, trứng nguyên quả thấm đượm nước dừa sánh đặc"
+  },
+  {
+    "dishId": "09b46d09-cea4-4c87-903f-3455b504cb54",
+    "name": "Gà xào sả ớt",
+    "nameEn": "Lemongrass Chili Chicken",
+    "cuisine": "Việt Nam",
+    "ingredients": [
+      { "name": "Thịt gà", "quantity": 400, "unit": "g" },
+      { "name": "Sả", "quantity": 4, "unit": "cây" },
+      { "name": "Ớt tươi", "quantity": 3, "unit": "quả" },
+      { "name": "Tỏi", "quantity": 4, "unit": "tép" },
+      { "name": "Hành tây", "quantity": 1, "unit": "củ" },
+      { "name": "Nước mắm", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Dầu ăn", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Hành lá", "quantity": 20, "unit": "g" },
+      { "name": "Tiêu", "quantity": 1, "unit": "muỗng cà phê" }
+    ],
+    "steps": [
+      {
+        "label": "Thịt gà rửa sạch, chặt miếng vừa ăn",
+        "durationMinutes": 3,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Sả băm nhuyễn, tỏi băm, ớt thái lát",
+        "durationMinutes": 4,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Ướp gà với sả, tỏi, ớt, nước mắm, đường, tiêu",
+        "durationMinutes": 10
+      },
+      {
+        "label": "Phi thơm tỏi và sả còn lại với dầu nóng",
+        "durationMinutes": 2
+      },
+      {
+        "label": "Cho gà vào xào lửa lớn, đảo đều đến khi săn lại",
+        "durationMinutes": 5
+      },
+      { "label": "Thêm hành tây, đảo đều", "durationMinutes": 2 },
+      { "label": "Rắc hành lá, tiêu, tắt bếp", "durationMinutes": 1 }
+    ],
+    "totalCookTimeMinutes": 25,
+    "caloriesPerServing": 320,
+    "tags": ["Việt Nam", "Có thịt", "Món xào", "Cay", "Đậm đà"],
+    "imageDescription": "Đĩa gà xào sả ớt thơm lừng với thịt gà vàng óng, sả và ớt đỏ rực, hành tây trong suốt và hành lá xanh"
+  },
+  {
+    "dishId": "8390afad-eb51-4613-bbc2-e2c4035a1b58",
+    "name": "Bò lúc lắc",
+    "nameEn": "Shaking Beef",
+    "cuisine": "Việt Nam",
+    "ingredients": [
+      { "name": "Thịt bò thăn", "quantity": 400, "unit": "g" },
+      { "name": "Tỏi", "quantity": 5, "unit": "tép" },
+      { "name": "Hành tây", "quantity": 1, "unit": "củ" },
+      { "name": "Ớt chuông", "quantity": 1, "unit": "quả" },
+      { "name": "Xà lách", "quantity": 100, "unit": "g" },
+      { "name": "Cà chua bi", "quantity": 100, "unit": "g" },
+      { "name": "Dầu hào", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Nước tương", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Tiêu", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Bơ", "quantity": 15, "unit": "g" }
+    ],
+    "steps": [
+      {
+        "label": "Thịt bò cắt hạt lựu, ướp với tỏi băm, dầu hào, nước tương, đường, tiêu",
+        "durationMinutes": 10,
+        "parallelGroup": "marinate"
+      },
+      {
+        "label": "Hành tây cắt múi cau, ớt chuông cắt vuông, cà chua bi cắt đôi",
+        "durationMinutes": 3,
+        "parallelGroup": "marinate"
+      },
+      {
+        "label": "Bày xà lách, cà chua lên đĩa",
+        "durationMinutes": 2,
+        "parallelGroup": "marinate"
+      },
+      {
+        "label": "Đun nóng chảo với bơ, cho thịt bò vào lắc đều lửa lớn",
+        "durationMinutes": 3
+      },
+      {
+        "label": "Thêm hành tây và ớt chuông, đảo nhanh",
+        "durationMinutes": 2
+      },
+      { "label": "Cho thịt bò lên đĩa rau, rắc tiêu", "durationMinutes": 1 }
+    ],
+    "totalCookTimeMinutes": 20,
+    "caloriesPerServing": 380,
+    "tags": ["Việt Nam", "Có thịt", "Món xào", "Đậm đà"],
+    "imageDescription": "Đĩa bò lúc lắc với những viên thịt bò áp chảo vàng nâu, hành tây và ớt chuông sặc sỡ trên nền xà lách xanh tươi"
+  },
+  {
+    "dishId": "5900bbe4-9cdb-4360-bb31-7760b192f877",
+    "name": "Mì Quảng",
+    "nameEn": "Quang Noodles",
+    "cuisine": "Miền Trung",
+    "ingredients": [
+      { "name": "Mì Quảng", "quantity": 400, "unit": "g" },
+      { "name": "Thịt gà", "quantity": 300, "unit": "g" },
+      { "name": "Tôm", "quantity": 150, "unit": "g" },
+      { "name": "Trứng cút", "quantity": 6, "unit": "quả" },
+      { "name": "Đậu phộng rang", "quantity": 50, "unit": "g" },
+      { "name": "Bánh tráng mè nướng", "quantity": 4, "unit": "miếng" },
+      { "name": "Nghệ", "quantity": 1, "unit": "củ" },
+      { "name": "Sả", "quantity": 2, "unit": "cây" },
+      { "name": "Hành lá", "quantity": 30, "unit": "g" },
+      { "name": "Rau sống các loại", "quantity": 150, "unit": "g" },
+      { "name": "Chanh", "quantity": 1, "unit": "quả" },
+      { "name": "Nước mắm", "quantity": 3, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      {
+        "label": "Giã nghệ, sả, ướp với thịt gà",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Luộc trứng cút, bóc vỏ",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      { "label": "Xào thịt gà với nghệ sả cho thấm", "durationMinutes": 8 },
+      {
+        "label": "Cho nước vào nồi gà, ninh lấy nước dùng",
+        "durationMinutes": 15
+      },
+      { "label": "Cho tôm vào nấu chín, nêm nước mắm", "durationMinutes": 5 },
+      {
+        "label": "Trụng mì Quảng qua nước sôi",
+        "durationMinutes": 2,
+        "parallelGroup": "assemble"
+      },
+      {
+        "label": "Xếp mì ra tô, gà, tôm, trứng cút lên trên",
+        "durationMinutes": 2,
+        "parallelGroup": "assemble"
+      },
+      {
+        "label": "Chan ít nước dùng, rắc đậu phộng, hành, rau sống, bánh tráng",
+        "durationMinutes": 2,
+        "parallelGroup": "assemble"
+      }
+    ],
+    "totalCookTimeMinutes": 43,
+    "caloriesPerServing": 450,
+    "tags": ["Việt Nam", "Miền Trung", "Có thịt", "Món nước", "Đậm đà"],
+    "imageDescription": "Tô mì Quảng vàng ươm màu nghệ với thịt gà, tôm, trứng cút, đậu phộng rang và rau sống tươi xanh"
+  },
+  {
+    "dishId": "11482879-ebef-4705-be6a-17cb2ddc2e11",
+    "name": "Bánh canh cua",
+    "nameEn": "Crab Tapioca Noodle Soup",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Bánh canh sợi to", "quantity": 400, "unit": "g" },
+      { "name": "Cua đồng", "quantity": 500, "unit": "g" },
+      { "name": "Tôm", "quantity": 150, "unit": "g" },
+      { "name": "Thịt heo xay", "quantity": 100, "unit": "g" },
+      { "name": "Hành tím", "quantity": 3, "unit": "củ" },
+      { "name": "Hành lá", "quantity": 30, "unit": "g" },
+      { "name": "Rau mùi", "quantity": 20, "unit": "g" },
+      { "name": "Giá đỗ", "quantity": 100, "unit": "g" },
+      { "name": "Nước mắm", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Tiêu", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Dầu điều", "quantity": 1, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      {
+        "label": "Rửa sạch cua, giã nhuyễn, lọc lấy nước cốt",
+        "durationMinutes": 10,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Bóc vỏ tôm, băm nhỏ",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Phi thơm hành tím, xào thịt heo xay và tôm",
+        "durationMinutes": 5
+      },
+      {
+        "label": "Trộn thịt tôm xào với thịt cua đã giã",
+        "durationMinutes": 3
+      },
+      {
+        "label": "Đun sôi nước, cho hỗn hợp cua thịt vào, chờ nổi lên",
+        "durationMinutes": 10
+      },
+      { "label": "Nêm nước mắm, dầu điều cho đẹp màu", "durationMinutes": 2 },
+      {
+        "label": "Luộc bánh canh trong nồi riêng, vớt ra tô",
+        "durationMinutes": 5,
+        "parallelGroup": "assemble"
+      },
+      {
+        "label": "Chan nước dùng cua, thêm hành, rau mùi, giá đỗ, tiêu",
+        "durationMinutes": 2,
+        "parallelGroup": "assemble"
+      }
+    ],
+    "totalCookTimeMinutes": 48,
+    "caloriesPerServing": 400,
+    "tags": ["Việt Nam", "Miền Nam", "Có thịt", "Món nước", "Đậm đà"],
+    "imageDescription": "Tô bánh canh sánh mịn với những miếng chả cua nổi trên mặt, tôm đỏ hồng, hành lá và rau mùi xanh"
+  },
+  {
+    "dishId": "af2b7f34-f087-4ad5-a3fd-4a77f56f9025",
+    "name": "Cháo lòng",
+    "nameEn": "Pork Offal Congee",
+    "cuisine": "Miền Bắc",
+    "ingredients": [
+      { "name": "Gạo tẻ", "quantity": 150, "unit": "g" },
+      { "name": "Gạo nếp", "quantity": 30, "unit": "g" },
+      { "name": "Lòng non", "quantity": 200, "unit": "g" },
+      { "name": "Tim heo", "quantity": 100, "unit": "g" },
+      { "name": "Gan heo", "quantity": 100, "unit": "g" },
+      { "name": "Thịt heo xay", "quantity": 100, "unit": "g" },
+      { "name": "Xương ống", "quantity": 500, "unit": "g" },
+      { "name": "Hành lá", "quantity": 30, "unit": "g" },
+      { "name": "Rau mùi", "quantity": 20, "unit": "g" },
+      { "name": "Tiêu", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Quẩy", "quantity": 4, "unit": "cái" },
+      { "name": "Gừng", "quantity": 1, "unit": "củ" }
+    ],
+    "steps": [
+      {
+        "label": "Vo gạo, để ráo",
+        "durationMinutes": 2,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Rửa sạch lòng non với muối và gừng, luộc sơ",
+        "durationMinutes": 10,
+        "parallelGroup": "prep"
+      },
+      { "label": "Ninh xương ống lấy nước dùng", "durationMinutes": 30 },
+      {
+        "label": "Lọc xương, cho gạo vào nước dùng ninh nhừ",
+        "durationMinutes": 25
+      },
+      {
+        "label": "Luộc tim, gan, lòng non chín, thái lát mỏng",
+        "durationMinutes": 8
+      },
+      {
+        "label": "Xào thịt heo xay với hành phi cho thơm",
+        "durationMinutes": 3,
+        "parallelGroup": "finish"
+      },
+      {
+        "label": "Múc cháo ra tô, xếp lòng, tim, gan, thịt xay lên trên",
+        "durationMinutes": 2,
+        "parallelGroup": "finish"
+      },
+      {
+        "label": "Rắc hành lá, rau mùi, tiêu, ăn kèm quẩy",
+        "durationMinutes": 1,
+        "parallelGroup": "finish"
+      }
+    ],
+    "totalCookTimeMinutes": 65,
+    "caloriesPerServing": 380,
+    "tags": ["Việt Nam", "Miền Bắc", "Có thịt", "Đậm đà"],
+    "imageDescription": "Tô cháo lòng nóng hổi trắng mịn với lòng non, tim gan thái lát, thịt băm, hành lá, rau mùi và quẩy giòn"
+  },
+  {
+    "dishId": "17444c50-25ef-48a3-bdc7-a3498ca7fd03",
+    "name": "Bún riêu cua",
+    "nameEn": "Crab Noodle Soup",
+    "cuisine": "Miền Bắc",
+    "ingredients": [
+      { "name": "Bún", "quantity": 500, "unit": "g" },
+      { "name": "Cua đồng", "quantity": 400, "unit": "g" },
+      { "name": "Đậu phụ", "quantity": 200, "unit": "g" },
+      { "name": "Cà chua", "quantity": 4, "unit": "quả" },
+      { "name": "Hành tím", "quantity": 3, "unit": "củ" },
+      { "name": "Mẻ", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Rau sống các loại", "quantity": 150, "unit": "g" },
+      { "name": "Bắp chuối bào", "quantity": 100, "unit": "g" },
+      { "name": "Hành lá", "quantity": 30, "unit": "g" },
+      { "name": "Ớt", "quantity": 2, "unit": "quả" },
+      { "name": "Nước mắm", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Dầu ăn", "quantity": 3, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      {
+        "label": "Rửa cua đồng, giã nhuyễn, lọc lấy nước cốt",
+        "durationMinutes": 10,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Cắt đậu phụ miếng vuông, chiên vàng",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      { "label": "Xào cà chua với hành tím cho mềm", "durationMinutes": 5 },
+      {
+        "label": "Đun nước cốt cua, cho mẻ và cà chua xào vào, khuấy đều, chờ gạch cua nổi",
+        "durationMinutes": 15
+      },
+      { "label": "Nêm nước mắm, thả đậu phụ chiên vào", "durationMinutes": 3 },
+      {
+        "label": "Chần bún qua nước sôi",
+        "durationMinutes": 2,
+        "parallelGroup": "assemble"
+      },
+      {
+        "label": "Múc bún ra tô, chan nước dùng riêu cua, thêm rau sống, ớt",
+        "durationMinutes": 2,
+        "parallelGroup": "assemble"
+      }
+    ],
+    "totalCookTimeMinutes": 42,
+    "caloriesPerServing": 350,
+    "tags": ["Việt Nam", "Miền Bắc", "Món nước", "Thanh đạm"],
+    "imageDescription": "Tô bún riêu đỏ cam với gạch cua nổi bồng bềnh, đậu phụ vàng, cà chua đỏ và rau sống xanh tươi"
+  },
+  {
+    "dishId": "51a4bbf7-3219-4dce-bf32-30721a124851",
+    "name": "Bánh cuốn",
+    "nameEn": "Steamed Rice Rolls",
+    "cuisine": "Miền Bắc",
+    "ingredients": [
+      { "name": "Bột gạo", "quantity": 200, "unit": "g" },
+      { "name": "Bột năng", "quantity": 50, "unit": "g" },
+      { "name": "Thịt heo xay", "quantity": 200, "unit": "g" },
+      { "name": "Nấm mèo", "quantity": 30, "unit": "g" },
+      { "name": "Hành khô", "quantity": 3, "unit": "củ" },
+      { "name": "Hành phi", "quantity": 30, "unit": "g" },
+      { "name": "Chả lụa", "quantity": 100, "unit": "g" },
+      { "name": "Nước mắm", "quantity": 4, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Chanh", "quantity": 1, "unit": "quả" },
+      { "name": "Rau thơm", "quantity": 30, "unit": "g" },
+      { "name": "Dầu ăn", "quantity": 2, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      {
+        "label": "Ngâm nấm mèo, băm nhỏ",
+        "durationMinutes": 10,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Pha bột gạo + bột năng với nước, để nghỉ",
+        "durationMinutes": 15,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Xào nhân: thịt heo xay, nấm mèo, hành khô băm",
+        "durationMinutes": 5
+      },
+      {
+        "label": "Pha nước chấm: nước mắm, đường, chanh",
+        "durationMinutes": 3,
+        "parallelGroup": "steam"
+      },
+      {
+        "label": "Tráng bánh cuốn: đổ bột lên vải căng trên nồi hấp, dàn mỏng, đậy nắp",
+        "durationMinutes": 1,
+        "parallelGroup": "steam"
+      },
+      {
+        "label": "Cho nhân vào bánh, cuộn lại",
+        "durationMinutes": 1,
+        "parallelGroup": "steam"
+      },
+      {
+        "label": "Lặp lại tráng và cuốn cho đến hết (khoảng 15 bánh)",
+        "durationMinutes": 15,
+        "parallelGroup": "steam"
+      },
+      {
+        "label": "Xếp bánh cuốn ra đĩa, rắc hành phi, chả lụa thái lát, rau thơm",
+        "durationMinutes": 2
+      }
+    ],
+    "totalCookTimeMinutes": 48,
+    "caloriesPerServing": 300,
+    "tags": ["Việt Nam", "Miền Bắc", "Có thịt", "Món hấp", "Thanh đạm"],
+    "imageDescription": "Đĩa bánh cuốn trắng mỏng trong suốt, nhân thịt nấm mèo ẩn bên trong, phủ hành phi vàng, chả lụa và rau thơm"
+  },
+  {
+    "dishId": "064b5aee-747d-4ab2-98e1-f0c9938241da",
+    "name": "Gà kho gừng",
+    "nameEn": "Ginger Braised Chicken",
+    "cuisine": "Việt Nam",
+    "ingredients": [
+      { "name": "Thịt gà", "quantity": 500, "unit": "g" },
+      { "name": "Gừng", "quantity": 1, "unit": "củ" },
+      { "name": "Nước mắm", "quantity": 3, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Hành tím", "quantity": 3, "unit": "củ" },
+      { "name": "Tỏi", "quantity": 3, "unit": "tép" },
+      { "name": "Tiêu", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Nước dừa tươi", "quantity": 100, "unit": "ml" },
+      { "name": "Hành lá", "quantity": 20, "unit": "g" },
+      { "name": "Ớt tươi", "quantity": 1, "unit": "quả" },
+      { "name": "Dầu ăn", "quantity": 2, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      {
+        "label": "Gà rửa sạch, chặt miếng vừa ăn",
+        "durationMinutes": 3,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Gừng cạo vỏ, đập dập và thái sợi",
+        "durationMinutes": 3,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Ướp gà với gừng, nước mắm, đường, tiêu, hành tỏi băm",
+        "durationMinutes": 10
+      },
+      {
+        "label": "Phi thơm hành tỏi với dầu, cho gà vào xào săn",
+        "durationMinutes": 5
+      },
+      { "label": "Thêm nước dừa, đậy nắp kho lửa nhỏ", "durationMinutes": 15 },
+      {
+        "label": "Mở nắp, kho cạn cho nước sánh lại, thịt thấm đều",
+        "durationMinutes": 5
+      },
+      { "label": "Rắc hành lá và ớt thái lát, tắt bếp", "durationMinutes": 1 }
+    ],
+    "totalCookTimeMinutes": 30,
+    "caloriesPerServing": 340,
+    "tags": ["Việt Nam", "Có thịt", "Món kho", "Đậm đà"],
+    "imageDescription": "Đĩa gà kho gừng với thịt gà màu nâu óng ánh, sợi gừng vàng, hành lá xanh và ớt đỏ điểm xuyết"
+  },
+  {
+    "dishId": "727e22ba-61fe-4978-bceb-5860dd2bd771",
+    "name": "Mực xào chua ngọt",
+    "nameEn": "Sweet and Sour Squid",
+    "cuisine": "Việt Nam",
+    "ingredients": [
+      { "name": "Mực ống", "quantity": 400, "unit": "g" },
+      { "name": "Cà chua", "quantity": 2, "unit": "quả" },
+      { "name": "Dứa", "quantity": 1, "unit": "miếng" },
+      { "name": "Dưa leo", "quantity": 1, "unit": "quả" },
+      { "name": "Hành tây", "quantity": 1, "unit": "củ" },
+      { "name": "Cần tây", "quantity": 50, "unit": "g" },
+      { "name": "Tỏi", "quantity": 3, "unit": "tép" },
+      { "name": "Tương cà", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 1, "unit": "muỗng canh" },
+      { "name": "Giấm", "quantity": 1, "unit": "muỗng canh" },
+      { "name": "Dầu ăn", "quantity": 3, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      {
+        "label": "Mực làm sạch, khứa vảy rồng, cắt miếng vừa ăn",
+        "durationMinutes": 5,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Cà chua, dứa, dưa leo cắt miếng. Hành tây cắt múi cau.",
+        "durationMinutes": 4,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Pha sốt chua ngọt: tương cà + đường + giấm + nước",
+        "durationMinutes": 2,
+        "parallelGroup": "prep"
+      },
+      {
+        "label": "Phi thơm tỏi, xào mực lửa lớn cho săn",
+        "durationMinutes": 2
+      },
+      {
+        "label": "Cho cà chua, dứa, dưa leo, hành tây, cần tây vào xào nhanh",
+        "durationMinutes": 3
+      },
+      { "label": "Rưới sốt chua ngọt, đảo đều, tắt bếp", "durationMinutes": 1 }
+    ],
+    "totalCookTimeMinutes": 15,
+    "caloriesPerServing": 220,
+    "tags": ["Việt Nam", "Có thịt", "Món xào", "Thanh đạm"],
+    "imageDescription": "Đĩa mực xào chua ngọt với mực cuộn tròn trắng tinh, cà chua đỏ, dứa vàng và rau củ sặc sỡ"
+  }
+]

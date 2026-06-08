@@ -1,0 +1,29 @@
+{
+  "name": "hom-nay-an-gi-backend-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.11.1",
+  "description": "Backend workspace for hom-nay-an-gi services.",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @hom-nay-an-gi/express-api --filter @hom-nay-an-gi/llm-proxy --filter @hom-nay-an-gi/cron-worker run dev",
+    "dev:api": "pnpm --filter @hom-nay-an-gi/express-api run dev",
+    "dev:llm-proxy": "pnpm --filter @hom-nay-an-gi/llm-proxy run dev",
+    "dev:cron-worker": "pnpm --filter @hom-nay-an-gi/cron-worker run dev",
+    "build": "pnpm -r --if-present run build",
+    "start:prod": "pnpm --filter @hom-nay-an-gi/express-api run start",
+    "start:llm-proxy": "pnpm --filter @hom-nay-an-gi/llm-proxy run start",
+    "start:cron-worker": "pnpm --filter @hom-nay-an-gi/cron-worker run start",
+    "typecheck": "pnpm --filter @hom-nay-an-gi/shared run build && pnpm -r --if-present run typecheck",
+    "lint": "pnpm -r --if-present run lint",
+    "format": "biome format --write .",
+    "test": "pnpm -r --if-present run test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.0",
+    "@types/node": "^24.10.1",
+    "pino-pretty": "^13.1.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.7"
+  }
+}

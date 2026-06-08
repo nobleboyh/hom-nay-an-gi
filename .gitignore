@@ -1,4 +1,17 @@
 _bmad
 .agents
+.commandcode
 .opencode
 .claude
+.env
+.env.local
+.DS_Store
+node_modules/
+dist/
+coverage/
+.expo/
+ios/
+android/
+mongo-data/
+redis-data/
+backups/

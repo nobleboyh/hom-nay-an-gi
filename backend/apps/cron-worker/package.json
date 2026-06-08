@@ -1,0 +1,16 @@
+{
+  "name": "@hom-nay-an-gi/cron-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/src/index.js",
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "lint": "biome check .",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@hom-nay-an-gi/shared": "workspace:*"
+  }
+}

@@ -1,0 +1,126 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - public
+    depends_on:
+      express-api:
+        condition: service_started
+
+  express-api:
+    build: ./backend
+    command: ["pnpm", "start:prod"]
+    environment:
+      PORT: 3000
+      MONGO_URI: ${MONGO_URI:-mongodb://mongo:27017/homnayangi}
+      REDIS_URI: ${REDIS_URI:-redis://redis:6379}
+      LLM_PROXY_URL: http://llm-proxy:3001
+      JWT_SECRET: ${JWT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      HERE_API_KEY: ${HERE_API_KEY}
+    networks:
+      - public
+      - internal
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      llm-proxy:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/v1/health').then((response) => { if (!response.ok) process.exit(1); }).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  llm-proxy:
+    build: ./backend
+    command: ["pnpm", "start:llm-proxy"]
+    environment:
+      PORT: 3001
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      LLM_API_KEY: ${LLM_API_KEY:-replace-with-llm-provider-api-key}
+      REDIS_URI: ${REDIS_URI:-redis://redis:6379}
+    networks:
+      - internal
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/health').then((response) => { if (!response.ok) process.exit(1); }).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  mongo:
+    image: mongo:8
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  cron-worker:
+    build: ./backend
+    command: ["pnpm", "start:cron-worker"]
+    environment:
+      LLM_PROXY_URL: http://llm-proxy:3001
+      REDIS_URI: ${REDIS_URI:-redis://redis:6379}
+    networks:
+      - internal
+    profiles:
+      - full
+    depends_on:
+      redis:
+        condition: service_healthy
+      llm-proxy:
+        condition: service_started
+
+networks:
+  internal:
+    driver: bridge
+  public:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  redis-data:

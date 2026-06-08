@@ -1,0 +1,31 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
+  "files": {
+    "includes": [
+      "apps/*/src/**",
+      "apps/*/tests/**",
+      "apps/*/package.json",
+      "apps/*/tsconfig.json",
+      "apps/*/vite.config.mts",
+      "packages/*/src/**",
+      "packages/*/tests/**",
+      "packages/*/package.json",
+      "packages/*/tsconfig.json",
+      "packages/*/vite.config.mts",
+      "package.json",
+      "pnpm-workspace.yaml",
+      "tsconfig.json",
+      "biome.json"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}

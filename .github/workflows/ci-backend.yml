@@ -1,0 +1,49 @@
+name: CI Backend
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/ci-backend.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/ci-backend.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:8
+        ports:
+          - 27017:27017
+
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      MONGO_URI: mongodb://localhost:27017/homnayangi
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - run: pnpm install
+
+      - run: pnpm typecheck
+
+      - run: pnpm lint
+
+      - run: pnpm test
