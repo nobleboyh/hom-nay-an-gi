@@ -12,6 +12,8 @@ status: final
 
 This PRD defines the MVP requirements for **Hôm Nay Ăn Gì**, a cross-platform mobile app that helps users decide what to eat by suggesting dishes based on available ingredients or random discovery. It is written for the development team and downstream UX/architecture work. Vocabulary is Glossary-anchored. Assumptions are tagged inline with `[ASSUMPTION]` and indexed in §9. This PRD builds on the brainstorming session documented in `brainstorming/brainstorming-session-2026-05-31.md`.
 
+For implementation planning, the mobile baseline is the Expo managed workflow on SDK 54; architecture artifacts own the SDK-specific scaffold and compatibility details.
+
 ## 1. Vision
 
 Deciding what to eat every day is a universal friction point. Hôm Nay Ăn Gì eliminates it by transforming what users already have (ingredients in the fridge) or what they're in the mood for into concrete dish suggestions with recipes, cook times, and calorie estimates. The app also helps users discover new food nearby or trending — bridging the gap between "I don't know what to eat" and "here's exactly what I should make or order." Bilingual (Vietnamese + English), it serves the Vietnamese market while being accessible to a broader audience.

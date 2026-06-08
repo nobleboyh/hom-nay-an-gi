@@ -3,7 +3,7 @@
 ## Coherence Validation ✅
 
 **Decision Compatibility:**
-All technology choices are mutually compatible. Expo SDK 56 ↔ Express 5.x ↔ MongoDB 8.x ↔ Redis 7.x form a coherent stack with no version conflicts. The Gemini 2.5 Flash provider is wrapped in a configurable `llmClient.ts` abstraction, allowing provider swap without code changes. Zustand + expo-sqlite + React Native work cleanly together via the StorageAdapter pattern. Docker Compose service topology has no circular dependencies.
+All technology choices are mutually compatible. Expo SDK 54 ↔ Express 5.x ↔ MongoDB 8.x ↔ Redis 7.x form a coherent stack with no version conflicts. The Gemini 2.5 Flash provider is wrapped in a configurable `llmClient.ts` abstraction, allowing provider swap without code changes. Zustand + expo-sqlite + React Native work cleanly together via the StorageAdapter pattern. Docker Compose service topology has no circular dependencies.
 
 **Pattern Consistency:**
 Backend follows the Express boilerplate conventions (camelCase files, co-located `__tests__/`, Route→Controller→Service layering). Frontend follows React/Expo conventions (PascalCase components, kebab-case routes, `use`-prefixed hooks). API uses consistent RESTful URL-versioned patterns with a standard JSON envelope. No contradictory naming or structural conventions exist between the two codebases.
@@ -26,7 +26,7 @@ The monorepo layout cleanly separates backend (`/backend`) and frontend (`/front
 | NFR | Architectural Support |
 |-----|----------------------|
 | Bilingual (vi/en) | ✅ `i18n.ts` catalog + LLM prompt language switch + `<span lang>` pattern |
-| Cross-platform | ✅ Expo SDK 56 targets iOS + Android + Web |
+| Cross-platform | ✅ Expo SDK 54 targets iOS + Android + Web |
 | Offline capability | ✅ Guest mode with expo-sqlite local storage + offline UX states |
 | WCAG 2.1 AA | ✅ ARIA→RN mapping table, `accessibility.ts` helpers, 44px component-level enforcement |
 | Performance | ✅ Redis cache (24h TTL), Gemini Flash latency (1-5s), streaming for LLM path |
@@ -144,7 +144,7 @@ cp -r backend-tmp/* backend/ && rm -rf backend-tmp
 cd backend && pnpm install
 
 # Step 3: Expo project init
-npx create-expo-app@latest --template default@sdk-56 frontend-tmp
+npx create-expo-app@latest --template default@sdk-54 frontend-tmp
 cp -r frontend-tmp/* frontend/ && rm -rf frontend-tmp
 
 # Step 4: OpenTelemetry setup (before writing business logic)

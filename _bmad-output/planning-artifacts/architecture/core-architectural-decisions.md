@@ -10,7 +10,7 @@
 | CD-2 | Auth | Google OAuth (Expo AuthSession) + email/password (bcrypt) with JWT + Redis blocklist | Express 5.x |
 | CD-3 | API | RESTful, URL-versioned, OpenAPI 3.1 from Zod schemas | — |
 | CD-4 | Recipe Engine | LLM API: Gemini 2.5 Flash primary (free 1,500 req/day), configurable provider abstraction via `LLM_PROVIDER` env var | Gemini 2.5 Flash |
-| CD-5 | Frontend | Expo SDK 56 with Expo Router, custom RN components, Zustand state management | Expo SDK 56 |
+| CD-5 | Frontend | Expo SDK 54 with Expo Router, custom RN components, Zustand state management | Expo SDK 54 |
 | CD-6 | Infrastructure | Docker Compose with 6 services (nginx, express-api, llm-proxy, mongo, redis, cron-worker) | Docker 27+ |
 | CD-7 | Sync | Client-initiated three-phase protocol: guest accumulate → login merge → incremental delta | — |
 

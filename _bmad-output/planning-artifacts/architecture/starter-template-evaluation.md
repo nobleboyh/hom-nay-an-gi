@@ -6,18 +6,18 @@ Full-stack mobile application with two codebases:
 
 | Domain | Technology | Starter |
 |--------|-----------|---------|
-| Mobile Frontend | Expo (React Native) SDK 56 | Official `create-expo-app` |
+| Mobile Frontend | Expo (React Native) SDK 54 | Official `create-expo-app` |
 | API Backend | ExpressJS 5.x (Node.js ≥18) | `edwinhern/express-typescript` boilerplate |
 | Infrastructure | Docker Compose | Custom compose file |
 
 ## Selected Starters
 
-### Frontend: Expo Default Template (SDK 56)
+### Frontend: Expo Default Template (SDK 54)
 
 **Initialization Command:**
 
 ```bash
-npx create-expo-app@latest --template default@sdk-56 hom-nay-an-gi
+npx create-expo-app@latest --template default@sdk-54 hom-nay-an-gi
 ```
 
 **Architectural Decisions Provided:**

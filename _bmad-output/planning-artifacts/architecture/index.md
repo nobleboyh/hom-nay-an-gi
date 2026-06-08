@@ -13,7 +13,7 @@
   - [Starter Template Evaluation](./starter-template-evaluation.md)
     - [Primary Technology Domain](./starter-template-evaluation.md#primary-technology-domain)
     - [Selected Starters](./starter-template-evaluation.md#selected-starters)
-      - [Frontend: Expo Default Template (SDK 56)](./starter-template-evaluation.md#frontend-expo-default-template-sdk-56)
+      - [Frontend: Expo Default Template (SDK 54)](./starter-template-evaluation.md#frontend-expo-default-template-sdk-54)
       - [Backend: Express TypeScript Boilerplate](./starter-template-evaluation.md#backend-express-typescript-boilerplate)
   - [Core Architectural Decisions](./core-architectural-decisions.md)
     - [Decision Priority Analysis](./core-architectural-decisions.md#decision-priority-analysis)
