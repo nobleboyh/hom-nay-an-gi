@@ -77,13 +77,13 @@ describe("Mongoose Models", () => {
       ).rejects.toMatchObject({ code: 11000 });
     });
 
-    itIfMongo("allows null email for google-only users", async () => {
+    itIfMongo("allows missing email for google-only users", async () => {
       const user = await User.create({
         googleId: "g-12345",
         displayName: "Google User",
         authProvider: "google",
       });
-      expect(user.email).toBeNull();
+      expect(user.email).toBeUndefined();
       expect(user.googleId).toBe("g-12345");
     });
 
