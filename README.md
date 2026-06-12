@@ -20,6 +20,7 @@ Install these first:
 
 Optional:
 
+- [Ollama](https://ollama.com/) with a local model (e.g. `llama3:latest` or `llama3.2:1b`) for LLM-powered recipe search
 - Expo Go on a physical device
 - iOS Simulator or Android Emulator
 
@@ -46,10 +47,24 @@ Files used:
 
 Key variables:
 
-- Root: `JWT_SECRET`, `GOOGLE_CLIENT_ID`, `LLM_PROVIDER`, `LLM_API_KEY`, `HERE_API_KEY`, `MONGO_URI`, `REDIS_URI`
+- Root: `JWT_SECRET`, `GOOGLE_CLIENT_ID`, `LLM_PROVIDER`, `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `HERE_API_KEY`, `MONGO_URI`, `REDIS_URI`
 - Frontend: `API_BASE_URL`, `GOOGLE_CLIENT_ID`, `SENTRY_DSN`
 
 For local development, placeholder values are enough to boot the app, but external integrations remain non-functional until you replace them.
+
+### LLM Provider
+
+The app uses Ollama by default (`LLM_PROVIDER=ollama`) with `llama3.2:1b`. To use a different model:
+
+```bash
+# Install a model via Ollama
+ollama pull llama3:latest
+
+# Update .env
+OLLAMA_MODEL=llama3:latest
+```
+
+To switch to a cloud provider (Gemini, OpenAI), set `LLM_PROVIDER` and provide the API key via `LLM_API_KEY`.
 
 ## Service Summary
 
@@ -58,7 +73,7 @@ For local development, placeholder values are enough to boot the app, but extern
 | `frontend` | Local Expo process only | User interface for web/mobile | `http://localhost:8081` for Expo web |
 | `nginx` | Docker container | Public entrypoint that exposes the backend on host port `8080` and proxies to `express-api` | `http://localhost:8080` |
 | `express-api` | Docker container or local Node process | Main REST API for the app | `/api/v1/health` via `http://localhost:8080` in Docker, or `http://localhost:3000` directly in non-Docker mode |
-| `llm-proxy` | Docker container or local Node process | Internal placeholder service for LLM-related requests | `http://localhost:3001/health` in non-Docker mode |
+| `llm-proxy` | Docker container or local Node process | Proxies requests to Ollama (or cloud LLM provider) | `http://localhost:3001/health` in non-Docker mode |
 | `mongo` | Docker container or local MongoDB server | Persistent application database | `mongodb://localhost:27017/homnayangi` |
 | `redis` | Docker container or local Redis server | Cache and shared runtime state | `redis://localhost:6379` |
 | `cron-worker` | Optional Docker container or local Node process | Background worker for scheduled jobs | No public HTTP endpoint |
@@ -172,29 +187,36 @@ Make sure these local services are already running:
 
 - MongoDB on `mongodb://127.0.0.1:27017/homnayangi`
 - Redis on `redis://127.0.0.1:6379`
+- Ollama (if using the default LLM provider): `ollama serve`
 
 The backend defaults already point to those local addresses if you do not override them.
 
 ### 3. Start backend services locally
 
-Run all backend processes together:
+First, build the shared package (required after any change to shared code):
+
+```bash
+cd backend
+pnpm --filter @hom-nay-an-gi/shared run build
+```
+
+Then start all backend processes in one terminal:
 
 ```bash
 cd backend
 pnpm dev
 ```
 
-That starts:
-
-- `express-api` on port `3000`
-- `llm-proxy` on port `3001`
-- `cron-worker`
-
-If you only want the API:
+This starts the express-api (`:3000`), llm-proxy (`:3001`), and cron-worker in parallel. To use a specific Ollama model:
 
 ```bash
-cd backend
-pnpm dev:api
+OLLAMA_MODEL=llama3:latest pnpm dev
+```
+
+Or start everything with Docker:
+
+```bash
+docker compose up -d
 ```
 
 ### 4. Start the frontend locally

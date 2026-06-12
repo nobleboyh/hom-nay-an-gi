@@ -10,6 +10,10 @@ import {
 import cors, { type CorsOptionsDelegate } from "cors";
 import express from "express";
 import helmet from "helmet";
+import { recipesRouter } from "./api/recipes/recipesRouter.js";
+import { loadSeedRecipes } from "./data/seedLoader.js";
+
+loadSeedRecipes();
 
 const allowedOrigins = parseCorsOrigins(env.CORS_ORIGIN);
 
@@ -60,6 +64,8 @@ export function buildApp(): express.Express {
 
   app.get("/api/v1/health", healthHandler);
   app.get("/api/v1/hello", helloHandler);
+
+  app.use("/api/v1/recipes", recipesRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -1,38 +1,84 @@
-import http from "node:http";
-import {
-  buildErrorResponse,
-  buildSuccessResponse,
-  env,
-  getLlmConfig,
-  logger,
-} from "@hom-nay-an-gi/shared";
+import { env, getLlmConfig, logger } from "@hom-nay-an-gi/shared";
+import cors from "cors";
+import express from "express";
 
-const llmConfig = getLlmConfig();
+import { complete } from "./llmClient.js";
 
-const server = http.createServer((request, response) => {
-  if (request.method === "GET" && request.url === "/health") {
-    response.writeHead(200, { "content-type": "application/json" });
-    response.end(
-      JSON.stringify(
-        buildSuccessResponse({
-          status: "ok",
-          service: "llm-proxy",
-          provider: llmConfig.provider,
-        }),
-      ),
-    );
-    return;
-  }
+function getApiKey(): string {
+  return process.env.LLM_API_KEY ?? "";
+}
 
-  response.writeHead(404, { "content-type": "application/json" });
-  response.end(
-    JSON.stringify(buildErrorResponse("NOT_FOUND", "Route not found")),
-  );
-});
+export function buildApp(): express.Express {
+  const app = express();
 
-server.listen(env.PORT, "0.0.0.0", () => {
+  app.use(cors());
+  app.use(express.json({ limit: "100kb" }));
+
+  app.get("/health", (_request, response) => {
+    response.json({
+      success: true,
+      data: {
+        status: "ok",
+        service: "llm-proxy",
+        provider: getLlmConfig().provider,
+      },
+    });
+  });
+
+  app.post("/complete", async (request, response) => {
+    const { prompt } = request.body as {
+      prompt?: { system?: string; user?: string };
+    };
+
+    if (prompt?.system === undefined || prompt?.user === undefined) {
+      response.status(400).json({
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Missing required fields: prompt.system, prompt.user",
+        },
+      });
+      return;
+    }
+
+    try {
+      const result = await complete(
+        prompt.system,
+        prompt.user,
+        { parse: (raw: unknown) => raw } as never,
+        {
+          provider: getLlmConfig().provider,
+          apiKey: getApiKey(),
+        },
+      );
+
+      response.json({
+        success: true,
+        data: result.data,
+        meta: result.meta,
+      });
+    } catch (error) {
+      logger.error({ err: error }, "LLM completion failed");
+
+      response.status(502).json({
+        success: false,
+        error: {
+          code: "LLM_PROVIDER_ERROR",
+          message: error instanceof Error ? error.message : "LLM call failed",
+        },
+      });
+    }
+  });
+
+  return app;
+}
+
+const app = buildApp();
+const port = env.PORT;
+
+app.listen(port, "0.0.0.0", () => {
   logger.info(
-    { port: env.PORT, target: env.LLM_PROXY_URL },
-    "LLM proxy placeholder listening",
+    { port, provider: getLlmConfig().provider },
+    "LLM proxy server listening",
   );
 });

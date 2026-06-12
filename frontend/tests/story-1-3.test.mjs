@@ -49,7 +49,7 @@ test('story 1.3 wires Vietnamese tabs, placeholders, and the API base env file',
   assert.match(tabsLayout, /Khám phá/);
   assert.match(tabsLayout, /Yêu thích/);
   assert.match(tabsLayout, /Cá nhân/);
-  assert.match(homeScreen, /Bỏ qua điều hướng/);
+  assert.match(homeScreen, /home\.skipNavigation/);
   assert.match(homeScreen, /main-content/);
   assert.match(profileScreen, /Cá nhân/);
   assert.match(recipeScreen, /showBackButton/);

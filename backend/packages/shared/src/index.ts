@@ -1,3 +1,23 @@
+export {
+  type CookingStep,
+  CookingStepSchema,
+  type Dish,
+  DishArraySchema,
+  type DishIdParams,
+  DishIdParamsSchema,
+  DishSchema,
+  type Ingredient as RecipeIngredient,
+  IngredientSchema as RecipeIngredientSchema,
+  type LlmDishResponse,
+  LlmDishResponseSchema,
+  type RecipeDetail,
+  type SearchMeta,
+  type SearchParams,
+  SearchParamsSchema,
+  type SearchResult,
+  type SurpriseMeParams,
+  SurpriseMeSchema,
+} from "./api/recipes/recipesValidation.js";
 export { asyncHandler } from "./common/middleware/asyncHandler.js";
 export { authenticate, signJwt } from "./common/middleware/authenticate.js";
 export {
@@ -52,3 +72,23 @@ export {
   type IUserPreference,
   UserPreference,
 } from "./models/UserPreference.js";
+export {
+  cacheDel,
+  cacheGet,
+  cacheSet,
+  rateLimitKey,
+  recipeSearchKey,
+  sessionKey,
+  surpriseKey,
+  trendingKey,
+} from "./services/cacheClient.js";
+export {
+  buildIngredientSearchPrompt,
+  buildSurprisePrompt,
+} from "./services/prompts.js";
+export {
+  buildIngredientTokens,
+  getRandomSeedRecipe,
+  jaccardSimilarity,
+  searchSeedRecipes,
+} from "./services/seedMatcher.js";

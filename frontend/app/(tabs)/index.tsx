@@ -1,78 +1,264 @@
-import { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { createApiClient, type ApiError } from '../../lib/api';
+import { useCallback, useState } from 'react';
+import {
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useDataStore } from '../../stores/dataStore';
+import { useUIStore } from '../../stores/uiStore';
+import { Button } from '../../components/Button';
+import { Chip } from '../../components/Chip';
+import { ChipRow, type ChipRowItem } from '../../components/ChipRow';
+import { CollapsibleSection } from '../../components/CollapsibleSection';
+import { EmptyState } from '../../components/EmptyState';
+import { InputField } from '../../components/InputField';
+import { Skeleton } from '../../components/Skeleton';
+import { parseIngredients } from '../../lib/parseIngredients';
+import { useReducedMotion } from '../../lib/accessibility';
 import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../../lib/tokens';
 
-type HelloResponse = {
-  message: string;
-  source: string;
-};
+const FOOD_TYPE_CHIPS: ChipRowItem[] = [
+  { id: 'vegetarian', label: 'Chay' },
+  { id: 'salad', label: 'Salad' },
+  { id: 'light', label: 'Nhẹ' },
+  { id: 'meat-included', label: 'Có thịt' },
+  { id: 'salty', label: 'Mặn' },
+  { id: 'sour', label: 'Chua' },
+  { id: 'sweet', label: 'Ngọt' },
+  { id: 'dessert', label: 'Tráng miệng' },
+];
 
-const apiClient = createApiClient({
-  baseUrl: process.env.API_BASE_URL || 'http://localhost:8080',
-  getToken: async () => null,
-  onTokenExpired: async () => {},
-  onUnauthenticated: () => {},
-});
+const CUISINE_CHIPS: ChipRowItem[] = [
+  { id: 'Việt Nam', label: 'Việt Nam' },
+  { id: 'Miền Bắc', label: 'Miền Bắc' },
+  { id: 'Miền Trung', label: 'Miền Trung' },
+  { id: 'Miền Nam', label: 'Miền Nam' },
+];
+
+const MOOD_CHIPS: ChipRowItem[] = [
+  { id: 'thèm-thịt', label: 'Thèm thịt' },
+  { id: 'thèm-cá', label: 'Thèm cá' },
+  { id: 'thèm-chua', label: 'Thèm chua' },
+  { id: 'thèm-ngọt', label: 'Thèm ngọt' },
+  { id: 'thèm-cay', label: 'Thèm cay' },
+  { id: 'thèm-mát', label: 'Thèm mát' },
+];
+
+const COOK_TIME_CHIPS: ChipRowItem[] = [
+  { id: '15', label: '15 phút' },
+  { id: '30', label: '30 phút' },
+  { id: '60', label: '60 phút' },
+  { id: '90', label: '90+ phút' },
+];
 
 export default function HomeScreen() {
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('Checking backend connection...');
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const prefersReducedMotion = useReducedMotion();
+  const { activeFilters, setFilters, addToast } = useUIStore();
+  const { resultsStatus: searchStatus, fetchDishes, fetchSurpriseMe } = useDataStore();
+  const [inputValue, setInputValue] = useState('');
+  const [ingredientChips, setIngredientChips] = useState<string[]>([]);
 
-  const webMainContentProps =
-    Platform.OS === 'web'
-      ? ({ id: 'main-content', tabIndex: -1 } as { id: string; tabIndex: number })
-      : {};
+  const webMainContentProps = Platform.OS === 'web'
+    ? ({ id: 'main-content', tabIndex: -1 } as { id: string; tabIndex: number })
+    : {};
 
-  async function loadHello() {
-    setStatus('loading');
-    setMessage('Checking backend connection...');
-
-    try {
-      const response = await apiClient.get<HelloResponse>('/api/v1/hello');
-      setStatus('success');
-      setMessage(`${response.data.message} (${response.data.source})`);
-    } catch (error) {
-      const apiError = error as ApiError;
-      setStatus('error');
-      setMessage(apiError.message || 'Unable to reach backend');
+  const handleChangeText = useCallback((text: string) => {
+    if (text.endsWith(',')) {
+      const beforeComma = text.slice(0, -1).trim();
+      if (beforeComma.length > 0) {
+        const parsed = parseIngredients(beforeComma);
+        if (parsed.length > 0) {
+          setIngredientChips((prev) => {
+            const combined = [...prev, ...parsed];
+            return [...new Set(combined)].slice(0, 20);
+          });
+        }
+      }
+      setInputValue('');
+    } else {
+      setInputValue(text);
     }
-  }
-
-  useEffect(() => {
-    void loadHello();
   }, []);
 
+  const handleSubmitIngredients = useCallback(() => {
+    if (inputValue.length === 0) return;
+    const parsed = parseIngredients(inputValue);
+    if (parsed.length === 0) return;
+    setIngredientChips((prev) => {
+      const combined = [...prev, ...parsed];
+      return [...new Set(combined)].slice(0, 20);
+    });
+    setInputValue('');
+  }, [inputValue]);
+
+  const handleRemoveIngredient = useCallback((ingredient: string) => {
+    if (!prefersReducedMotion) {
+      LayoutAnimation.configureNext({
+        duration: 150,
+        update: { type: 'easeInEaseOut', property: 'opacity' },
+      });
+    }
+    setIngredientChips((prev) => prev.filter((i) => i !== ingredient));
+  }, [prefersReducedMotion]);
+
+  const handleSearch = useCallback(async () => {
+    await fetchDishes(ingredientChips, activeFilters);
+    const { resultsStatus: status } = useDataStore.getState();
+    if (status === 'error') {
+      addToast('Không thể tìm món. Vui lòng thử lại.', 'error');
+      return;
+    }
+    if (!prefersReducedMotion) {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    }
+    router.push('/(tabs)/results');
+  }, [ingredientChips, activeFilters, fetchDishes, prefersReducedMotion, router, addToast]);
+
+  const handleSurprise = useCallback(async () => {
+    await fetchSurpriseMe();
+    const { homeStatus } = useDataStore.getState();
+    if (homeStatus === 'error') {
+      addToast('Không thể tải món bất ngờ. Vui lòng thử lại.', 'error');
+      return;
+    }
+    router.push('/recipe/surprise');
+  }, [fetchSurpriseMe, router, addToast]);
+
+  const selectedCookTime = activeFilters.cookTime ? String(activeFilters.cookTime) : '30';
+
   return (
-    <View style={styles.screen}>
-      <Pressable accessibilityRole="link" onPress={() => {}} style={styles.skipLink}>
-        <Text style={styles.skipLinkText}>Bỏ qua điều hướng → #main-content</Text>
+    <View style={[styles.screen, { paddingTop: insets.top }]}>
+      <Pressable
+        accessibilityLabel="Bỏ qua điều hướng, chuyển đến nội dung chính"
+        accessibilityRole="link"
+        onPress={() => {
+          if (Platform.OS === 'web') {
+            const el = document.getElementById('main-content');
+            if (el) el.focus();
+          }
+        }}
+        style={styles.skipLink}
+      >
+        <Text style={styles.skipLinkText}>Bỏ qua điều hướng → Nội dung chính</Text>
       </Pressable>
 
-      <View {...webMainContentProps} accessibilityRole="summary" nativeID="main-content" style={styles.card}>
-        <Text style={styles.eyebrow}>Backend Smoke Test</Text>
-        <Text style={styles.title}>Trang chủ</Text>
-        <Text style={styles.description}>
-          This screen calls <Text style={styles.inlineCode}>/api/v1/hello</Text> to verify the
-          frontend can reach the backend.
-        </Text>
+      <ScrollView
+        {...webMainContentProps}
+        contentContainerStyle={styles.scrollContent}
+        nativeID="main-content"
+        showsVerticalScrollIndicator={false}
+      >
+        <Text accessibilityRole="header" style={styles.appTitle}>Hôm Nay Ăn Gì</Text>
+        <Text style={styles.tagline}>Nhập nguyên liệu bạn có — để tôi gợi ý món ngon</Text>
 
-        <View style={styles.statusBox}>
-          <Text style={styles.statusLabel}>Status</Text>
-          <Text
-            style={[
-              styles.statusValue,
-              status === 'success' ? styles.success : status === 'error' ? styles.error : null,
-            ]}>
-            {status.toUpperCase()}
-          </Text>
-          <Text style={styles.message}>{message}</Text>
+        <View style={styles.inputSection}>
+          <InputField
+            accessibilityLabel="Nhập nguyên liệu"
+            onChangeText={handleChangeText}
+            onSubmitEditing={handleSubmitIngredients}
+            placeholder="Gõ nguyên liệu, ví dụ: thịt gà, bông cải, trứng"
+            value={inputValue}
+          />
+          {ingredientChips.length > 0 ? (
+            <View style={styles.chipList}>
+              {ingredientChips.map((ingredient) => (
+                <Chip
+                  key={ingredient}
+                  label={ingredient}
+                  onRemove={() => handleRemoveIngredient(ingredient)}
+                  variant="ingredient"
+                />
+              ))}
+            </View>
+          ) : null}
         </View>
 
-        <Pressable accessibilityRole="button" onPress={() => void loadHello()} style={styles.button}>
-          <Text style={styles.buttonText}>Retry hello check</Text>
-        </Pressable>
-      </View>
+        <View style={styles.filterSection}>
+          <Text accessibilityRole="header" style={styles.sectionLabel}>Loại món</Text>
+          <ChipRow
+            items={FOOD_TYPE_CHIPS}
+            mode="multiSelect"
+            onSelectionChange={(ids) => setFilters({ foodTypes: ids })}
+            selectedIds={activeFilters.foodTypes}
+            variant="tag"
+          />
+        </View>
+
+        <View style={styles.filterSection}>
+          <Text accessibilityRole="header" style={styles.sectionLabel}>Ẩm thực</Text>
+          <ChipRow
+            items={CUISINE_CHIPS}
+            mode="multiSelect"
+            onSelectionChange={(ids) => setFilters({ cuisines: ids })}
+            selectedIds={activeFilters.cuisines}
+            variant="cuisine"
+          />
+        </View>
+
+        <CollapsibleSection title="Cảm giác thèm">
+          <ChipRow
+            items={MOOD_CHIPS}
+            mode="multiSelect"
+            onSelectionChange={(ids) => setFilters({ moods: ids })}
+            selectedIds={activeFilters.moods}
+            variant="tag"
+          />
+        </CollapsibleSection>
+
+        <View style={styles.filterSection}>
+          <Text accessibilityRole="header" style={styles.sectionLabel}>Thời gian nấu</Text>
+          <ChipRow
+            items={COOK_TIME_CHIPS}
+            mode="singleSelect"
+            onSelectionChange={(ids) => {
+              const value = ids.length > 0 ? Number(ids[0]) : null;
+              setFilters({ cookTime: value });
+            }}
+            selectedIds={[selectedCookTime]}
+            variant="time"
+          />
+        </View>
+
+        <View style={styles.buttonSection}>
+          <Button
+            fullWidth
+            loading={searchStatus === 'loading'}
+            onPress={handleSearch}
+            variant="primary"
+          >
+            Tìm món
+          </Button>
+          <Button onPress={handleSurprise} variant="secondary">
+            Bất ngờ!
+          </Button>
+        </View>
+
+        {searchStatus === 'loading' ? (
+          <View style={styles.skeletonSection}>
+            <Skeleton variant="card" />
+            <Skeleton variant="card" />
+            <Skeleton variant="card" />
+          </View>
+        ) : null}
+
+        {searchStatus === 'error' ? (
+          <EmptyState
+            ctaLabel="Thử lại"
+            description="Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+            icon="⚠️"
+            onCtaPress={handleSearch}
+            title="Đã xảy ra lỗi"
+          />
+        ) : null}
+      </ScrollView>
     </View>
   );
 }
@@ -81,12 +267,10 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: oklchToRgba(Colors.bg),
-    paddingHorizontal: Spacing.md2,
-    paddingVertical: Spacing.md2,
-    justifyContent: 'center',
   },
   skipLink: {
     alignSelf: 'flex-start',
+    marginHorizontal: Spacing.md2,
     marginBottom: Spacing.gap,
     borderRadius: Radius.sm,
     backgroundColor: oklchToRgba(Colors.fg),
@@ -99,88 +283,48 @@ const styles = StyleSheet.create({
     fontSize: Typography.cardSubtitle.fontSize,
     fontWeight: Typography.button.fontWeight,
   },
-  card: {
-    width: '100%',
-    maxWidth: 420,
-    alignSelf: 'center',
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: oklchToRgba(Colors.border),
-    backgroundColor: oklchToRgba(Colors.surface),
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: 28,
+  scrollContent: {
+    paddingHorizontal: Spacing.md2,
+    paddingBottom: 100,
     gap: Spacing.md2,
   },
-  eyebrow: {
-    fontFamily: Typography.badge.family,
-    fontSize: Typography.badge.fontSize,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-    color: oklchToRgba(Colors.accentStrong),
-  },
-  title: {
+  appTitle: {
     fontFamily: Typography.appTitle.family,
     fontSize: Typography.appTitle.fontSize,
-    fontWeight: '800',
-    color: oklchToRgba(Colors.fg),
-  },
-  description: {
-    fontFamily: Typography.cardSubtitle.family,
-    fontSize: Typography.cardTitle.fontSize,
-    lineHeight: 24,
-    color: oklchToRgba(Colors.muted),
-  },
-  inlineCode: {
-    fontFamily: 'Courier',
-    color: oklchToRgba(Colors.fg),
-  },
-  statusBox: {
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    borderColor: oklchToRgba(Colors.border),
-    backgroundColor: oklchToRgba(Colors.accentDim),
-    padding: Spacing.md2,
-    gap: Spacing.sm2,
-  },
-  statusLabel: {
-    fontFamily: Typography.badge.family,
-    fontSize: Typography.badge.fontSize,
     fontWeight: '700',
-    textTransform: 'uppercase',
-    color: oklchToRgba(Colors.muted),
-  },
-  statusValue: {
-    fontFamily: Typography.cardTitle.family,
-    fontSize: Typography.cardTitle.fontSize,
-    fontWeight: '700',
+    lineHeight: Typography.appTitle.lineHeight,
     color: oklchToRgba(Colors.fg),
+    letterSpacing: Typography.appTitle.letterSpacing,
   },
-  success: {
-    color: '#1E7A46',
-  },
-  error: {
-    color: '#B63737',
-  },
-  message: {
+  tagline: {
     fontFamily: Typography.cardSubtitle.family,
     fontSize: Typography.cardSubtitle.fontSize,
-    lineHeight: 22,
+    lineHeight: Typography.cardSubtitle.lineHeight,
+    color: oklchToRgba(Colors.muted),
+  },
+  inputSection: {
+    gap: Spacing.sm,
+  },
+  chipList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  filterSection: {
+    gap: Spacing.sm,
+  },
+  sectionLabel: {
+    fontFamily: Typography.sectionTitle.family,
+    fontSize: Typography.sectionTitle.fontSize,
+    fontWeight: Typography.sectionTitle.fontWeight,
+    lineHeight: Typography.sectionTitle.lineHeight,
     color: oklchToRgba(Colors.fg),
   },
-  button: {
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: Radius.md,
-    backgroundColor: oklchToRgba(Colors.accentStrong),
-    paddingHorizontal: Spacing.md2,
-    paddingVertical: Spacing.sm2,
+  buttonSection: {
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
   },
-  buttonText: {
-    color: '#FFFFFF',
-    fontFamily: Typography.button.family,
-    fontSize: Typography.button.fontSize,
-    fontWeight: Typography.button.fontWeight,
+  skeletonSection: {
+    gap: Spacing.sm,
   },
 });

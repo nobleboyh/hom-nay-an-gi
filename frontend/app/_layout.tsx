@@ -8,12 +8,15 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { NetworkStatusProvider } from '../lib/networkStatus';
 
-Sentry.init({
-  dsn: process.env.SENTRY_DSN || '',
-  enableInExpoDevelopment: false,
-  debug: false,
-  tracesSampleRate: 0.1,
-});
+const sentryDsn = process.env.SENTRY_DSN;
+if (sentryDsn && !sentryDsn.startsWith('replace-with-')) {
+  Sentry.init({
+    dsn: sentryDsn,
+    enableInExpoDevelopment: false,
+    debug: false,
+    tracesSampleRate: 0.1,
+  });
+}
 
 export default function RootLayout() {
   return (

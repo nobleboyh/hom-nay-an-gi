@@ -5,6 +5,7 @@ import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../lib/tokens'
 export type TimelineStep = {
   duration: string;
   label: string;
+  parallelGroup?: string;
 };
 
 export type TimelineProps = {
@@ -12,25 +13,53 @@ export type TimelineProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+function groupSteps(steps: TimelineStep[]): TimelineStep[][] {
+  const groups: TimelineStep[][] = [];
+  let currentGroup: TimelineStep[] = [];
+  let currentGroupId: string | undefined;
+
+  for (const step of steps) {
+    if (step.parallelGroup && step.parallelGroup === currentGroupId) {
+      currentGroup.push(step);
+    } else {
+      if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+      }
+      currentGroup = [step];
+      currentGroupId = step.parallelGroup;
+    }
+  }
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
+  return groups;
+}
+
 export function Timeline({ steps }: TimelineProps) {
+  const grouped = groupSteps(steps);
+
   return (
     <View accessibilityRole="list" style={styles.list}>
-      {steps.map((step, index) => {
-        const isLast = index === steps.length - 1;
+      {grouped.map((group, groupIndex) => {
+        const isLast = groupIndex === grouped.length - 1;
 
         return (
           <View
-            key={`${step.label}-${index}`}
+            key={`group-${groupIndex}`}
             role="listitem"
-            accessibilityLabel={`${step.label}, ${step.duration}`}
+            accessibilityLabel={group.map((s) => `${s.label}, ${s.duration}`).join('; ')}
             style={styles.row}>
             <View style={styles.markerColumn}>
               <View style={styles.dot} />
               {!isLast ? <View style={styles.bar} /> : null}
             </View>
             <View style={styles.content}>
-              <Text style={styles.label}>{step.label}</Text>
-              <Text style={styles.duration}>{step.duration}</Text>
+              {group.map((step, stepIndex) => (
+                <View key={`step-${stepIndex}`} style={stepIndex > 0 ? styles.parallelStep : undefined}>
+                  <Text style={styles.label}>{step.label}</Text>
+                  <Text style={styles.duration}>{step.duration}</Text>
+                </View>
+              ))}
             </View>
           </View>
         );
@@ -69,6 +98,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingBottom: Spacing.xs,
+  },
+  parallelStep: {
+    marginTop: Spacing.sm,
   },
   label: {
     color: oklchToRgba(Colors.fg),

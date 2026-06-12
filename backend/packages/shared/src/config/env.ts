@@ -17,7 +17,11 @@ const envSchema = z.object({
     .default(
       "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8081,exp://127.0.0.1:19000,exp://localhost:19000",
     ),
-  LLM_PROVIDER: z.string().min(1).default("gemini"),
+  LLM_PROVIDER: z.string().min(1).default("ollama"),
+  // LLM_PROVIDER: z.string().optional(),
+  // LLM_API_KEY: z.string().optional(),
+  OLLAMA_BASE_URL: z.string().url().default("http://localhost:11434"),
+  OLLAMA_MODEL: z.string().min(1).default("llama3.2:1b"),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

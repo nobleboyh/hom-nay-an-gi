@@ -67,6 +67,12 @@ export default function TabsLayout() {
           tabBarIcon: ({ color }) => <TabIcon color={color} glyph="◉" />,
         }}
       />
+      <Tabs.Screen
+        name="results"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

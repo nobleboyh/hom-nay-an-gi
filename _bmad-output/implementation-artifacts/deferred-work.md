@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review of 2-1-llm-integration (2026-06-10)
+
+- **`as never` passthrough schema** — Zod schemas can't be serialized over HTTP; validation happens at express-api layer. Architectural decision, not a bug.
+- **Anthropic JSON regex extraction fragile** — Anthropic lacks native JSON mode; current best-effort regex extraction is sufficient for prompted JSON outputs.
+- **`JSON.parse` reviver only guards `__proto__`** — Zod validation at express-api layer provides safety. Seed matcher fallback also protects against bad cached data.
+
 ## Deferred from: code review of Stories 1.8-1.10 (2026-06-05)
 
 - **Docker JWT_SECRET empty string bypasses Zod default → crash at startup** (`docker-compose.yml`): Docker Compose resolves `${JWT_SECRET}` to empty string; Zod `.default()` only fires when key is undefined, not empty string. Fix: add fallback `${JWT_SECRET:-replace-with-a-long-secret}` in docker-compose or preprocess env.
@@ -12,3 +18,45 @@
 - **CI skips all model tests when MongoDB unavailable** (`.github/workflows/ci-backend.yml`): ~~All Mongoose model tests skipped silently, CI passes green but data layer has zero coverage.~~ ✅ **Fixed** — added MongoDB 8 service container to CI job with `MONGO_URI` env var.
 - **llm-proxy hardcoded port, no error listener** (`backend/src/llm-proxy.ts`): Port 3001 hardcoded, EADDRINUSE crashes unhandled.
 - **ErrorBoundary.reset() doesn't remount children** (`frontend/components/ErrorBoundary.tsx`): Reset sets error:null but children retain state. Corrupted child state re-triggers same error → crash loop.
+
+## Deferred from: code review of 2-4-results-screen (2026-06-11)
+
+- **Toast churn during pagination** — In `results.tsx`, `addToast` inside `useEffect` dependency may fire multiple toasts on rapid pagination. Toast component caps at MAX_TOASTS=3, so UX impact is minimal.
+- **Stale closure in `handleSearch` — `homeStatus` reference** — `handleSearch` reads `homeStatus` from `useDataStore.getState()` which is always fresh. Not a real bug.
+- **`activeFilters` single subscription re-renders on any filter change** — Minor perf issue. Fix: select individual filter properties.
+- **`fetchDishes` stub returns cached data, not API** — Architectural decision for MVP. Will be replaced when backend is connected.
+- **`fetchSurpriseMe` always falls to `homeStatus: 'empty'`** — Stub returns no data. Will be connected in later epic.
+- **`parseIngredients` silently returns `[]` on >20 deduped** — Caller (`handleSubmitEditing`) already checks `rawItems.length > 0` and shows toast. Working as intended.
+- **Offline banner shown redundantly — `isConnected` check in `useEffect` + offline detection double-fires** — Minor duplicate UX, no crash.
+- **`handleSubmitEditing` shows toast for both empty input AND max-ingredients violation** — Toast message is "Tối đa 20 nguyên liệu" which is correct for the max-ingredients case.
+- **No `useCallback` on `renderSortItem` / `renderCardItem` functions in FlatList** — FlatList inline functions create new refs each render. Minor perf — not noticable on expected list sizes (10-30 items).
+- **`useFocusEffect` in ResultsScreen may double-fire on navigation transitions** — Callback guard (`mountedRef`) prevents second execution.
+
+## Deferred from: code review of 2-3-home-screen (2026-06-11)
+
+- **Chip uses `×` (U+00D7) instead of `✕` (U+2715)** — Chip component in "must not change" list, pre-existing
+- **NetworkStatusProvider hardcodes Vietnamese strings** — Pre-existing issue in networkStatus.tsx, not part of this story
+- **`animRefs` Map may leak entries on interrupted animations** — Low impact edge case
+- **No keyboard dismissal on search press** — Minor UX polish
+- **Nested Pressable in Chip may propagate tap to outer** — Chip in "must not change" list, pre-existing
+- **CollapsibleSection uses character swap instead of 180° rotation** — Component in "must not change" list, pre-existing
+- **Error toasts lack retry action** — Toast component doesn't support actions
+- **Nested ScrollViews (vertical + horizontal) on iOS** — Platform-specific, likely works
+- **Toast fade-out animation dead code when onDismiss provided** — Minor, no UX impact
+- **`parseIngredients` returns `[]` for both empty and too many** — Caller duplicates logic
+- **Input not disabled during async search/surprise** — Minor UX polish
+- **`useRecipes` subscriptions (`dishes`, `homeStatus`) unused in HomeScreen** — Minor perf
+
+## Deferred from: code review of 2-2-recipes-api-module (2026-06-11)
+
+- **Module-level mutable state `lastSurpriseDishId`** (`recipesService.ts:189-191`): Not safe under concurrent/multi-instance deployments, but acceptable for MVP.
+- **Race condition in `surpriseMe()`** (`recipesService.ts`): Read-modify-write of `lastSurpriseDishId` not atomic under concurrent requests; fine for single-process MVP.
+- **`getDishById` reads `req.params` instead of `req.validated`** (`recipesController.ts`): Functionally equivalent, but inconsistent with search/surprise handler pattern.
+- ~~**`searchSeedRecipes` filters zero-match dishes** (`seedMatcher.ts:84-85`): Pre-existing behavior in shared code; not modified by this story.~~ ✅ **Won't fix** — intentional: dishes with 0% ingredient match are correctly excluded from results.
+
+## Deferred from: code review of 2-6-shopping-list-screen (2026-06-11)
+
+- **Ingredient names containing commas break comma-separated parsing** (`frontend/app/shopping-list.tsx:91-97`): Upstream contract issue — RecipeScreen serializes ingredients as comma-separated list, but ingredient names may contain commas. Fix requires coordinate change across screens.
+- **Skeleton timeout hardcoded to 600ms** (`frontend/app/shopping-list.tsx:160-163`): Intentional for MVP — route params are synchronous so no actual fetch to await.
+- **`remove` for `shopping_lists_guest` uses `dishId` column instead of `id`** (`frontend/stores/storageAdapter.ts:240`): Pre-existing pattern in `remove()` function; `remove` not called in this story.
+- **`remove` for `search_history_guest` uses non-existent `dishId` column** (`frontend/stores/storageAdapter.ts:240`): Pre-existing bug in `remove()` function; not introduced by this story.
