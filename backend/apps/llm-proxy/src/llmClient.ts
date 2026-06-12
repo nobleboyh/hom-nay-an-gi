@@ -240,7 +240,7 @@ function createOllamaAdapter(): ProviderAdapter {
         choices?: { message?: { content?: string } }[];
       };
 
-      let text = data.choices?.[0]?.message?.content ?? "{}";
+      const text = data.choices?.[0]?.message?.content ?? "{}";
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       return JSON.parse(jsonMatch?.[0] ?? "{}") as Record<string, unknown>;
     },

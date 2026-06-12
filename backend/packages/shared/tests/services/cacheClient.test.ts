@@ -13,6 +13,7 @@ import {
 
 vi.mock("../../src/config/redis.js", () => ({
   redis: {
+    status: "ready",
     get: vi.fn(),
     set: vi.fn(),
     del: vi.fn(),

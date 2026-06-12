@@ -105,7 +105,10 @@ const EN_FEW_SHOT_EXAMPLES = [
           ],
           steps: [
             { label: "Prep ingredients", durationMinutes: 10 },
-            { label: "Stir-fry chicken with lemongrass and chili", durationMinutes: 15 },
+            {
+              label: "Stir-fry chicken with lemongrass and chili",
+              durationMinutes: 15,
+            },
             { label: "Plate and serve", durationMinutes: 5 },
           ],
           totalCookTimeMinutes: 30,

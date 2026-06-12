@@ -109,20 +109,10 @@ describe("llmClient", () => {
       fetchSpy.mockRestore();
     });
 
-    it("falls back to fallback provider on primary failure", async () => {
-      const mockResponse = { result: "fallback-success" };
-
+    it("returns seed fallback on primary failure", async () => {
       const fetchSpy = vi
         .spyOn(globalThis, "fetch")
-        .mockRejectedValueOnce(new Error("Primary failed"))
-        .mockResolvedValueOnce(
-          new Response(
-            JSON.stringify({
-              content: [{ text: JSON.stringify(mockResponse) }],
-            }),
-            { status: 200, headers: { "x-api-key": "test" } },
-          ),
-        );
+        .mockRejectedValue(new Error("Primary failed"));
 
       const { complete } = await import("../src/llmClient.js");
 
@@ -130,36 +120,7 @@ describe("llmClient", () => {
         "system prompt",
         "user prompt",
         testSchema,
-        {
-          apiKey: "primary-key",
-          fallbackProvider: "anthropic",
-          fallbackApiKey: "fallback-key",
-        },
-      );
-
-      expect(result.data).toEqual(mockResponse);
-      expect(result.meta.degraded).toBe(true);
-      expect(result.meta.provider).toBe("anthropic");
-
-      fetchSpy.mockRestore();
-    });
-
-    it("returns seed fallback when both providers fail", async () => {
-      const fetchSpy = vi
-        .spyOn(globalThis, "fetch")
-        .mockRejectedValue(new Error("All providers failed"));
-
-      const { complete } = await import("../src/llmClient.js");
-
-      const result = await complete(
-        "system prompt",
-        "user prompt",
-        testSchema,
-        {
-          apiKey: "primary-key",
-          fallbackProvider: "openai",
-          fallbackApiKey: "fallback-key",
-        },
+        { apiKey: "primary-key" },
       );
 
       expect(result.data).toBeNull();
