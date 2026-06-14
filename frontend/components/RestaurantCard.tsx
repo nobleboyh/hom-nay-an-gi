@@ -19,6 +19,7 @@ export type RestaurantCardProps = {
   onPress: () => void;
   price?: string;
   rating?: string;
+  restaurantName?: string;
   style?: StyleProp<ViewStyle>;
   thumbnail?: string;
 };
@@ -30,6 +31,7 @@ export function RestaurantCard({
   onPress,
   price,
   rating,
+  restaurantName,
   style,
 }: RestaurantCardProps) {
   return (
@@ -50,11 +52,12 @@ export function RestaurantCard({
         </View>
         <View style={styles.info}>
           <Text style={styles.name}>{name}</Text>
-          <View style={styles.metaRow}>
-            <Text style={styles.metaText}>{formatDistance(distanceMeters)}</Text>
-            {rating ? <Text style={styles.metaText}>{rating}</Text> : null}
-            {price ? <Text style={styles.metaText}>{price}</Text> : null}
-          </View>
+          <Text style={styles.metaText}>
+            {restaurantName}{restaurantName && distanceMeters != null ? ' • ' : ''}{distanceMeters != null ? formatDistance(distanceMeters) : ''}
+          </Text>
+          <Text style={styles.metaText}>
+            {rating != null ? `⭐ ${rating}` : ''}{rating != null && price ? ' • ' : ''}{price ?? ''}
+          </Text>
         </View>
       </Card>
     </Pressable>
@@ -90,16 +93,10 @@ const styles = StyleSheet.create({
   name: {
     fontFamily: Typography.cardTitle.family,
     fontSize: Typography.cardTitle.fontSize,
-    fontWeight: Typography.cardTitle.fontWeight,
+    fontWeight: '600',
     lineHeight: Typography.cardTitle.lineHeight,
     color: oklchToRgba(Colors.fg),
     ...(Platform.OS === 'web' ? { userSelect: 'none' } : {}),
-  },
-  metaRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    alignItems: 'center',
-    flexWrap: 'wrap',
   },
   metaText: {
     fontFamily: Typography.meta.family,

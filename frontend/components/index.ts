@@ -8,6 +8,7 @@ export { CollapsibleSection } from './CollapsibleSection';
 export { DishCard } from './DishCard';
 export { EmptyState } from './EmptyState';
 export { InputField } from './InputField';
+export { LocationPicker } from './LocationPicker';
 export { RestaurantCard } from './RestaurantCard';
 export { ResultCard } from './ResultCard';
 export { ServingAdjuster } from './ServingAdjuster';

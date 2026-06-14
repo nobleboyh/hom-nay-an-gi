@@ -10,6 +10,7 @@ import {
 import cors, { type CorsOptionsDelegate } from "cors";
 import express from "express";
 import helmet from "helmet";
+import discoveryRouter from "./api/discovery/discoveryRouter.js";
 
 const allowedOrigins = parseCorsOrigins(env.CORS_ORIGIN);
 
@@ -57,6 +58,8 @@ export function buildApp(): express.Express {
 
   app.use(requestLogger);
   app.use(generalLimiter);
+
+  app.use("/api/v1/discovery", discoveryRouter);
 
   app.get("/api/v1/health", healthHandler);
   app.get("/api/v1/hello", helloHandler);

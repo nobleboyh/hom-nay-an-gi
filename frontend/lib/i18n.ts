@@ -243,4 +243,6 @@ export function getInlineLanguageProps(
   };
 }
 
-void hydrateLanguage();
+if (typeof window !== 'undefined') {
+  void hydrateLanguage();
+}

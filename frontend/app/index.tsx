@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { createApiClient, type ApiError } from '../../lib/api';
-import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../../lib/tokens';
+import { createApiClient, type ApiError } from '../lib/api';
+import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../lib/tokens';
 
 type HelloResponse = {
   message: string;

@@ -12,3 +12,25 @@
 - **CI skips all model tests when MongoDB unavailable** (`.github/workflows/ci-backend.yml`): ~~All Mongoose model tests skipped silently, CI passes green but data layer has zero coverage.~~ ✅ **Fixed** — added MongoDB 8 service container to CI job with `MONGO_URI` env var.
 - **llm-proxy hardcoded port, no error listener** (`backend/src/llm-proxy.ts`): Port 3001 hardcoded, EADDRINUSE crashes unhandled.
 - **ErrorBoundary.reset() doesn't remount children** (`frontend/components/ErrorBoundary.tsx`): Reset sets error:null but children retain state. Corrupted child state re-triggers same error → crash loop.
+
+## Deferred from: code review of story 3-2-discovery-api-module (2026-06-10)
+
+- **No rate limiting on `POST /generate`** (`llm-proxy/src/index.ts`): Infrastructure concern, applies to all endpoints, not specific to this story.
+- **Thundering herd on cache miss** (`discoveryService.ts:197-229`): Multiple concurrent cache misses could all call LLM simultaneously. Acceptable for MVP; add cache mutex in future optimization.
+- **Empty HERE results skip Overpass fallback** (`services/index.ts:50-53`): Design behavior — circuit breaker returns HERE results when non-empty. Acceptable for MVP.
+- **Validation error responses lack `requestId`** (`discoveryController.ts`): Pre-existing response shape inconsistency between validation errors (no meta) and error handler (includes meta.requestId).
+- **LLM proxy `/generate` no auth** (`llm-proxy/src/index.ts`): Open proxy endpoint, acceptable as internal service behind network boundary.
+- **Polar latitude could cause NaN bounding box** (`overpassClient.ts`): Extreme edge case for lat=±90°, irrelevant to SE Asia geography.
+
+## Deferred from: second code review of story 3-2-discovery-api-module (2026-06-10)
+
+- **Dockerfile regression** (`backend/Dockerfile`): Single-stage build replaces multi-stage; removes compilation step. May cause production runtime failures.
+- **Real-mode JWT auth test coverage** (`backend/packages/shared/tests/authenticate.test.ts`): Tests removed because env is loaded at import time (can't test real mode). Pre-existing limitation requiring env module refactoring.
+- **`tests/` removed from `tsconfig.json` include** (`backend/apps/express-api/tsconfig.json`): Test files no longer type-checked by `tsc`.
+- **Hardcoded Gemini provider in `callLlmForTrending`** (`discoveryService.ts`): `provider: "gemini"` is hardcoded; switching provider requires changes in two places. Acceptable for MVP.
+- **Cache-set failure leads to repeat LLM calls** (`discoveryService.ts`): When `redis.setex()` fails, the next request sees a cache miss and calls LLM again. Acceptable for MVP.
+- **`getNearby` has no caching** (`discoveryService.ts`): Every nearby request goes to HERE Maps regardless of same lat/lng/radius. Add 60s caching later.
+- **Seed fallback warning floods logs** (`discoveryService.ts`): Rate-limit warning to first failure, then debug until success.
+- **Stub mode accepts any `x-user-id`** (`authenticate.ts`): By design for development; production requires real `JWT_SECRET`.
+- **Response format inconsistency (meta field)** (`discoveryController.ts`, `errorHandler.ts`): Controller `buildErrorResponse` lacks `meta` field that error handler's `ServiceResponse.failure` includes. Pre-existing.
+- **Seed price filter brittle** (`discoveryService.ts`): Not applicable to current code; seed items all use explicit `priceRange` strings.
