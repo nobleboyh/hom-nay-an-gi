@@ -7,8 +7,8 @@ import {
   redis,
 } from "@hom-nay-an-gi/shared";
 import {
-  searchNearby as nearbyFromClients,
   type NearbyResult,
+  searchNearby as nearbyFromClients,
 } from "../../services/index.js";
 import type { TrendingDish } from "./discoveryValidation.js";
 import {
@@ -102,7 +102,7 @@ const NEARBY_SEED: NearbyResult[] = [
     cuisine: "Vietnamese",
     externalUrl: null,
     lat: 10.8215,
-    lng: 106.6280,
+    lng: 106.628,
   },
   {
     restaurantName: "Bún Chả Hương Liên",
@@ -112,8 +112,8 @@ const NEARBY_SEED: NearbyResult[] = [
     priceRange: "35.000đ – 50.000đ",
     cuisine: "Vietnamese",
     externalUrl: null,
-    lat: 10.8250,
-    lng: 106.6310,
+    lat: 10.825,
+    lng: 106.631,
   },
   {
     restaurantName: "Bánh Mì Huỳnh Hoa",
@@ -123,7 +123,7 @@ const NEARBY_SEED: NearbyResult[] = [
     priceRange: "25.000đ – 45.000đ",
     cuisine: "Vietnamese",
     externalUrl: null,
-    lat: 10.8220,
+    lat: 10.822,
     lng: 106.6285,
   },
   {
@@ -135,7 +135,7 @@ const NEARBY_SEED: NearbyResult[] = [
     cuisine: "Vietnamese",
     externalUrl: null,
     lat: 10.8245,
-    lng: 106.6260,
+    lng: 106.626,
   },
   {
     restaurantName: "Cơm Tấm Bụi Sài Gòn",
@@ -156,8 +156,8 @@ const NEARBY_SEED: NearbyResult[] = [
     priceRange: "40.000đ – 60.000đ",
     cuisine: "Vietnamese",
     externalUrl: null,
-    lat: 10.8200,
-    lng: 106.6250,
+    lat: 10.82,
+    lng: 106.625,
   },
   {
     restaurantName: "Nha Trang BBQ",
@@ -167,8 +167,8 @@ const NEARBY_SEED: NearbyResult[] = [
     priceRange: "100.000đ – 200.000đ",
     cuisine: "Vietnamese",
     externalUrl: null,
-    lat: 10.8270,
-    lng: 106.6330,
+    lat: 10.827,
+    lng: 106.633,
   },
   {
     restaurantName: "Kichi Kichi Lê Văn Sỹ",
@@ -178,8 +178,8 @@ const NEARBY_SEED: NearbyResult[] = [
     priceRange: "100.000đ – 200.000đ",
     cuisine: "Chinese",
     externalUrl: null,
-    lat: 10.8180,
-    lng: 106.6220,
+    lat: 10.818,
+    lng: 106.622,
   },
   {
     restaurantName: "Sushi KA",
@@ -189,8 +189,8 @@ const NEARBY_SEED: NearbyResult[] = [
     priceRange: "tren-200k",
     cuisine: "Japanese",
     externalUrl: null,
-    lat: 10.8260,
-    lng: 106.6300,
+    lat: 10.826,
+    lng: 106.63,
   },
   {
     restaurantName: "Hanuri BBQ",
@@ -200,8 +200,8 @@ const NEARBY_SEED: NearbyResult[] = [
     priceRange: "100.000đ – 200.000đ",
     cuisine: "Korean",
     externalUrl: null,
-    lat: 10.8230,
-    lng: 106.6340,
+    lat: 10.823,
+    lng: 106.634,
   },
   {
     restaurantName: "Pizza Hut Đồng Khởi",
@@ -211,8 +211,8 @@ const NEARBY_SEED: NearbyResult[] = [
     priceRange: "100.000đ – 200.000đ",
     cuisine: "Italian",
     externalUrl: null,
-    lat: 10.8150,
-    lng: 106.6240,
+    lat: 10.815,
+    lng: 106.624,
   },
   {
     restaurantName: "Phở 2000",
@@ -262,7 +262,9 @@ function fallbackToSeed(
 ) {
   const items = filterSeed(TRENDING_SEED, cuisine);
   const filtered = price
-    ? items.filter((d) => d.priceRange?.toLowerCase().includes(price.toLowerCase()))
+    ? items.filter((d) =>
+        d.priceRange?.toLowerCase().includes(price.toLowerCase()),
+      )
     : items;
   logger.warn({ cuisine, price }, "using seed fallback for trending");
   return paginate(filtered, offset, limit);
@@ -310,7 +312,11 @@ async function callLlmForTrending(
     );
   }
 
-  let proxyBody: { success: boolean; data?: { content: string }; error?: { code: string; message: string } };
+  let proxyBody: {
+    success: boolean;
+    data?: { content: string };
+    error?: { code: string; message: string };
+  };
   try {
     proxyBody = (await response.json()) as typeof proxyBody;
   } catch {
@@ -336,7 +342,10 @@ async function callLlmForTrending(
   try {
     parsed = parseTrendingContent(proxyBody.data.content);
   } catch (error) {
-    logger.warn({ error, contentPreview: proxyBody.data.content.slice(0, 200) }, "LLM response Zod validation failed, retrying once");
+    logger.warn(
+      { error, contentPreview: proxyBody.data.content.slice(0, 200) },
+      "LLM response Zod validation failed, retrying once",
+    );
     try {
       const retryResult = await callLlmForTrendingRaw(cuisine, price);
       parsed = retryResult;
@@ -393,7 +402,11 @@ async function callLlmForTrendingRaw(
     );
   }
 
-  let proxyBody: { success: boolean; data?: { content: string }; error?: { code: string; message: string } };
+  let proxyBody: {
+    success: boolean;
+    data?: { content: string };
+    error?: { code: string; message: string };
+  };
   try {
     proxyBody = (await response.json()) as typeof proxyBody;
   } catch {
@@ -444,7 +457,11 @@ export async function getTrending(
     );
     const seed = fallbackToSeed(cuisine, price, offset, limit);
     if (seed.items.length === 0) {
-      throw new AppError("TRENDING_UNAVAILABLE", 503, "Trending data is currently unavailable");
+      throw new AppError(
+        "TRENDING_UNAVAILABLE",
+        503,
+        "Trending data is currently unavailable",
+      );
     }
     return seed;
   }
@@ -466,10 +483,7 @@ export async function getTrending(
   return paginate(validated.items, offset, limit);
 }
 
-function nearbySeedFilter(
-  cuisine?: string,
-  price?: string,
-): NearbyResult[] {
+function nearbySeedFilter(cuisine?: string, price?: string): NearbyResult[] {
   let items = NEARBY_SEED;
   if (cuisine) {
     const lower = cuisine.toLowerCase();
@@ -479,8 +493,10 @@ function nearbySeedFilter(
     items = items.filter((r) => {
       if (!r.priceRange) return false;
       const p = price.toLowerCase();
-      if (p === "low") return r.priceRange.includes("25.") || r.priceRange.includes("15.");
-      if (p === "mid") return r.priceRange.includes("35.") || r.priceRange.includes("45.");
+      if (p === "low")
+        return r.priceRange.includes("25.") || r.priceRange.includes("15.");
+      if (p === "mid")
+        return r.priceRange.includes("35.") || r.priceRange.includes("45.");
       if (p === "high") return r.priceRange.includes("100.");
       if (p === "premium") return r.priceRange.includes("200");
       return r.priceRange.toLowerCase().includes(p);

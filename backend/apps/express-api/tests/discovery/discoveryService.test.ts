@@ -131,9 +131,9 @@ describe("getTrending", () => {
   it("should use cache key with cuisine and price", async () => {
     mockRedis.get.mockResolvedValue(null);
 
-    await expect(
-      getTrending("Vietnamese", "mid", 0, 10),
-    ).rejects.toThrow("Trending data is currently unavailable");
+    await expect(getTrending("Vietnamese", "mid", 0, 10)).rejects.toThrow(
+      "Trending data is currently unavailable",
+    );
 
     expect(mockRedis.get).toHaveBeenCalledWith(
       "trending:cuisine:vietnamese:price:mid",

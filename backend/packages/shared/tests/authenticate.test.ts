@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { authenticate, signJwt, AuthenticationError } from "../src/index.js";
+import { AuthenticationError, authenticate, signJwt } from "../src/index.js";
 import {
   createMockRequest,
   createMockResponse,
@@ -35,7 +35,6 @@ describe("authenticate middleware", () => {
       expect((calls[0] as Error).message).toBe("Authentication required");
       expect(req.user).toBeUndefined();
     });
-
   });
 
   describe("token & error handling", () => {

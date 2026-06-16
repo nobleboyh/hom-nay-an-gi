@@ -66,11 +66,16 @@ async function handleGenerate(
   request: http.IncomingMessage,
   response: http.ServerResponse,
 ) {
-  if (request.headers["content-type"]?.startsWith("application/json") !== true) {
+  if (
+    request.headers["content-type"]?.startsWith("application/json") !== true
+  ) {
     sendJson(
       response,
       400,
-      buildErrorResponse("VALIDATION_ERROR", "Content-Type must be application/json"),
+      buildErrorResponse(
+        "VALIDATION_ERROR",
+        "Content-Type must be application/json",
+      ),
     );
     return;
   }
@@ -105,7 +110,10 @@ async function handleGenerate(
     sendJson(
       response,
       400,
-      buildErrorResponse("VALIDATION_ERROR", `Prompt exceeds ${PROMPT_MAX_LENGTH} character limit`),
+      buildErrorResponse(
+        "VALIDATION_ERROR",
+        `Prompt exceeds ${PROMPT_MAX_LENGTH} character limit`,
+      ),
     );
     return;
   }
@@ -124,7 +132,10 @@ async function handleGenerate(
     sendJson(
       response,
       400,
-      buildErrorResponse("VALIDATION_ERROR", `Unsupported provider: ${rawProvider}`),
+      buildErrorResponse(
+        "VALIDATION_ERROR",
+        `Unsupported provider: ${rawProvider}`,
+      ),
     );
     return;
   }

@@ -14,6 +14,7 @@ import { recipesRouter } from "./api/recipes/recipesRouter.js";
 import { loadSeedRecipes } from "./data/seedLoader.js";
 
 loadSeedRecipes();
+
 import discoveryRouter from "./api/discovery/discoveryRouter.js";
 
 const allowedOrigins = parseCorsOrigins(env.CORS_ORIGIN);
