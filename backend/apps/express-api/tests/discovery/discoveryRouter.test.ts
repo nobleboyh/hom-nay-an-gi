@@ -95,6 +95,12 @@ const mockShared = vi.hoisted(() => {
     generalLimiter: (_req: unknown, _res: unknown, next: () => void) => {
       next();
     },
+    llmLimiter: (_req: unknown, _res: unknown, next: () => void) => {
+      next();
+    },
+    SearchParamsSchema: { parse: (data: unknown) => data },
+    DishIdParamsSchema: { parse: (data: unknown) => data },
+    SurpriseMeSchema: { parse: (data: unknown) => data },
   };
 });
 
