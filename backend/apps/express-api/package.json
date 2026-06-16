@@ -14,7 +14,8 @@
     "@hom-nay-an-gi/shared": "workspace:*",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "helmet": "^8.1.0"
+    "helmet": "^8.1.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

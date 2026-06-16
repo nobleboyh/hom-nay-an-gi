@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "dev": "PORT=3001 tsx watch src/index.ts",
+    "dev": "cross-env PORT=3001 tsx watch src/index.ts",
     "start": "node dist/src/index.js",
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "lint": "biome check .",
@@ -20,6 +20,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/supertest": "^6.0.3",
+    "cross-env": "^10.1.0",
     "supertest": "^7.1.4"
   }
 }

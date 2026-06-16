@@ -192,8 +192,7 @@ async function handleGenerate(
         return;
       }
 
-      const readTimeout = AbortSignal.timeout(10_000);
-      const geminiData = (await geminiResponse.json({ signal: readTimeout })) as {
+      const geminiData = (await geminiResponse.json()) as {
         candidates?: {
           content?: { parts?: { text?: string }[] };
           finishReason?: string;
@@ -372,18 +371,10 @@ export function buildApp(): express.Express {
   return app;
 }
 
-const server = createServer();
-server.listen(env.PORT, "0.0.0.0", () => {
-  logger.info(
-    { port, provider: getLlmConfig().provider },
-    "LLM proxy server listening",
-  );
-});
-
 const app = buildApp();
 app.listen(env.PORT, "0.0.0.0", () => {
   logger.info(
-    { port, provider: getLlmConfig().provider },
+    { port: env.PORT, provider: getLlmConfig().provider },
     "LLM proxy server listening",
   );
 });
