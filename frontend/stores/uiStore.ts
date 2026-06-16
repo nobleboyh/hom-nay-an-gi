@@ -13,6 +13,7 @@ export interface FilterState {
   foodTypes: string[];
   cuisines: string[];
   cookTime: number | null;
+  moods: string[];
 }
 
 export interface UIStore {
@@ -45,6 +46,7 @@ export const useUIStore = create<UIStore>((set, get) => ({
     foodTypes: [],
     cuisines: ['Việt Nam'],
     cookTime: 30,
+    moods: [],
   },
   isLoading: false,
   toasts: [],

@@ -10,6 +10,7 @@ const SAFE_TABLES: Record<string, string> = {
   dishes_cache: 'dishes_cache',
   favorites_guest: 'favorites_guest',
   search_history_guest: 'search_history_guest',
+  shopping_lists_guest: 'shopping_lists_guest',
 };
 
 function resolveTable(collection: string): string {
@@ -45,6 +46,14 @@ async function getDb(): Promise<SQLite.SQLiteDatabase> {
         resultCount INTEGER,
         selectedDishId TEXT,
         createdAt TEXT
+      );
+      CREATE TABLE IF NOT EXISTS shopping_lists_guest (
+        id TEXT PRIMARY KEY,
+        dishId TEXT,
+        dishName TEXT,
+        ingredients TEXT,
+        checkedState TEXT,
+        savedAt TEXT
       );
     `);
   }
@@ -129,6 +138,30 @@ export const storageAdapter = {
         return rows;
       }
 
+      if (collection === 'shopping_lists_guest') {
+        if (key === 'all') {
+          const rows = await database.getAllAsync<SqliteRow>(
+            'SELECT * FROM shopping_lists_guest ORDER BY savedAt DESC',
+          );
+          return rows.map((r) => ({
+            ...r,
+            ingredients: r.ingredients ? JSON.parse(r.ingredients as string) : [],
+            checkedState: r.checkedState ? JSON.parse(r.checkedState as string) : {},
+          }));
+        }
+        const row = await database.getFirstAsync<SqliteRow>(
+          'SELECT * FROM shopping_lists_guest WHERE id = ?',
+          [key],
+        );
+        return row
+          ? {
+              ...row,
+              ingredients: row.ingredients ? JSON.parse(row.ingredients as string) : [],
+              checkedState: row.checkedState ? JSON.parse(row.checkedState as string) : {},
+            }
+          : null;
+      }
+
       return null;
     } catch (error) {
       console.error('[storageAdapter] SQLite read error:', error);
@@ -168,6 +201,19 @@ export const storageAdapter = {
         await database.runAsync(
           'INSERT INTO search_history_guest (ingredients, createdAt) VALUES (?, ?)',
           [dataJson, now],
+        );
+      } else if (collection === 'shopping_lists_guest') {
+        const record = data as Record<string, unknown>;
+        await database.runAsync(
+          `INSERT OR REPLACE INTO shopping_lists_guest (id, dishId, dishName, ingredients, checkedState, savedAt) VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            key,
+            (record.dishId as string) ?? null,
+            (record.dishName as string) ?? null,
+            record.ingredients ? JSON.stringify(record.ingredients) : '[]',
+            record.checkedState ? JSON.stringify(record.checkedState) : '{}',
+            now,
+          ],
         );
       }
     } catch (error) {

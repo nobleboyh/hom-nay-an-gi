@@ -1,4 +1,3 @@
-import http from "node:http";
 import {
   buildErrorResponse,
   buildSuccessResponse,
@@ -6,6 +5,13 @@ import {
   getLlmConfig,
   logger,
 } from "@hom-nay-an-gi/shared";
+import cors from "cors";
+import express from "express";
+import http from "http";
+
+import { complete } from "./llmClient.js";
+
+// ---- raw http server (from HEAD) ----
 
 const llmConfig = getLlmConfig();
 const LLM_API_KEY = process.env.LLM_API_KEY ?? "";
@@ -14,8 +20,8 @@ const GEMINI_API_BASE =
 const GEMINI_MODEL = "gemini-2.5-flash";
 const LLM_TIMEOUT_MS = 15_000;
 
-const MAX_BODY_SIZE = 1_048_576; // 1MB
-const PROMPT_MAX_LENGTH = 10_000; // per-prompt character limit
+const MAX_BODY_SIZE = 1_048_576;
+const PROMPT_MAX_LENGTH = 10_000;
 const VALID_PROVIDERS = ["gemini"] as const;
 type Provider = (typeof VALID_PROVIDERS)[number];
 
@@ -295,10 +301,89 @@ export function createServer() {
   );
 }
 
+// ---- express server (from main) ----
+
+function getApiKey(): string {
+  return process.env.LLM_API_KEY ?? "";
+}
+
+export function buildApp(): express.Express {
+  const app = express();
+
+  app.use(cors());
+  app.use(express.json({ limit: "100kb" }));
+
+  app.get("/health", (_request, response) => {
+    response.json({
+      success: true,
+      data: {
+        status: "ok",
+        service: "llm-proxy",
+        provider: getLlmConfig().provider,
+      },
+    });
+  });
+
+  app.post("/complete", async (request, response) => {
+    const { prompt } = request.body as {
+      prompt?: { system?: string; user?: string };
+    };
+
+    if (prompt?.system === undefined || prompt?.user === undefined) {
+      response.status(400).json({
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Missing required fields: prompt.system, prompt.user",
+        },
+      });
+      return;
+    }
+
+    try {
+      const result = await complete(
+        prompt.system,
+        prompt.user,
+        { parse: (raw: unknown) => raw } as never,
+        {
+          provider: getLlmConfig().provider,
+          apiKey: getApiKey(),
+        },
+      );
+
+      response.json({
+        success: true,
+        data: result.data,
+        meta: result.meta,
+      });
+    } catch (error) {
+      logger.error({ err: error }, "LLM completion failed");
+
+      response.status(502).json({
+        success: false,
+        error: {
+          code: "LLM_PROVIDER_ERROR",
+          message: error instanceof Error ? error.message : "LLM call failed",
+        },
+      });
+    }
+  });
+
+  return app;
+}
+
 const server = createServer();
 server.listen(env.PORT, "0.0.0.0", () => {
   logger.info(
-    { port: env.PORT, target: env.LLM_PROXY_URL },
-    "LLM proxy placeholder listening",
+    { port, provider: getLlmConfig().provider },
+    "LLM proxy server listening",
+  );
+});
+
+const app = buildApp();
+app.listen(env.PORT, "0.0.0.0", () => {
+  logger.info(
+    { port, provider: getLlmConfig().provider },
+    "LLM proxy server listening",
   );
 });

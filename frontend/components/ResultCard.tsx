@@ -19,12 +19,14 @@ export type ResultCardDish = {
   name: string;
   matchPercentage: number;
   cuisineTags: ChipRowItem[];
+  cookTimeMinutes: number;
+  caloriesPerServing: number;
 };
 
 export type ResultCardAction =
-  | { key: 'viewRecipe'; label: string; onPress: () => void }
-  | { key: 'shopping'; label: string; onPress: () => void }
-  | { key: 'save'; label: string; onPress: () => void };
+  | { key: 'viewRecipe'; label: string; onPress: () => void; accessibilityLabel?: string }
+  | { key: 'shopping'; label: string; onPress: () => void; accessibilityLabel?: string }
+  | { key: 'save'; label: string; onPress: () => void; isSaved?: boolean; accessibilityLabel?: string };
 
 export type ResultCardProps = {
   actions: ResultCardAction[];
@@ -63,7 +65,12 @@ export function ResultCard({
           expanded ? styles.headerExpanded : null,
           { opacity: pressed ? 0.88 : 1 },
         ]}>
-        <Text style={styles.name}>{dish.name}</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.name}>{dish.name}</Text>
+          <Text style={styles.meta}>
+            {dish.cookTimeMinutes} phút • {dish.caloriesPerServing} cal
+          </Text>
+        </View>
         <Badge tone="accent" value={`${dish.matchPercentage}%`} />
       </Pressable>
       {expanded ? (
@@ -86,6 +93,7 @@ export function ResultCard({
             {actions.map((action) => (
               <Button
                 key={action.key}
+                accessibilityLabel={action.accessibilityLabel}
                 onPress={action.onPress}
                 variant={action.key === 'viewRecipe' ? 'primary' : 'secondary'}>
                 {action.label}
@@ -111,18 +119,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: Spacing.sm,
   },
+  headerLeft: {
+    flex: 1,
+    gap: Spacing.xs,
+  },
   headerExpanded: {
     borderBottomWidth: 1,
     borderBottomColor: oklchToRgba(Colors.border),
   },
   name: {
-    flex: 1,
     fontFamily: Typography.cardTitle.family,
     fontSize: Typography.cardTitle.fontSize,
     fontWeight: Typography.cardTitle.fontWeight,
     lineHeight: Typography.cardTitle.lineHeight,
     color: oklchToRgba(Colors.fg),
     ...(Platform.OS === 'web' ? { userSelect: 'none' } : {}),
+  },
+  meta: {
+    fontFamily: Typography.meta.family,
+    fontSize: Typography.meta.fontSize,
+    fontWeight: Typography.meta.fontWeight,
+    lineHeight: Typography.meta.lineHeight,
+    color: oklchToRgba(Colors.muted),
   },
   body: {
     padding: Spacing.md,

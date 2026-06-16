@@ -50,8 +50,12 @@ services:
     command: ["pnpm", "start:llm-proxy"]
     environment:
       PORT: 3001
-      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
-      LLM_API_KEY: ${LLM_API_KEY:-replace-with-llm-provider-api-key}
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      # LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      # LLM_API_KEY: ${LLM_API_KEY:-replace-with-llm-provider-api-key}
+
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:8b}
       REDIS_URI: ${REDIS_URI:-redis://redis:6379}
     networks:
       - internal
@@ -88,6 +92,8 @@ services:
 
   redis:
     image: redis:7-alpine
+    ports:
+      - "6379:6379"
     volumes:
       - redis-data:/data
     networks:

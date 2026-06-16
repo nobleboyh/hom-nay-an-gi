@@ -4,13 +4,22 @@
   "type": "module",
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "dev": "tsx watch src/index.ts",
+    "dev": "PORT=3001 tsx watch src/index.ts",
     "start": "node dist/src/index.js",
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "lint": "biome check .",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@hom-nay-an-gi/shared": "workspace:*"
+    "@hom-nay-an-gi/shared": "workspace:*",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4"
   }
 }

@@ -11,7 +11,16 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { NetworkStatusProvider } from '../lib/networkStatus';
 import { useUIStore, type TabName } from '../stores/uiStore';
 
-const sentryDsn = process.env.SENTRY_DSN || '';
+const sentryDsn = process.env.SENTRY_DSN;
+if (sentryDsn && !sentryDsn.startsWith('replace-with-')) {
+  Sentry.init({
+    dsn: sentryDsn,
+    enableInExpoDevelopment: false,
+    debug: false,
+    tracesSampleRate: 0.1,
+  });
+}
+
 if (sentryDsn && sentryDsn !== 'replace-with-your-sentry-dsn') {
   Sentry.init({
     dsn: sentryDsn,

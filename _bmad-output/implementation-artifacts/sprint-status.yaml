@@ -21,9 +21,17 @@ development_status:
   1-8-common-backend-infrastructure: done
   1-9-cicd-workflows-zustand-store-scaffold: done
   1-10-client-error-monitoring: done
+  epic-2: ready-for-dev
+  2-1-llm-integration: done
+  2-2-recipes-api-module: done
+  2-3-home-screen: done
+  2-4-results-screen: done
+   2-5-recipe-screen: done
+   2-6-shopping-list-screen: done
+   epic-2: done
   epic-3: done
   3-1-here-maps-client: done
   3-2-discovery-api-module: done
   3-3-discover-screen: done
 
-last_updated: 2026-06-10
+last_updated: 2026-06-11
