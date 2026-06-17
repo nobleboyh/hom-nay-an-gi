@@ -10,18 +10,18 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useDataStore } from '../../stores/dataStore';
-import { useUIStore } from '../../stores/uiStore';
-import { Button } from '../../components/Button';
-import { Chip } from '../../components/Chip';
-import { ChipRow, type ChipRowItem } from '../../components/ChipRow';
-import { CollapsibleSection } from '../../components/CollapsibleSection';
-import { EmptyState } from '../../components/EmptyState';
-import { InputField } from '../../components/InputField';
-import { Skeleton } from '../../components/Skeleton';
-import { parseIngredients } from '../../lib/parseIngredients';
-import { useReducedMotion } from '../../lib/accessibility';
-import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../../lib/tokens';
+import { useDataStore } from '../stores/dataStore';
+import { useUIStore } from '../stores/uiStore';
+import { Button } from '../components/Button';
+import { Chip } from '../components/Chip';
+import { ChipRow, type ChipRowItem } from '../components/ChipRow';
+import { CollapsibleSection } from '../components/CollapsibleSection';
+import { EmptyState } from '../components/EmptyState';
+import { InputField } from '../components/InputField';
+import { Skeleton } from '../components/Skeleton';
+import { parseIngredients } from '../lib/parseIngredients';
+import { useReducedMotion } from '../lib/accessibility';
+import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../lib/tokens';
 
 const FOOD_TYPE_CHIPS: ChipRowItem[] = [
   { id: 'vegetarian', label: 'Chay' },

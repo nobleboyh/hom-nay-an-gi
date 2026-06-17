@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 
 const mockRedis = vi.hoisted(() => ({
   get: vi.fn(),
@@ -152,7 +152,7 @@ describe("getTrending", () => {
 
   it("should fall back to seed data when LLM call fails", async () => {
     mockRedis.get.mockResolvedValue(null);
-    (global.fetch as vi.Mock).mockRejectedValue(new Error("Network error"));
+    (global.fetch as Mock).mockRejectedValue(new Error("Network error"));
 
     const result = await getTrending(undefined, undefined, 0, 10);
 

@@ -378,8 +378,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: oklchToRgba(Colors.fg),
     padding: 0,
-    outlineStyle: 'none',
-    ...(Platform.OS === 'web' ? { outline: 'none' } : {}),
+    ...(Platform.OS === 'web' ? { outline: 'none' as const } : {}),
   },
   currentLocationRow: {
     flexDirection: 'row',

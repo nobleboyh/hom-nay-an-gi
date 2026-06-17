@@ -13,16 +13,16 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 
-import { ResultCard, SortDropdown, EmptyState, Skeleton, Toast, Button } from '../../components';
-import type { ResultCardAction, ResultCardDish } from '../../components/ResultCard';
-import type { SortKey, SortOption } from '../../components/SortDropdown';
-import { t } from '../../lib/i18n';
-import { useReducedMotion } from '../../lib/accessibility';
-import { useNetworkStatus } from '../../lib/networkStatus';
-import { useDataStore } from '../../stores/dataStore';
-import { useUIStore } from '../../stores/uiStore';
-import { Colors, Spacing, Radius, Typography, oklchToRgba } from '../../lib/tokens';
-import type { Dish } from '../../types/dish';
+import { ResultCard, SortDropdown, EmptyState, Skeleton, Toast, Button } from '../components';
+import type { ResultCardAction, ResultCardDish } from '../components/ResultCard';
+import type { SortKey, SortOption } from '../components/SortDropdown';
+import { t } from '../lib/i18n';
+import { useReducedMotion } from '../lib/accessibility';
+import { useNetworkStatus } from '../lib/networkStatus';
+import { useDataStore } from '../stores/dataStore';
+import { useUIStore } from '../stores/uiStore';
+import { Colors, Spacing, Radius, Typography, oklchToRgba } from '../lib/tokens';
+import type { Dish } from '../types/dish';
 
 const SORT_OPTIONS: SortOption[] = [
   { key: 'best_match', label: t('results.sort.bestMatch') },
