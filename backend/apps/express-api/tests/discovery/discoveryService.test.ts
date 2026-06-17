@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+} from "vitest";
 
 const mockRedis = vi.hoisted(() => ({
   get: vi.fn(),
@@ -101,7 +109,7 @@ describe("getTrending", () => {
     const result = await getTrending(undefined, undefined, 0, 10);
 
     expect(result.items).toHaveLength(1);
-    expect(result.items[0]!.dishId).toBe("cached-1");
+    expect(result.items[0]?.dishId).toBe("cached-1");
     expect(mockRedis.get).toHaveBeenCalledWith("trending");
   });
 

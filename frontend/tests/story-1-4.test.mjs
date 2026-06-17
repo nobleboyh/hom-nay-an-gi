@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
-const frontendRoot = new URL('..', import.meta.url);
-const resolveFromFrontend = (...segments) => path.join(frontendRoot.pathname, ...segments);
+const frontendRoot = fileURLToPath(new URL('..', import.meta.url));
+const resolveFromFrontend = (...segments) => path.join(frontendRoot, ...segments);
 
 function loadTypeScriptModule(relativePath, stubs = {}) {
   const filePath = resolveFromFrontend(relativePath);

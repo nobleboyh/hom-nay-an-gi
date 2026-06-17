@@ -46,7 +46,7 @@ const GEMINI_URL =
 
 const realFetch = global.fetch.bind(global);
 
-async function geminiFetch(url: RequestInfo | URL, options?: RequestInit) {
+async function _geminiFetch(url: RequestInfo | URL, options?: RequestInit) {
   const response = await realFetch(url, options);
   const body = await response.clone().text();
   return {

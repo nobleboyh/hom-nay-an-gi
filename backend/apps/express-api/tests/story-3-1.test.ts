@@ -106,10 +106,10 @@ describe("HERE Maps Client", () => {
     const results = await hereMapsSearchNearby(DEFAULT_PARAMS, "test-api-key");
 
     expect(results).toHaveLength(2);
-    expect(results[0]!.restaurantName).toBe("Pho 24");
-    expect(results[0]!.distance).toBe(100);
-    expect(results[0]!.rating).toBe(4.5);
-    expect(results[0]!.cuisine).toBe("Vietnamese");
+    expect(results[0]?.restaurantName).toBe("Pho 24");
+    expect(results[0]?.distance).toBe(100);
+    expect(results[0]?.rating).toBe(4.5);
+    expect(results[0]?.cuisine).toBe("Vietnamese");
 
     // Verify API was called with correct parameters
     expect(mockFetch).toHaveBeenCalledWith(
@@ -196,7 +196,7 @@ describe("HERE Maps Client", () => {
 
     const results = await hereMapsSearchNearby(DEFAULT_PARAMS, "test-api-key");
 
-    expect(results[0]!.distance).toBeLessThan(results[1]!.distance);
+    expect(results[0]?.distance).toBeLessThan(results[1]?.distance);
   });
 
   it("should throw error if API key is missing", async () => {
@@ -271,8 +271,8 @@ describe("Overpass Client", () => {
     const results = await overpassSearchNearby(DEFAULT_PARAMS);
 
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0]!.restaurantName).toBe("Pho 24");
-    expect(results[0]!.cuisine).toBe("vietnamese");
+    expect(results[0]?.restaurantName).toBe("Pho 24");
+    expect(results[0]?.cuisine).toBe("vietnamese");
 
     // Verify Overpass was called with POST
     expect(mockFetch).toHaveBeenCalledWith(
@@ -306,7 +306,7 @@ describe("Overpass Client", () => {
     const results = await overpassSearchNearby(DEFAULT_PARAMS);
 
     // Distance should be very close to 0 (same location)
-    expect(results[0]!.distance).toBeLessThan(1);
+    expect(results[0]?.distance).toBeLessThan(1);
   });
 
   it("should filter results by radius", async () => {
@@ -459,7 +459,7 @@ describe("Circuit Breaker (searchNearby)", () => {
     const results = await searchNearby(DEFAULT_PARAMS);
 
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0]!.restaurantName).toBe("Pho 24");
+    expect(results[0]?.restaurantName).toBe("Pho 24");
   });
 
   it("should fallback to Overpass if HERE Maps fails", async () => {
@@ -476,7 +476,7 @@ describe("Circuit Breaker (searchNearby)", () => {
     const results = await searchNearby(DEFAULT_PARAMS);
 
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0]!.restaurantName).toBe("Pho 24");
+    expect(results[0]?.restaurantName).toBe("Pho 24");
   });
 
   it("should return empty array if both APIs fail", async () => {
