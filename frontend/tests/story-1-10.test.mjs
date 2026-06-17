@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const frontendRoot = new URL('..', import.meta.url);
-const resolveFromFrontend = (...segments) => path.join(frontendRoot.pathname, ...segments);
+const frontendRoot = fileURLToPath(new URL('..', import.meta.url));
+const resolveFromFrontend = (...segments) => path.join(frontendRoot, ...segments);
 
 // Task 1: sentry-expo dependency
 test('sentry-expo is in package.json dependencies', () => {

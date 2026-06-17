@@ -26,8 +26,11 @@ development_status:
   2-2-recipes-api-module: done
   2-3-home-screen: done
   2-4-results-screen: done
-   2-5-recipe-screen: done
-   2-6-shopping-list-screen: done
-   epic-2: done
+  2-5-recipe-screen: done
+  2-6-shopping-list-screen: done
+  epic-3: done
+  3-1-here-maps-client: done
+  3-2-discovery-api-module: done
+  3-3-discover-screen: done
 
 last_updated: 2026-06-11

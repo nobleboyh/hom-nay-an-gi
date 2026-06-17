@@ -1,3 +1,4 @@
+export type { ZodType } from "zod";
 export {
   type CookingStep,
   CookingStepSchema,
@@ -68,6 +69,7 @@ export {
 export { Favorite, type IFavorite } from "./models/Favorite.js";
 export { type ISearchHistory, SearchHistory } from "./models/SearchHistory.js";
 export { type IUser, User } from "./models/User.js";
+
 export {
   type IUserPreference,
   UserPreference,

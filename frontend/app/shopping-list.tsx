@@ -17,7 +17,6 @@ import { Button, EmptyState, Skeleton, TipCard, Toast } from '../components';
 import type { ToastProps } from '../components/Toast';
 import { formatTime } from '../lib/formatTime';
 import { t } from '../lib/i18n';
-import { useNetworkStatus } from '../lib/networkStatus';
 import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../lib/tokens';
 import { storageAdapter } from '../stores/storageAdapter';
 import { useUIStore } from '../stores/uiStore';
@@ -107,13 +106,12 @@ export default function ShoppingListScreen() {
     cookTime?: string;
   }>();
 
-  const { isOnline } = useNetworkStatus();
   const addToast = useUIStore((s) => s.addToast);
   const dismissToast = useUIStore((s) => s.dismissToast);
   const toasts = useUIStore((s) => s.toasts);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
+  const [isError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showCompletionBanner, setShowCompletionBanner] = useState(false);
 

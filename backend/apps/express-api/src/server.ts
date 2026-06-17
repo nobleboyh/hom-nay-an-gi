@@ -15,6 +15,8 @@ import { loadSeedRecipes } from "./data/seedLoader.js";
 
 loadSeedRecipes();
 
+import discoveryRouter from "./api/discovery/discoveryRouter.js";
+
 const allowedOrigins = parseCorsOrigins(env.CORS_ORIGIN);
 
 const corsOptionsDelegate: CorsOptionsDelegate = (request, callback) => {
@@ -61,6 +63,8 @@ export function buildApp(): express.Express {
 
   app.use(requestLogger);
   app.use(generalLimiter);
+
+  app.use("/api/v1/discovery", discoveryRouter);
 
   app.get("/api/v1/health", healthHandler);
   app.get("/api/v1/hello", helloHandler);

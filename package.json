@@ -1,0 +1,9 @@
+{
+  "name": "hom-nay-an-gi",
+  "private": true,
+  "scripts": {
+    "test": "npm test --prefix frontend & cd backend & pnpm test",
+    "test:frontend": "npm test --prefix frontend",
+    "test:backend": "cd backend && pnpm test"
+  }
+}

@@ -3,6 +3,7 @@ import 'react-native-reanimated';
 import * as Sentry from 'sentry-expo';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
+
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ErrorBoundary } from '../components/ErrorBoundary';
@@ -24,10 +25,10 @@ export default function RootLayout() {
       <NetworkStatusProvider>
         <ErrorBoundary>
           <StatusBar style="dark" />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="recipe/[id]" />
-            <Stack.Screen name="shopping-list" />
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="shopping-list" options={{ headerShown: false }} />
           </Stack>
         </ErrorBoundary>
       </NetworkStatusProvider>

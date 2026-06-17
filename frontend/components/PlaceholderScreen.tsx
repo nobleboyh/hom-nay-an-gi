@@ -1,4 +1,4 @@
-import { type Href, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -57,7 +57,7 @@ export function PlaceholderScreen({
           <Pressable
             accessibilityLabel="Go back"
             accessibilityRole="button"
-            onPress={() => router.replace('/(tabs)' as Href)}
+            onPress={() => router.replace('/')}
             style={styles.backButton}>
             <Text style={styles.backButtonText}>‹</Text>
           </Pressable>

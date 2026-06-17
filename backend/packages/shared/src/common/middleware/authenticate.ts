@@ -84,7 +84,7 @@ function verifyJwt(token: string): JwtPayload {
     throw new AuthenticationError("Invalid token");
   }
 
-  if (payload.exp && Date.now() / 1000 > payload.exp) {
+  if (payload.exp != null && Date.now() / 1000 > payload.exp) {
     throw new AuthenticationError("Token expired");
   }
 
@@ -101,7 +101,11 @@ export function authenticate(
       logger.warn("authenticate middleware running in stub mode");
       stubWarningLogged = true;
     }
-    const userId = (req.headers["x-user-id"] as string) ?? "stub-user";
+    const userId = req.headers["x-user-id"] as string | undefined;
+    if (!userId) {
+      next(new AuthenticationError("Authentication required"));
+      return;
+    }
     req.user = { userId, authProvider: "stub" };
     next();
     return;

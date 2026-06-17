@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { authenticate, signJwt } from "../src/index.js";
+import { AuthenticationError, authenticate, signJwt } from "../src/index.js";
 import {
   createMockRequest,
   createMockResponse,
@@ -24,65 +24,20 @@ describe("authenticate middleware", () => {
       });
     });
 
-    it("falls back to stub-user when no x-user-id header", async () => {
+    it("returns 401 when no x-user-id header", async () => {
       const req = createMockRequest();
       const res = createMockResponse();
       const { calls, next } = createNextSpy();
 
       authenticate(req, res, next);
 
-      expect(calls).toEqual([undefined]);
-      expect(req.user).toEqual({
-        userId: "stub-user",
-        authProvider: "stub",
-      });
-    });
-
-    it("does not block requests (no 401)", async () => {
-      const req = createMockRequest();
-      const res = createMockResponse();
-      const { calls, next } = createNextSpy();
-
-      authenticate(req, res, next);
-
-      expect(calls).toEqual([undefined]);
+      expect(calls[0]).toBeInstanceOf(AuthenticationError);
+      expect((calls[0] as Error).message).toBe("Authentication required");
+      expect(req.user).toBeUndefined();
     });
   });
 
-  describe("real mode (custom JWT_SECRET)", () => {
-    it("accepts a valid JWT token", async () => {
-      const token = signJwt({
-        sub: "user-abc",
-        provider: "google",
-        exp: Math.floor(Date.now() / 1000) + 3600,
-        iat: Math.floor(Date.now() / 1000),
-      });
-
-      const req = createMockRequest({
-        headers: { authorization: `Bearer ${token}` },
-      });
-      const res = createMockResponse();
-      const { calls, next } = createNextSpy();
-
-      authenticate(req, res, next);
-
-      expect(calls).toEqual([undefined]);
-    });
-
-    it("returns 401 when no Authorization header (in real mode)", async () => {
-      const req = createMockRequest();
-      const res = createMockResponse();
-      const { calls, next } = createNextSpy();
-
-      authenticate(req, res, next);
-
-      expect(calls).toEqual([undefined]);
-      expect(req.user).toEqual({
-        userId: "stub-user",
-        authProvider: "stub",
-      });
-    });
-
+  describe("token & error handling", () => {
     it("signJwt produces a verifiable token (round-trip)", () => {
       const payload = {
         sub: "user-xyz",

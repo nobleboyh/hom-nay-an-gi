@@ -10,13 +10,13 @@ import {
   View,
 } from 'react-native';
 
-import { ChipRow } from '../../components/ChipRow';
-import { EmptyState } from '../../components/EmptyState';
-import { LocationPicker, type LocationOption } from '../../components/LocationPicker';
-import { RestaurantCard } from '../../components/RestaurantCard';
-import { Skeleton } from '../../components/Skeleton';
-import { createApiClient, type ApiError } from '../../lib/api';
-import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../../lib/tokens';
+import { ChipRow } from '../components/ChipRow';
+import { EmptyState } from '../components/EmptyState';
+import { LocationPicker, type LocationOption } from '../components/LocationPicker';
+import { RestaurantCard } from '../components/RestaurantCard';
+import { Skeleton } from '../components/Skeleton';
+import { createApiClient, type ApiError } from '../lib/api';
+import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../lib/tokens';
 
 const apiClient = createApiClient({
   baseUrl: process.env.API_BASE_URL || 'http://localhost:8080',

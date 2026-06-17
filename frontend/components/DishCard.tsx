@@ -59,18 +59,13 @@ export function DishCard({
         </View>
         <View style={styles.body}>
           <Text style={styles.name}>{dishName}</Text>
-          {restaurantName ? (
-            <Text style={styles.restaurant}>{restaurantName}</Text>
+          {(restaurantName || rating) ? (
+            <Text style={styles.restaurant}>
+              {restaurantName}{restaurantName && rating ? ' • ' : ''}{rating ? `⭐ ${rating}` : ''}
+            </Text>
           ) : null}
-          {(rating || price) ? (
-            <View style={styles.metaRow}>
-              {rating ? (
-                <Text style={styles.metaText}>{rating}</Text>
-              ) : null}
-              {price ? (
-                <Text style={styles.metaText}>{price}</Text>
-              ) : null}
-            </View>
+          {price ? (
+            <Text style={styles.price}>{price}</Text>
           ) : null}
         </View>
       </Card>
@@ -123,17 +118,13 @@ const styles = StyleSheet.create({
     color: oklchToRgba(Colors.muted),
     ...(Platform.OS === 'web' ? { userSelect: 'none' } : {}),
   },
-  metaRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    alignItems: 'center',
-  },
-  metaText: {
+  price: {
     fontFamily: Typography.meta.family,
     fontSize: Typography.meta.fontSize,
-    fontWeight: Typography.meta.fontWeight,
+    fontWeight: '600',
     lineHeight: Typography.meta.lineHeight,
-    color: oklchToRgba(Colors.muted),
+    color: oklchToRgba(Colors.accent),
+    marginTop: Spacing.xs,
     ...(Platform.OS === 'web' ? { userSelect: 'none' } : {}),
   },
 });
