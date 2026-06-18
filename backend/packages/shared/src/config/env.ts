@@ -9,6 +9,12 @@ const envSchema = z.object({
   REDIS_URI: z.string().min(1).default("redis://127.0.0.1:6379"),
   LLM_PROXY_URL: z.string().url().default("http://127.0.0.1:3001"),
   JWT_SECRET: z.string().min(16).default("replace-with-a-long-secret"),
+  JWT_REFRESH_SECRET: z
+    .string()
+    .min(16)
+    .default("replace-with-a-long-refresh-secret"),
+  JWT_ACCESS_EXPIRY: z.string().default("15m"),
+  JWT_REFRESH_EXPIRY: z.string().default("30d"),
   GOOGLE_CLIENT_ID: z.string().min(1).default("replace-with-google-client-id"),
   HERE_API_KEY: z.string().min(1).default("replace-with-here-api-key"),
   CORS_ORIGIN: z

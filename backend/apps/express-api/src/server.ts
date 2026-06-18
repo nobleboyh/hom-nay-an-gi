@@ -1,4 +1,5 @@
 import {
+  authenticate,
   buildSuccessResponse,
   env,
   errorHandler,
@@ -10,7 +11,12 @@ import {
 import cors, { type CorsOptionsDelegate } from "cors";
 import express from "express";
 import helmet from "helmet";
+import { authRouter } from "./api/auth/authRouter.js";
+import { favoritesRouter } from "./api/favorites/favoritesRouter.js";
 import { recipesRouter } from "./api/recipes/recipesRouter.js";
+import { settingsRouter } from "./api/settings/settingsRouter.js";
+import { syncRouter } from "./api/sync/syncRouter.js";
+import * as settingsController from "./api/settings/settingsController.js";
 import { loadSeedRecipes } from "./data/seedLoader.js";
 
 loadSeedRecipes();
@@ -57,9 +63,10 @@ export function helloHandler(
 export function buildApp(): express.Express {
   const app = express();
 
+  app.set("trust proxy", 1);
   app.use(helmet(helmetOptions));
   app.use(cors(corsOptionsDelegate));
-  app.use(express.json());
+  app.use(express.json({ limit: "5mb" }));
 
   app.use(requestLogger);
   app.use(generalLimiter);
@@ -69,7 +76,11 @@ export function buildApp(): express.Express {
   app.get("/api/v1/health", healthHandler);
   app.get("/api/v1/hello", helloHandler);
 
+  app.use("/api/v1/auth", authRouter);
+  app.use("/api/v1/favorites", favoritesRouter);
   app.use("/api/v1/recipes", recipesRouter);
+  app.use("/api/v1/settings", settingsRouter);
+  app.delete("/api/v1/account", authenticate, settingsController.deleteAccount);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

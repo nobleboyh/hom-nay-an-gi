@@ -8,6 +8,12 @@
 
 ## Deferred from: code review of Stories 1.8-1.10 (2026-06-05)
 
+## Deferred from: code review of story 4-3-auth-store-storage-adapter (2026-06-17)
+
+- **useProxy may fail in production builds** [authStore.ts:175] — `makeRedirectUri({ useProxy: true })` requires custom URL scheme for standalone builds. Requires separate configuration.
+- **performTokenRefresh does not retry original request** [authStore.ts:255-310] — AC5 retry happens in api.ts `createApiClient`, not in the store. Existing architecture.
+- **initialize() never invoked automatically** [authStore.ts:52-68] — AC1 observable behavior works; app code calls `initialize()` in profile.tsx. Explicit call is correct pattern.
+
 - **Docker JWT_SECRET empty string bypasses Zod default → crash at startup** (`docker-compose.yml`): Docker Compose resolves `${JWT_SECRET}` to empty string; Zod `.default()` only fires when key is undefined, not empty string. Fix: add fallback `${JWT_SECRET:-replace-with-a-long-secret}` in docker-compose or preprocess env.
 - **Server listens before DB/Redis ready** (`backend/src/index.ts`): `server.listen()` fires before `Promise.allSettled([connectDatabase(), connectRedis()])` resolves. Container healthcheck passes but DB may not be connected. Fix: swap order — await DB connections before listening.
 - **JWT payload JSON.parse throws 500 instead of 401** (`backend/src/common/middleware/authenticate.ts`): Malformed JWT payload causes SyntaxError → 500. Should be caught and rethrown as AuthenticationError.
@@ -82,3 +88,33 @@
 - **Stub mode accepts any `x-user-id`** (`authenticate.ts`): By design for development; production requires real `JWT_SECRET`.
 - **Response format inconsistency (meta field)** (`discoveryController.ts`, `errorHandler.ts`): Controller `buildErrorResponse` lacks `meta` field that error handler's `ServiceResponse.failure` includes. Pre-existing.
 - **Seed price filter brittle** (`discoveryService.ts`): Not applicable to current code; seed items all use explicit `priceRange` strings.
+
+## Deferred from: code review of 4-1-auth-api-module (2026-06-16)
+
+- **In-memory rate limiter not shared across processes** (`authRouter.ts:14`): Pre-existing architecture limitation; each process/worker maintains its own counter. Multi-instance deployments can bypass the 5-request-per-minute limit by distributing requests across instances.
+
+## Deferred from: code review of 4-2-login-screen (2026-06-16)
+
+- **Google button text hardcoded** (`frontend/components/LoginScreen.tsx:183`): "Tiếp tục với Google" hardcoded instead of using `t()`. Deferred to Story 4.3 which will wire the real Google OAuth flow.
+- **Rate-limit cooldown lost on component remount** (`frontend/components/LoginScreen.tsx:35,77`): `isRateLimited` is local component state. Navigating away and back resets the 5-minute cooldown. The server enforces the real limit, so this is UX sugar only.
+
+## Deferred from: code review of 4-4-favorites-api-module (2026-06-17)
+
+- **Stub-mode userId causes Mongoose CastError** — authenticate.ts stub mode sets userId as x-user-id string value (not valid ObjectId). Pre-existing authenticate behavior, not caused by favorites code.
+
+## Deferred from: code review of 4-5-sync-api-module (2026-06-17)
+
+- **Timestamp injection via client-controlled date** — `lastSyncAt` client value is used in `new Date()`. Pre-existing pattern; client timestamps are accepted by design for conflict comparison.
+- **`Buffer.byteLength(JSON.stringify(req.body))` double-serialization** — Pre-existing pattern used in controller; minor memory overhead for oversized payloads.
+
+## Deferred from: code review of 4-7-settings-api-module (2026-06-17)
+
+- **Soft-deleted users can still authenticate** — `authenticate.ts` doesn't check `user.deletedAt`. Pre-existing, not caused by this story.
+- **`theme` enum mismatch: Zod rejects "system", Mongoose allows it** — Pre-existing Mongoose model enum; dark mode deferred per FR-27.
+- **`userId` from `x-user-id` bypasses ObjectId validation in stub mode** — Pre-existing `authenticate.ts` stub behavior; already documented above under 4-4-favorites-api-module.
+
+## Deferred from: code review of 4-8-profile-settings-screens (2026-06-17)
+
+- **No token refresh/re-auth pattern** — syncPreferences and clearAllFavorites use raw fetch instead of an API client that handles 401/retry. Pre-existing architecture pattern across all stores.
+- **EXPO_PUBLIC_API_BASE_URL port inconsistency (8080 vs 3000)** — authStore defaults to 8080, dataStore/profile default to 3000. Pre-existing across all stores.
+- **Tests verify string presence not behavior** — Most tests are simple string-match checks. By design for static-analysis tests per the story spec.

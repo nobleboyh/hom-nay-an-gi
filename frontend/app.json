@@ -50,7 +50,9 @@
         {
           "locationWhenInUsePermission": "Ứng dụng cần vị trí của bạn để tìm nhà hàng gần đó."
         }
-      ]
+      ],
+      "expo-web-browser",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,

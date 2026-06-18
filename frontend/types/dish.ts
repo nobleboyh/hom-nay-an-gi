@@ -7,6 +7,10 @@ export interface Dish {
   caloriesPerServing: number;
   cuisine: string;
   imageUrl?: string;
+  updatedAt?: string;
+  nameEn?: string;
+  tags?: string[];
+  imageDescription?: string;
 }
 
 export interface Favorite {

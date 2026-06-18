@@ -26,6 +26,22 @@ Optional:
 
 For physical iPhones using Expo Go from the App Store, the frontend is pinned to Expo SDK 54 for compatibility.
 
+## Test Accounts
+
+After starting the backend (Docker or local), seed the database with test users:
+
+```bash
+cd backend
+pnpm seed:test-users
+```
+
+| Email | Password | Name |
+|-------|----------|------|
+| `test@example.com` | `password123` | Nguyen Van A |
+| `demo@example.com` | `demo1234` | Tran Thi B |
+
+Re-running the command is safe — existing users are skipped.
+
 ## Environment Setup
 
 Create the root environment file used by Docker and backend services:

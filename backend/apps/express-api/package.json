@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "dev": "tsx watch src/index.ts",
+    "seed:users": "tsx src/scripts/seedTestUsers.ts",
     "start": "node dist/src/index.js",
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "lint": "biome check .",
@@ -12,14 +13,19 @@
   },
   "dependencies": {
     "@hom-nay-an-gi/shared": "workspace:*",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "google-auth-library": "^9.15.1",
+    "jsonwebtoken": "^9.0.3",
     "helmet": "^8.1.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/supertest": "^6.0.3",
     "supertest": "^7.1.4"
   }
