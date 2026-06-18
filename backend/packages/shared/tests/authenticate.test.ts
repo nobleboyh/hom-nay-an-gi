@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AuthenticationError, authenticate, signJwt } from "../src/index.js";
+import { authenticate, signJwt } from "../src/index.js";
 import {
   createMockRequest,
   createMockResponse,

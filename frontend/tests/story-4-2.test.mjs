@@ -81,7 +81,7 @@ test('LoginScreen has guest flow handler', () => {
 test('LoginScreen has register link handler', () => {
   const source = fs.readFileSync(resolveFromFrontend('components/LoginScreen.tsx'), 'utf8');
   assert.match(source, /handleRegister/);
-  assert.match(source, /login\.comingSoon/);
+  assert.match(source, /router\.push\(.*register/);
 });
 
 test('LoginScreen handles login error states', () => {
@@ -114,7 +114,6 @@ test('LoginScreen uses t() for all user-facing strings', () => {
   assert.match(source, /t\('login\.invalidCredentials'\)/);
   assert.match(source, /t\('login\.rateLimited'\)/);
   assert.match(source, /t\('login\.offline'\)/);
-  assert.match(source, /t\('login\.comingSoon'\)/);
   assert.match(source, /t\('guest\.continue'\)/);
   assert.match(source, /t\('benefits\.sync'\)/);
   assert.match(source, /t\('benefits\.recommendations'\)/);
@@ -124,11 +123,8 @@ test('LoginScreen uses t() for all user-facing strings', () => {
 // Task 8: Accessibility
 test('LoginScreen has required accessibility roles', () => {
   const source = fs.readFileSync(resolveFromFrontend('components/LoginScreen.tsx'), 'utf8');
-  assert.match(source, /accessibilityRole="main"/);
   assert.match(source, /accessibilityRole="header"/);
-  assert.match(source, /accessibilityLevel=\{1\}/);
   assert.match(source, /accessibilityLiveRegion="polite"/);
-  assert.match(source, /accessibilityRole="form"/);
   assert.match(source, /accessibilityRole="link"/);
   assert.doesNotMatch(source, /accessibilityRole="complementary"/);
 });

@@ -2,10 +2,10 @@ import {
   AppError,
   Favorite,
   type IFavorite,
-  SearchHistory,
   type ISearchHistory,
-  UserPreference,
   type IUserPreference,
+  SearchHistory,
+  UserPreference,
 } from "@hom-nay-an-gi/shared";
 
 interface SyncFavoriteInput {
@@ -63,12 +63,13 @@ export async function mergeGuestData(
     preferences?: SyncPreferencesInput;
   },
 ): Promise<FirstTimeResult> {
-  const [mergedFavorites, mergedHistory, mergedPreferences] =
-    await Promise.all([
+  const [mergedFavorites, mergedHistory, mergedPreferences] = await Promise.all(
+    [
       mergeFavorites(userId, payload.favorites ?? []),
       mergeHistory(userId, payload.deviceId, payload.history ?? []),
       mergePreferences(userId, payload.preferences),
-    ]);
+    ],
+  );
 
   return {
     favorites: mergedFavorites,
@@ -89,7 +90,10 @@ export async function deltaSync(
     SearchHistory.find({ userId, createdAt: { $gt: lastSyncAt } })
       .sort({ createdAt: -1 })
       .lean() as Promise<ISearchHistory[]>,
-    UserPreference.findOne({ userId, updatedAt: { $gt: lastSyncAt } }).lean() as Promise<IUserPreference | null>,
+    UserPreference.findOne({
+      userId,
+      updatedAt: { $gt: lastSyncAt },
+    }).lean() as Promise<IUserPreference | null>,
   ]);
 
   return {
@@ -107,9 +111,7 @@ async function mergeFavorites(
   if (guestFavorites.length === 0) return [];
 
   const cloudFavorites = await Favorite.find({ userId }).lean();
-  const cloudMap = new Map(
-    cloudFavorites.map((f) => [f.dishId, f]),
-  );
+  const cloudMap = new Map(cloudFavorites.map((f) => [f.dishId, f]));
 
   const results: IFavorite[] = [];
   const writes: Array<Promise<IFavorite>> = [];
@@ -127,12 +129,10 @@ async function mergeFavorites(
             },
           },
           { upsert: true, new: true },
-        ).then((d) => d!.toObject() as IFavorite),
+        ).then((d) => d?.toObject() as IFavorite),
       );
     } else {
-      const guestTimestamp = gf.savedAt
-        ? new Date(gf.savedAt).getTime()
-        : 0;
+      const guestTimestamp = gf.savedAt ? new Date(gf.savedAt).getTime() : 0;
       const serverTimestamp = existing.updatedAt
         ? new Date(existing.updatedAt).getTime()
         : 0;
@@ -144,9 +144,7 @@ async function mergeFavorites(
             {
               $set: {
                 dishData: gf.dishData,
-                savedAt: gf.savedAt
-                  ? new Date(gf.savedAt)
-                  : new Date(),
+                savedAt: gf.savedAt ? new Date(gf.savedAt) : new Date(),
                 updatedAt: new Date(),
               },
             },
@@ -230,8 +228,7 @@ async function mergePreferences(
         guestPreferences.notifications?.breakfastReminder ?? false,
       lunchReminder: guestPreferences.notifications?.lunchReminder ?? false,
       dinnerReminder: guestPreferences.notifications?.dinnerReminder ?? false,
-      dailySuggestion:
-        guestPreferences.notifications?.dailySuggestion ?? false,
+      dailySuggestion: guestPreferences.notifications?.dailySuggestion ?? false,
     },
   });
 

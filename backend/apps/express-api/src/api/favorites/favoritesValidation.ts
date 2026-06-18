@@ -19,5 +19,8 @@ export const saveFavoriteBodySchema = z.object({
 });
 
 export const deleteFavoriteParamsSchema = z.object({
-  favoriteId: z.string().min(1).regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId format"),
+  favoriteId: z
+    .string()
+    .min(1)
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId format"),
 });

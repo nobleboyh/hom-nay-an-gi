@@ -101,9 +101,11 @@ const mockShared = vi.hoisted(() => {
     SearchParamsSchema: { parse: (data: unknown) => data },
     DishIdParamsSchema: { parse: (data: unknown) => data },
     SurpriseMeSchema: { parse: (data: unknown) => data },
-    validate: (_schema: unknown) => (_req: unknown, _res: unknown, next: (err?: unknown) => void) => {
-      next();
-    },
+    validate:
+      (_schema: unknown) =>
+      (_req: unknown, _res: unknown, next: (err?: unknown) => void) => {
+        next();
+      },
   };
 });
 

@@ -1,5 +1,5 @@
-import { Router } from "express";
 import { authenticate, validate } from "@hom-nay-an-gi/shared";
+import { Router } from "express";
 import * as settingsController from "./settingsController.js";
 import { updatePreferencesSchema } from "./settingsValidation.js";
 

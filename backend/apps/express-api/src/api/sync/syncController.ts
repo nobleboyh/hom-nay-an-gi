@@ -34,25 +34,24 @@ export const sync = asyncHandler(
       );
     }
 
-    const validated = (
-      req as ValidatedRequest<SyncValidated>
-    ).validated;
+    const validated = (req as ValidatedRequest<SyncValidated>).validated;
     const userId = (req.user as { userId: string }).userId;
 
-    let result;
+    type MergeInput = Parameters<typeof syncService.mergeGuestData>[1];
 
     if (validated.lastSyncAt === null || validated.lastSyncAt === undefined) {
-      result = await syncService.mergeGuestData(userId, {
+      const result = await syncService.mergeGuestData(userId, {
         deviceId: validated.deviceId,
-        favorites: validated.favorites as any,
-        history: validated.history as any,
-        preferences: validated.preferences as any,
+        favorites: validated.favorites as MergeInput["favorites"],
+        history: validated.history as MergeInput["history"],
+        preferences: validated.preferences as MergeInput["preferences"],
       });
-    } else {
-      const lastSyncAt = new Date(validated.lastSyncAt);
-      result = await syncService.deltaSync(userId, lastSyncAt);
+      res.status(200).json(ServiceResponse.success(result, getRequestId(req)));
+      return;
     }
 
+    const lastSyncAt = new Date(validated.lastSyncAt);
+    const result = await syncService.deltaSync(userId, lastSyncAt);
     res.status(200).json(ServiceResponse.success(result, getRequestId(req)));
   },
 );

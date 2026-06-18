@@ -10,8 +10,16 @@ import bcrypt from "bcrypt";
 const BCRYPT_ROUNDS = 12;
 
 const TEST_USERS = [
-  { email: "test@example.com", password: "password123", displayName: "Nguyen Van A" },
-  { email: "demo@example.com", password: "demo1234", displayName: "Tran Thi B" },
+  {
+    email: "test@example.com",
+    password: "password123",
+    displayName: "Nguyen Van A",
+  },
+  {
+    email: "demo@example.com",
+    password: "demo1234",
+    displayName: "Tran Thi B",
+  },
 ];
 
 async function seed() {
@@ -42,7 +50,9 @@ async function seed() {
 
   console.log("\n--- Test accounts ---");
   for (const { email, password, displayName } of TEST_USERS) {
-    console.log(`  Email: ${email}  Password: ${password}  Name: ${displayName}`);
+    console.log(
+      `  Email: ${email}  Password: ${password}  Name: ${displayName}`,
+    );
   }
   console.log("---------------------\n");
 }

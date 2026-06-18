@@ -84,7 +84,6 @@ describe("GET /api/v1/settings/preferences", () => {
     expect(res.body.data.dietaryPreferences).toEqual([]);
     expect(res.body.data.theme).toBe("light");
   });
-
 });
 
 describe("PUT /api/v1/settings/preferences", () => {
@@ -154,7 +153,6 @@ describe("PUT /api/v1/settings/preferences", () => {
 
     expect(res.status).toBe(400);
   });
-
 });
 
 describe("DELETE /api/v1/account", () => {

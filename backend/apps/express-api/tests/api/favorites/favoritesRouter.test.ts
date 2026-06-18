@@ -82,7 +82,9 @@ describe("GET /api/v1/favorites", () => {
     expect(item.dishData.cookTimeMinutes).toBe(120);
     expect(item.dishData.caloriesPerServing).toBe(450);
     expect(item.dishData.tags).toEqual(["soup", "beef", "noodles"]);
-    expect(item.dishData.imageDescription).toBe("A bowl of pho with beef slices");
+    expect(item.dishData.imageDescription).toBe(
+      "A bowl of pho with beef slices",
+    );
     expect(item.savedAt).toBeDefined();
   });
 
@@ -223,7 +225,11 @@ describe("DELETE /api/v1/favorites/:favoriteId", () => {
   it("returns 404 for favorite owned by another user", async () => {
     const { AppError } = await import("@hom-nay-an-gi/shared");
     vi.mocked(remove).mockRejectedValueOnce(
-      new AppError("FAVORITE_NOT_FOUND", 404, "Favorite not found or does not belong to you"),
+      new AppError(
+        "FAVORITE_NOT_FOUND",
+        404,
+        "Favorite not found or does not belong to you",
+      ),
     );
 
     const app = createApp();

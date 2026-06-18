@@ -27,7 +27,10 @@ export const list = asyncHandler(
 export const save = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { dishId, dishData } = (
-      req as ValidatedRequest<{ dishId: string; dishData: Record<string, unknown> }>
+      req as ValidatedRequest<{
+        dishId: string;
+        dishData: Record<string, unknown>;
+      }>
     ).validated;
     const userId = (req.user as { userId: string }).userId;
 
@@ -38,9 +41,8 @@ export const save = asyncHandler(
 
 export const remove = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { favoriteId } = (
-      req as ValidatedRequest<{ favoriteId: string }>
-    ).validated;
+    const { favoriteId } = (req as ValidatedRequest<{ favoriteId: string }>)
+      .validated;
     const userId = (req.user as { userId: string }).userId;
 
     await favoritesService.remove(userId, favoriteId);

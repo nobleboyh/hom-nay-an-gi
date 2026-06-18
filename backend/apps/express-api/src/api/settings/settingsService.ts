@@ -1,4 +1,10 @@
-import { env, logger, redis, User, UserPreference } from "@hom-nay-an-gi/shared";
+import {
+  env,
+  logger,
+  redis,
+  User,
+  UserPreference,
+} from "@hom-nay-an-gi/shared";
 import jwt from "jsonwebtoken";
 
 const DEFAULT_PREFERENCES = {
@@ -50,8 +56,14 @@ export async function updatePreferences(
 
   const setFields: Record<string, unknown> = { updatedAt: new Date() };
   for (const [key, value] of Object.entries(updates)) {
-    if (key === "notifications" && typeof value === "object" && value !== null) {
-      for (const [nKey, nValue] of Object.entries(value as Record<string, unknown>)) {
+    if (
+      key === "notifications" &&
+      typeof value === "object" &&
+      value !== null
+    ) {
+      for (const [nKey, nValue] of Object.entries(
+        value as Record<string, unknown>,
+      )) {
         setFields[`notifications.${nKey}`] = nValue;
       }
     } else {
@@ -64,7 +76,9 @@ export async function updatePreferences(
     { new: true, runValidators: true },
   );
   if (prefs === null) {
-    throw new Error("Failed to update preferences — result was null after upsert");
+    throw new Error(
+      "Failed to update preferences — result was null after upsert",
+    );
   }
   return prefs.toObject();
 }
@@ -91,9 +105,7 @@ export async function deleteAccount(
         }
 
         try {
-          const refreshJtis = await redis.smembers(
-            `refresh_tokens:${userId}`,
-          );
+          const refreshJtis = await redis.smembers(`refresh_tokens:${userId}`);
           if (refreshJtis.length > 0) {
             const pipeline = redis.pipeline();
             for (const jti of refreshJtis) {
@@ -103,7 +115,9 @@ export async function deleteAccount(
             await pipeline.exec();
           }
         } catch {
-          logger.warn("Failed to revoke refresh tokens during account deletion");
+          logger.warn(
+            "Failed to revoke refresh tokens during account deletion",
+          );
         }
       }
     } catch {

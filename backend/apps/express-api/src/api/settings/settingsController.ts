@@ -1,5 +1,9 @@
-import { asyncHandler, ServiceResponse, type ValidatedRequest } from "@hom-nay-an-gi/shared";
 import { randomUUID } from "node:crypto";
+import {
+  asyncHandler,
+  ServiceResponse,
+  type ValidatedRequest,
+} from "@hom-nay-an-gi/shared";
 import type { Request, Response } from "express";
 import * as settingsService from "./settingsService.js";
 
@@ -19,7 +23,8 @@ export const getPreferences = asyncHandler(
 export const updatePreferences = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const userId = (req.user as { userId: string }).userId;
-    const updates = (req as ValidatedRequest<Record<string, unknown>>).validated;
+    const updates = (req as ValidatedRequest<Record<string, unknown>>)
+      .validated;
     const result = await settingsService.updatePreferences(userId, updates);
     res.status(200).json(ServiceResponse.success(result, getRequestId(req)));
   },
