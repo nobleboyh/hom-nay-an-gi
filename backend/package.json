@@ -3,6 +3,12 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.11.1",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt",
+      "esbuild"
+    ]
+  },
   "description": "Backend workspace for hom-nay-an-gi services.",
   "scripts": {
     "dev": "pnpm --parallel --filter @hom-nay-an-gi/express-api --filter @hom-nay-an-gi/llm-proxy --filter @hom-nay-an-gi/cron-worker run dev",
@@ -16,6 +22,7 @@
     "typecheck": "pnpm --filter @hom-nay-an-gi/shared run build && pnpm -r --if-present run typecheck",
     "lint": "pnpm -r --if-present run lint",
     "format": "biome format --write .",
+    "seed:test-users": "pnpm --filter @hom-nay-an-gi/express-api run seed:users",
     "test": "pnpm -r --if-present run test"
   },
   "devDependencies": {

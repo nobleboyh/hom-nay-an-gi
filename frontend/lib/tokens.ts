@@ -52,6 +52,12 @@ export const Typography = {
     fontWeight: '600',
     lineHeight: 22,
   },
+  body: {
+    family: TypographyFamilies.body,
+    fontSize: 15,
+    fontWeight: '400',
+    lineHeight: 22,
+  },
   cardTitle: {
     family: TypographyFamilies.body,
     fontSize: 16,

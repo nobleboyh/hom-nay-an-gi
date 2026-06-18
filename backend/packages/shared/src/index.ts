@@ -20,7 +20,13 @@ export {
   SurpriseMeSchema,
 } from "./api/recipes/recipesValidation.js";
 export { asyncHandler } from "./common/middleware/asyncHandler.js";
-export { authenticate, signJwt } from "./common/middleware/authenticate.js";
+export {
+  authenticate,
+  generateAccessToken,
+  generateJti,
+  generateRefreshToken,
+  signJwt,
+} from "./common/middleware/authenticate.js";
 export {
   errorHandler,
   notFoundHandler,

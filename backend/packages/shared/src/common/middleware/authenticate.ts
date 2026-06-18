@@ -1,6 +1,8 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
+import jwt, { type SignOptions } from "jsonwebtoken";
 import { env } from "../../config/env.js";
+import { redis } from "../../config/redis.js";
 import { AuthenticationError } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
 
@@ -17,96 +19,66 @@ const isStubMode = env.JWT_SECRET === STUB_SECRET;
 
 let stubWarningLogged = false;
 
-function base64urlDecode(input: string): string {
-  const base64 = input.replace(/-/g, "+").replace(/_/g, "/");
-  return Buffer.from(base64, "base64").toString("utf8");
+export function generateJti(): string {
+  return randomUUID();
 }
 
-function base64urlEncode(input: string): string {
-  return Buffer.from(input).toString("base64url");
+interface TokenPayload {
+  sub: string;
+  provider: string;
+  jti: string;
 }
 
-interface JwtPayload {
+export function generateAccessToken(userId: string, provider: string): string {
+  const payload: TokenPayload = {
+    sub: userId,
+    provider,
+    jti: generateJti(),
+  };
+  const options: SignOptions = {
+    expiresIn: env.JWT_ACCESS_EXPIRY as unknown as number,
+  };
+  return jwt.sign(payload, env.JWT_SECRET, options);
+}
+
+export function generateRefreshToken(userId: string, provider: string): string {
+  const payload: TokenPayload = {
+    sub: userId,
+    provider,
+    jti: generateJti(),
+  };
+  const options: SignOptions = {
+    expiresIn: env.JWT_REFRESH_EXPIRY as unknown as number,
+  };
+  return jwt.sign(payload, env.JWT_REFRESH_SECRET, options);
+}
+
+export function signJwt(payload: {
   sub: string;
   provider: string;
   exp?: number;
   iat?: number;
+}): string {
+  const { exp, ...rest } = payload;
+  const tokenPayload = { ...rest, jti: generateJti() };
+  const options: SignOptions | undefined = exp
+    ? { expiresIn: Math.max(0, exp - Math.floor(Date.now() / 1000)) }
+    : undefined;
+  return jwt.sign(tokenPayload, env.JWT_SECRET, options);
 }
 
-function signJwt(payload: JwtPayload): string {
-  const header = base64urlEncode(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-  const body = base64urlEncode(JSON.stringify(payload));
-  const signature = createHmac("sha256", env.JWT_SECRET)
-    .update(`${header}.${body}`)
-    .digest("base64url");
-  return `${header}.${body}.${signature}`;
-}
-
-function verifyJwt(token: string): JwtPayload {
-  const parts = token.split(".");
-  if (parts.length !== 3) {
-    throw new AuthenticationError("Invalid token");
-  }
-
-  const [headerB64, payloadB64, signatureB64] = parts;
-
-  let header: { alg: string; typ: string };
-  try {
-    header = JSON.parse(base64urlDecode(headerB64 as string));
-  } catch {
-    throw new AuthenticationError("Invalid token");
-  }
-
-  if (header.alg !== "HS256" || header.typ !== "JWT") {
-    throw new AuthenticationError("Invalid token");
-  }
-
-  const expectedSig = createHmac("sha256", env.JWT_SECRET)
-    .update(`${headerB64}.${payloadB64}`)
-    .digest();
-
-  const actualSig = Buffer.from(
-    (signatureB64 as string).replace(/-/g, "+").replace(/_/g, "/"),
-    "base64",
-  );
-
-  if (
-    expectedSig.length !== actualSig.length ||
-    !timingSafeEqual(expectedSig, actualSig)
-  ) {
-    throw new AuthenticationError("Invalid token");
-  }
-
-  let payload: JwtPayload;
-  try {
-    payload = JSON.parse(base64urlDecode(payloadB64 as string)) as JwtPayload;
-  } catch {
-    throw new AuthenticationError("Invalid token");
-  }
-
-  if (payload.exp != null && Date.now() / 1000 > payload.exp) {
-    throw new AuthenticationError("Token expired");
-  }
-
-  return payload;
-}
-
-export function authenticate(
+export async function authenticate(
   req: Request,
   _res: Response,
   next: NextFunction,
-): void {
+): Promise<void> {
   if (isStubMode) {
     if (!stubWarningLogged) {
       logger.warn("authenticate middleware running in stub mode");
       stubWarningLogged = true;
     }
     const userId = req.headers["x-user-id"] as string | undefined;
-    if (!userId) {
-      next(new AuthenticationError("Authentication required"));
-      return;
-    }
-    req.user = { userId, authProvider: "stub" };
+    req.user = { userId: userId ?? "stub-user", authProvider: "stub" };
     next();
     return;
   }
@@ -124,12 +96,42 @@ export function authenticate(
   }
 
   try {
-    const payload = verifyJwt(token);
+    const payload = jwt.verify(token, env.JWT_SECRET) as TokenPayload;
+
+    if (redis.status === "ready") {
+      try {
+        const blocked = await redis.get(`blocklist:${payload.jti}`);
+        if (blocked !== null) {
+          next(
+            new AuthenticationError("AUTH_TOKEN_REVOKED", 401, "Token revoked"),
+          );
+          return;
+        }
+      } catch {
+        logger.warn("Redis blocklist check failed — proceeding without it");
+      }
+    } else {
+      logger.warn("Redis unavailable — skipping blocklist check");
+    }
+
     req.user = { userId: payload.sub, authProvider: payload.provider };
     next();
   } catch (error) {
-    next(error);
+    const jwtError = error as { name?: string; message?: string };
+    if (jwtError.name === "TokenExpiredError") {
+      next(new AuthenticationError("AUTH_TOKEN_EXPIRED", 401, "Token expired"));
+    } else if (jwtError.name === "JsonWebTokenError") {
+      next(new AuthenticationError("Authentication required"));
+    } else if (jwtError.name === "NotBeforeError") {
+      next(
+        new AuthenticationError(
+          "AUTH_TOKEN_NOT_YET_VALID",
+          401,
+          "Token not yet valid",
+        ),
+      );
+    } else {
+      next(error);
+    }
   }
 }
-
-export { signJwt };

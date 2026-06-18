@@ -121,14 +121,24 @@ export const storageAdapter = {
 
       if (collection === 'favorites_guest') {
         if (key === 'all') {
-          const rows = await database.getAllAsync<SqliteRow>('SELECT dishData FROM favorites_guest ORDER BY savedAt DESC');
-          return rows.map((r) => JSON.parse(r.dishData as string));
+          const rows = await database.getAllAsync<SqliteRow>('SELECT dishId, dishData, savedAt FROM favorites_guest ORDER BY savedAt DESC');
+          return rows.map((r) => ({
+            dishId: r.dishId as string,
+            dishData: JSON.parse(r.dishData as string),
+            savedAt: r.savedAt as string,
+          }));
         }
         const row = await database.getFirstAsync<SqliteRow>(
-          'SELECT dishData FROM favorites_guest WHERE dishId = ?',
+          'SELECT dishId, dishData, savedAt FROM favorites_guest WHERE dishId = ?',
           [key],
         );
-        return row ? JSON.parse(row.dishData as string) : null;
+        return row
+          ? {
+              dishId: row.dishId as string,
+              dishData: JSON.parse(row.dishData as string),
+              savedAt: row.savedAt as string,
+            }
+          : null;
       }
 
       if (collection === 'search_history_guest') {
@@ -244,14 +254,82 @@ export const storageAdapter = {
   },
 
   async syncFromCloud(): Promise<void> {
-    console.log('[storageAdapter] stub: syncFromCloud — real sync deferred to Epic 3');
     if (!isAuthenticated()) return;
+    const client = getApiClient();
     try {
-      const client = getApiClient();
-      const response = await client.post<unknown>('/api/v1/sync', {});
-      console.log('[storageAdapter] sync response:', response.data);
+      await client.post('/api/v1/sync', {});
     } catch (error) {
       console.error('[storageAdapter] sync error:', error);
     }
   },
 };
+
+export async function clearGuestData(): Promise<void> {
+  try {
+    const database = await getDb();
+    await database.execAsync(`
+      DELETE FROM dishes_cache;
+      DELETE FROM favorites_guest;
+      DELETE FROM search_history_guest;
+      DELETE FROM shopping_lists_guest;
+    `);
+  } catch {
+    console.warn('[storageAdapter] clearGuestData: tables may not exist');
+  }
+}
+
+let _guestDeviceId: string | null = null;
+function getGuestDeviceId(): string {
+  if (!_guestDeviceId) {
+    _guestDeviceId = `guest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+  return _guestDeviceId;
+}
+
+export async function guestToAuthenticated(): Promise<void> {
+  if (!isAuthenticated()) return;
+
+  const database = await getDb();
+
+  const favoritesRows = await database.getAllAsync<SqliteRow>(
+    'SELECT dishData, savedAt FROM favorites_guest ORDER BY savedAt DESC',
+  );
+  const favorites = favoritesRows.flatMap((r) => {
+    try {
+      return [{ dishData: JSON.parse(r.dishData as string) as Record<string, unknown>, savedAt: r.savedAt as string }];
+    } catch {
+      console.warn('[storageAdapter] Skipping invalid favorite dishData');
+      return [];
+    }
+  });
+
+  const historyRows = await database.getAllAsync<SqliteRow>(
+    'SELECT * FROM search_history_guest ORDER BY createdAt DESC LIMIT 1000',
+  );
+
+  const payload: Record<string, unknown> = {
+    deviceId: getGuestDeviceId(),
+    favorites,
+    history: historyRows,
+    lastSyncAt: null,
+  };
+
+  const client = getApiClient();
+  const maxRetries = 3;
+  const delays = [1_000, 3_000, 9_000];
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      await client.post('/api/v1/sync', payload);
+      await clearGuestData();
+      return;
+    } catch (err) {
+      if (attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+      } else {
+        console.error('[storageAdapter] guestToAuthenticated failed after retries:', err);
+        throw err;
+      }
+    }
+  }
+}
