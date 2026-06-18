@@ -289,7 +289,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       scopes: ['openid', 'profile', 'email'],
       responseType: AuthSession.ResponseType.IdToken,
       usePKCE: false,
-    }, discovery);
+    });
 
     const result = await request.promptAsync(discovery);
 

@@ -39,7 +39,9 @@ export default function RootLayout() {
 
     const responseListener = addNotificationResponseReceivedListener((response) => {
       const data = response.notification.request.content.data;
-      router.push(data?.target ?? '/');
+      if (typeof data?.target === 'string') {
+        router.push(data.target as any);
+      }
     });
 
     return () => {

@@ -101,7 +101,6 @@ export default function RegisterScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView
-        accessibilityRole="main"
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
@@ -111,13 +110,12 @@ export default function RegisterScreen() {
 
         <Text
           accessibilityRole="header"
-          accessibilityLevel={1}
           style={styles.title}
         >
           {t('register.title')}
         </Text>
 
-        <View accessibilityRole="form" style={styles.form}>
+        <View style={styles.form}>
           <InputField
             accessibilityLabel={t('register.displayName')}
             autoCapitalize="words"

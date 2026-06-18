@@ -148,13 +148,11 @@ export function LoginScreen() {
   return (
     <View style={styles.screen}>
     <ScrollView
-      accessibilityRole="main"
       contentContainerStyle={styles.scrollContent}
       keyboardShouldPersistTaps="handled"
     >
       <Text
         accessibilityRole="header"
-        accessibilityLevel={1}
         style={styles.title}
       >
         {t('app.title')}
@@ -166,7 +164,7 @@ export function LoginScreen() {
         style={styles.benefitsCard}
       />
 
-      <View accessibilityLabel={t('login.prompt')} accessibilityRole="form" style={styles.form}>
+      <View accessibilityLabel={t('login.prompt')} style={styles.form}>
         <InputField
           accessibilityLabel={t('login.email')}
           autoCapitalize="none"
