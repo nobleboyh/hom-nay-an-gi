@@ -3,7 +3,7 @@ import { authenticate, validate } from "@hom-nay-an-gi/shared";
 import * as settingsController from "./settingsController.js";
 import { updatePreferencesSchema } from "./settingsValidation.js";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/preferences", authenticate, settingsController.getPreferences);
 router.put(

@@ -78,11 +78,7 @@ export async function authenticate(
       stubWarningLogged = true;
     }
     const userId = req.headers["x-user-id"] as string | undefined;
-    if (!userId) {
-      next(new AuthenticationError("Authentication required"));
-      return;
-    }
-    req.user = { userId, authProvider: "stub" };
+    req.user = { userId: userId ?? "stub-user", authProvider: "stub" };
     next();
     return;
   }

@@ -24,16 +24,18 @@ describe("authenticate middleware", () => {
       });
     });
 
-    it("returns 401 when no x-user-id header", async () => {
+    it("defaults to stub-user when no x-user-id header", async () => {
       const req = createMockRequest();
       const res = createMockResponse();
       const { calls, next } = createNextSpy();
 
       authenticate(req, res, next);
 
-      expect(calls[0]).toBeInstanceOf(AuthenticationError);
-      expect((calls[0] as Error).message).toBe("Authentication required");
-      expect(req.user).toBeUndefined();
+      expect(calls).toEqual([undefined]);
+      expect(req.user).toEqual({
+        userId: "stub-user",
+        authProvider: "stub",
+      });
     });
   });
 

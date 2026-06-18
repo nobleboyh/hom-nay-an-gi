@@ -17,10 +17,10 @@ function getRequestId(req: Request): string {
 
 interface SyncValidated {
   deviceId: string;
-  favorites?: unknown[];
-  history?: unknown[];
-  preferences?: Record<string, unknown>;
-  lastSyncAt?: string | null;
+  favorites: unknown[] | undefined;
+  history: unknown[] | undefined;
+  preferences: Record<string, unknown> | undefined;
+  lastSyncAt: string | null | undefined;
 }
 
 export const sync = asyncHandler(
@@ -44,10 +44,9 @@ export const sync = asyncHandler(
     if (validated.lastSyncAt === null || validated.lastSyncAt === undefined) {
       result = await syncService.mergeGuestData(userId, {
         deviceId: validated.deviceId,
-        favorites: validated.favorites as SyncValidated["favorites"],
-        history: validated.history as SyncValidated["history"],
-        preferences:
-          validated.preferences as SyncValidated["preferences"],
+        favorites: validated.favorites as any,
+        history: validated.history as any,
+        preferences: validated.preferences as any,
       });
     } else {
       const lastSyncAt = new Date(validated.lastSyncAt);
