@@ -40,12 +40,10 @@ export const sync = asyncHandler(
     type MergeInput = Parameters<typeof syncService.mergeGuestData>[1];
 
     if (validated.lastSyncAt === null || validated.lastSyncAt === undefined) {
-      const result = await syncService.mergeGuestData(userId, {
-        deviceId: validated.deviceId,
-        favorites: validated.favorites as MergeInput["favorites"],
-        history: validated.history as MergeInput["history"],
-        preferences: validated.preferences as MergeInput["preferences"],
-      });
+      const result = await syncService.mergeGuestData(
+        userId,
+        validated as unknown as MergeInput,
+      );
       res.status(200).json(ServiceResponse.success(result, getRequestId(req)));
       return;
     }
