@@ -24,7 +24,7 @@ const envSchema = z.object({
       "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8081,exp://127.0.0.1:19000,exp://localhost:19000",
     ),
   LLM_PROVIDER: z
-    .enum(["ollama", "gemini", "openai", "anthropic"])
+    .enum(["ollama", "gemini", "openai", "anthropic", "deepseek"])
     .default("ollama"),
   LLM_API_KEY: z.string().optional(),
   OLLAMA_BASE_URL: z.string().url().default("http://localhost:11434"),

@@ -116,14 +116,20 @@ function createGeminiAdapter(apiKey: string): ProviderAdapter {
 
 const OPENAI_API_BASE = "https://api.openai.com/v1";
 
-function createOpenAiAdapter(apiKey: string): ProviderAdapter {
+function createOpenAiCompatibleAdapter(
+  apiKey: string,
+  baseUrl: string,
+  model: string,
+  providerLabel: string,
+  responseFormat: { type: "json_object" } | undefined,
+): ProviderAdapter {
   return {
     async complete(
       systemPrompt: string,
       userPrompt: string,
       signal: AbortSignal,
     ): Promise<unknown> {
-      const response = await fetch(`${OPENAI_API_BASE}/chat/completions`, {
+      const response = await fetch(`${baseUrl}/chat/completions`, {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -131,19 +137,19 @@ function createOpenAiAdapter(apiKey: string): ProviderAdapter {
         },
         signal,
         body: JSON.stringify({
-          model: "gpt-4o-mini",
+          model,
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
           ],
           temperature: 0.3,
-          response_format: { type: "json_object" },
+          ...(responseFormat ? { response_format: responseFormat } : {}),
         }),
       });
 
       if (!response.ok) {
         throw new ProviderError(
-          `OpenAI API error: ${response.status}`,
+          `${providerLabel} API error: ${response.status}`,
           response.status,
         );
       }
@@ -157,6 +163,29 @@ function createOpenAiAdapter(apiKey: string): ProviderAdapter {
       return JSON.parse(text) as Record<string, unknown>;
     },
   };
+}
+
+function createOpenAiAdapter(apiKey: string): ProviderAdapter {
+  return createOpenAiCompatibleAdapter(
+    apiKey,
+    OPENAI_API_BASE,
+    "gpt-4o-mini",
+    "OpenAI",
+    { type: "json_object" },
+  );
+}
+
+const DEEPSEEK_API_BASE = "https://api.deepseek.com/v1";
+const DEEPSEEK_MODEL = "deepseek-chat";
+
+function createDeepSeekAdapter(apiKey: string): ProviderAdapter {
+  return createOpenAiCompatibleAdapter(
+    apiKey,
+    DEEPSEEK_API_BASE,
+    DEEPSEEK_MODEL,
+    "DeepSeek",
+    undefined,
+  );
 }
 
 const ANTHROPIC_API_BASE = "https://api.anthropic.com/v1";
@@ -264,6 +293,9 @@ function createProvider(providerName: string, apiKey: string): ProviderAdapter {
     }
     case "openai": {
       return createOpenAiAdapter(apiKey);
+    }
+    case "deepseek": {
+      return createDeepSeekAdapter(apiKey);
     }
     case "anthropic": {
       return createAnthropicAdapter(apiKey);

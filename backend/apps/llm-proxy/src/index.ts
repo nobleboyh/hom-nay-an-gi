@@ -18,11 +18,13 @@ const LLM_API_KEY = process.env.LLM_API_KEY ?? "";
 const GEMINI_API_BASE =
   "https://generativelanguage.googleapis.com/v1beta/models";
 const GEMINI_MODEL = "gemini-2.5-flash";
+const DEEPSEEK_API_BASE = "https://api.deepseek.com/v1";
+const DEEPSEEK_MODEL = "deepseek-chat";
 const LLM_TIMEOUT_MS = 15_000;
 
 const MAX_BODY_SIZE = 1_048_576;
 const PROMPT_MAX_LENGTH = 10_000;
-const VALID_PROVIDERS = ["gemini"] as const;
+const VALID_PROVIDERS = ["gemini", "deepseek"] as const;
 type Provider = (typeof VALID_PROVIDERS)[number];
 
 function parseJsonBody(request: http.IncomingMessage): Promise<{
@@ -148,8 +150,10 @@ async function handleGenerate(
     timeout = setTimeout(() => controller.abort(), LLM_TIMEOUT_MS);
 
     let generatedText: string;
+    let model: string;
 
     if (provider === "gemini") {
+      model = GEMINI_MODEL;
       const geminiBody: Record<string, unknown> = {
         contents: [
           {
@@ -226,6 +230,61 @@ async function handleGenerate(
       }
 
       generatedText = candidate.content.parts[0]?.text ?? "";
+    } else if (provider === "deepseek") {
+      model = DEEPSEEK_MODEL;
+      const messages = [];
+
+      if (body.schema) {
+        const isArray = body.schema.type === "array";
+        messages.push({
+          role: "system",
+          content: `You must respond with valid JSON matching this schema: ${JSON.stringify(body.schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.`,
+        });
+      }
+
+      messages.push({ role: "user", content: body.prompt });
+
+      const deepSeekResponse = await fetch(
+        `${DEEPSEEK_API_BASE}/chat/completions`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${LLM_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: DEEPSEEK_MODEL,
+            messages,
+            temperature: 0.3,
+          }),
+          signal: controller.signal,
+        },
+      );
+
+      clearTimeout(timeout);
+
+      if (!deepSeekResponse.ok) {
+        const errorText = await deepSeekResponse.text();
+        logger.error(
+          { status: deepSeekResponse.status, errorText },
+          "DeepSeek API error",
+        );
+        sendJson(
+          response,
+          502,
+          buildErrorResponse(
+            "LLM_PROVIDER_ERROR",
+            `DeepSeek API returned ${deepSeekResponse.status}`,
+          ),
+        );
+        return;
+      }
+
+      const deepSeekData = (await deepSeekResponse.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+
+      generatedText = deepSeekData.choices?.[0]?.message?.content ?? "";
     } else {
       clearTimeout(timeout);
       sendJson(
@@ -257,7 +316,7 @@ async function handleGenerate(
       buildSuccessResponse({
         content: generatedText,
         provider,
-        model: GEMINI_MODEL,
+        model,
       }),
     );
   } catch (error: unknown) {

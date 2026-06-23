@@ -43,6 +43,7 @@ async function withServer(
 
 const GEMINI_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
 
 const realFetch = global.fetch.bind(global);
 
@@ -74,6 +75,29 @@ function mockGemini(
             text: data.text,
           } as unknown as Response;
         }
+        return {
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve(data),
+          text: () => Promise.resolve(JSON.stringify(data)),
+        } as unknown as Response;
+      }
+      return realFetch(url, options);
+    },
+  );
+}
+
+function mockDeepSeek(
+  deepSeekResponse: () => Promise<{
+    choices: Array<{ message: { content: string } }>;
+  }>,
+  onRequest?: (body: Record<string, unknown>) => void,
+) {
+  vi.spyOn(global, "fetch").mockImplementation(
+    async (url: RequestInfo | URL, options?: RequestInit) => {
+      if (typeof url === "string" && url.startsWith(DEEPSEEK_URL)) {
+        onRequest?.(JSON.parse(String(options?.body)));
+        const data = await deepSeekResponse();
         return {
           ok: true,
           status: 200,
@@ -131,6 +155,58 @@ describe("LLM Proxy - Generate endpoint", () => {
       const body = await res.json();
       expect(body.success).toBe(true);
       expect(body.data.content).toBeTruthy();
+    });
+  });
+
+  it("should return 200 with generated content for DeepSeek request", async () => {
+    mockDeepSeek(
+      async () => ({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify([{ dishId: "1", name: "Pho" }]),
+            },
+          },
+        ],
+      }),
+      (requestBody) => {
+        expect(requestBody).not.toHaveProperty("response_format");
+        expect(requestBody.messages).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              content: expect.stringContaining("Return ONLY the JSON array"),
+            }),
+          ]),
+        );
+      },
+    );
+
+    await withServer(async (baseUrl) => {
+      const res = await fetch(`${baseUrl}/generate`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          provider: "deepseek",
+          prompt: "Generate trending dishes",
+          schema: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                dishId: { type: "string" },
+                name: { type: "string" },
+              },
+            },
+          },
+        }),
+      });
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.success).toBe(true);
+      expect(body.data.content).toBeTruthy();
+      expect(body.data.provider).toBe("deepseek");
+      expect(body.data.model).toBe("deepseek-chat");
     });
   });
 

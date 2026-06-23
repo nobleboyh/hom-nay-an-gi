@@ -49,6 +49,51 @@ describe("llmClient", () => {
       vi.mocked(fetch).mockRestore();
     });
 
+    it("returns typed result from DeepSeek provider", async () => {
+      const mockResponse = { result: "deepseek-success" };
+
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            choices: [
+              {
+                message: { content: JSON.stringify(mockResponse) },
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+
+      const { complete } = await import("../src/llmClient.js");
+
+      const result = await complete(
+        "system prompt",
+        "user prompt",
+        testSchema,
+        { apiKey: "test-key", provider: "deepseek" },
+      );
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        "https://api.deepseek.com/v1/chat/completions",
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            authorization: "Bearer test-key",
+          }),
+        }),
+      );
+      const requestInit = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+      expect(JSON.parse(String(requestInit.body))).not.toHaveProperty(
+        "response_format",
+      );
+      expect(result.data).toEqual(mockResponse);
+      expect(result.meta.degraded).toBe(false);
+      expect(result.meta.source).toBe("llm");
+      expect(result.meta.provider).toBe("deepseek");
+
+      fetchSpy.mockRestore();
+    });
+
     it("returns degraded result on LLM failure", async () => {
       vi.spyOn(globalThis, "fetch").mockRejectedValueOnce(
         new Error("Network error"),

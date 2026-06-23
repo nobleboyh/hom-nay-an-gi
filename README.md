@@ -80,7 +80,13 @@ ollama pull llama3:latest
 OLLAMA_MODEL=llama3:latest
 ```
 
-To switch to a cloud provider (Gemini, OpenAI), set `LLM_PROVIDER` and provide the API key via `LLM_API_KEY`.
+To switch to a cloud provider (Gemini, OpenAI, Anthropic, or DeepSeek), set `LLM_PROVIDER` and provide the API key via `LLM_API_KEY`.
+
+```bash
+# DeepSeek example
+LLM_PROVIDER=deepseek
+LLM_API_KEY=replace-with-deepseek-api-key
+```
 
 ## Service Summary
 
