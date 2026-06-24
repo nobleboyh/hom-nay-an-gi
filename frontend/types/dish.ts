@@ -14,6 +14,7 @@ export interface Dish {
 }
 
 export interface Favorite {
+  _id?: string;
   dishId: string;
   dishData: Dish;
   savedAt: string;

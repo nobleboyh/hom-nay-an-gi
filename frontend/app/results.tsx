@@ -154,10 +154,17 @@ export default function ResultsScreen() {
       const saved = isSaved(dish.dishId);
       try {
         if (saved) {
-          await removeFavorite(dish.dishId);
+          const ok = await removeFavorite(dish.dishId);
+          if (!ok) {
+            addToast(t('state.error.generic'), 'error');
+          }
         } else {
-          await saveFavorite(dish);
-          addToast(t('results.saveSuccess'), 'success');
+          const ok = await saveFavorite(dish);
+          if (ok) {
+            addToast(t('results.saveSuccess'), 'success');
+          } else {
+            addToast(t('state.error.generic'), 'error');
+          }
         }
       } catch {
         addToast(t('state.error.generic'), 'error');

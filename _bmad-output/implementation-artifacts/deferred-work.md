@@ -118,3 +118,14 @@
 - **No token refresh/re-auth pattern** — syncPreferences and clearAllFavorites use raw fetch instead of an API client that handles 401/retry. Pre-existing architecture pattern across all stores.
 - **EXPO_PUBLIC_API_BASE_URL port inconsistency (8080 vs 3000)** — authStore defaults to 8080, dataStore/profile default to 3000. Pre-existing across all stores.
 - **Tests verify string presence not behavior** — Most tests are simple string-match checks. By design for static-analysis tests per the story spec.
+
+## Deferred from: code review of 4-10-authenticated-favorites-route-regression-fix (2026-06-24)
+
+- **storageAdapter.read returns stale data for authenticated SQLite-only collections** — When authenticated and reading `favorites_guest` (a SQLITE_ONLY_COLLECTION), bypasses API and reads SQLite. But favorites were saved via API, not SQLite. Pre-existing design limitation.
+- **Race: getTarget says 'api' but token null at request time** — If user logs out between `getTarget()` and token retrieval. Pre-existing race in auth state transitions.
+- **Race: getTarget says 'sqlite' but user authenticates before write completes** — SQLite path runs even though user now authenticated. `guestToAuthenticated()` will sync later.
+- **No favorites auto-reload after login/logout cycle** — After `logout` → `clearData()` then re-login, `fetchFavorites` never called. Existing gap.
+- **fetchPreferences races with clearData during token refresh** — `performTokenRefresh()` failure calls `logout()` → `clearData()` while `fetchPreferences` continues. Pre-existing race.
+- **searchDishes Date.now() ID collision risk** — Two searches in same millisecond produce identical `id` values. Pre-existing.
+- **storageAdapter.write API path silently swallows all errors** — When authenticated and collection not in SQLITE_ONLY_COLLECTIONS, API write catches all errors and returns `void`. Pre-existing design.
+- **Tests only static regex matching, no runtime verification** — All tests assert source code patterns. This is the project's existing test convention.

@@ -14,6 +14,7 @@ import helmet from "helmet";
 import { authRouter } from "./api/auth/authRouter.js";
 import { favoritesRouter } from "./api/favorites/favoritesRouter.js";
 import { recipesRouter } from "./api/recipes/recipesRouter.js";
+import { syncRouter } from "./api/sync/syncRouter.js";
 import * as settingsController from "./api/settings/settingsController.js";
 import { settingsRouter } from "./api/settings/settingsRouter.js";
 import { loadSeedRecipes } from "./data/seedLoader.js";
@@ -79,6 +80,7 @@ export function buildApp(): express.Express {
   app.use("/api/v1/favorites", favoritesRouter);
   app.use("/api/v1/recipes", recipesRouter);
   app.use("/api/v1/settings", settingsRouter);
+  app.use("/api/v1/sync", syncRouter);
   app.delete("/api/v1/account", authenticate, settingsController.deleteAccount);
 
   app.use(notFoundHandler);
