@@ -13,6 +13,8 @@ const SAFE_TABLES: Record<string, string> = {
   shopping_lists_guest: 'shopping_lists_guest',
 };
 
+const SQLITE_ONLY_COLLECTIONS = new Set(['dishes_cache', 'favorites_guest', 'search_history_guest', 'shopping_lists_guest']);
+
 function resolveTable(collection: string): string {
   const table = SAFE_TABLES[collection];
   if (!table) {
@@ -22,42 +24,36 @@ function resolveTable(collection: string): string {
 }
 
 let db: SQLite.SQLiteDatabase | null = null;
+let dbReady: Promise<SQLite.SQLiteDatabase> | null = null;
 let apiClient: ApiClient | null = null;
+let sqliteFailed = false;
+
+const memoryFavoritesGuest = new Map<string, unknown>();
 
 async function getDb(): Promise<SQLite.SQLiteDatabase> {
-  if (!db) {
-    db = await SQLite.openDatabaseAsync('guest.db');
-    await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS dishes_cache (
-        dishId TEXT PRIMARY KEY,
-        dishData TEXT,
-        cachedAt TEXT
-      );
-      CREATE TABLE IF NOT EXISTS favorites_guest (
-        dishId TEXT PRIMARY KEY,
-        dishData TEXT,
-        savedAt TEXT
-      );
-      CREATE TABLE IF NOT EXISTS search_history_guest (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        ingredients TEXT,
-        tags TEXT,
-        cookTimeMax INTEGER,
-        resultCount INTEGER,
-        selectedDishId TEXT,
-        createdAt TEXT
-      );
-      CREATE TABLE IF NOT EXISTS shopping_lists_guest (
-        id TEXT PRIMARY KEY,
-        dishId TEXT,
-        dishName TEXT,
-        ingredients TEXT,
-        checkedState TEXT,
-        savedAt TEXT
-      );
-    `);
+  if (!db && !dbReady) {
+    dbReady = (async () => {
+      const database = await SQLite.openDatabaseAsync('guest.db');
+      const tables = [
+        `CREATE TABLE IF NOT EXISTS dishes_cache (dishId TEXT PRIMARY KEY, dishData TEXT, cachedAt TEXT)`,
+        `CREATE TABLE IF NOT EXISTS favorites_guest (dishId TEXT PRIMARY KEY, dishData TEXT, savedAt TEXT)`,
+        `CREATE TABLE IF NOT EXISTS search_history_guest (id INTEGER PRIMARY KEY AUTOINCREMENT, ingredients TEXT, tags TEXT, cookTimeMax INTEGER, resultCount INTEGER, selectedDishId TEXT, createdAt TEXT)`,
+        `CREATE TABLE IF NOT EXISTS shopping_lists_guest (id TEXT PRIMARY KEY, dishId TEXT, dishName TEXT, ingredients TEXT, checkedState TEXT, savedAt TEXT)`,
+      ];
+      for (const sql of tables) {
+        await database.execAsync(sql);
+      }
+      db = database;
+      dbReady = null;
+      return database;
+    })().catch((e) => {
+      console.error('[storageAdapter] DB init error:', e);
+      dbReady = null;
+      throw e;
+    });
   }
-  return db;
+  const result = db ?? await dbReady!;
+  return result;
 }
 
 function getApiClient(): ApiClient {
@@ -89,7 +85,7 @@ export const storageAdapter = {
   },
 
   async read(collection: string, key: string): Promise<unknown | null> {
-    if (isAuthenticated()) {
+    if (isAuthenticated() && !SQLITE_ONLY_COLLECTIONS.has(collection)) {
       console.log(`[storageAdapter] authed → API read: ${collection}/${key}`);
       try {
         const client = getApiClient();
@@ -100,7 +96,7 @@ export const storageAdapter = {
       }
     }
 
-    console.log(`[storageAdapter] guest → SQLite read: ${collection}/${key}`);
+    console.log(`[storageAdapter] SQLite read: ${collection}/${key}`);
     try {
       const database = await getDb();
 
@@ -120,13 +116,31 @@ export const storageAdapter = {
       }
 
       if (collection === 'favorites_guest') {
+        if (sqliteFailed) {
+          if (key === 'all') {
+            const items = [...memoryFavoritesGuest.values()] as {
+              dishId: string;
+              dishData: unknown;
+              savedAt: string;
+            }[];
+            return items.sort((a, b) => (b.savedAt ?? '').localeCompare(a.savedAt ?? ''));
+          }
+          return memoryFavoritesGuest.get(key) ?? null;
+        }
         if (key === 'all') {
           const rows = await database.getAllAsync<SqliteRow>('SELECT dishId, dishData, savedAt FROM favorites_guest ORDER BY savedAt DESC');
-          return rows.map((r) => ({
-            dishId: r.dishId as string,
-            dishData: JSON.parse(r.dishData as string),
-            savedAt: r.savedAt as string,
-          }));
+          return rows.flatMap((r) => {
+            try {
+              return [{
+                dishId: r.dishId as string,
+                dishData: JSON.parse(r.dishData as string),
+                savedAt: r.savedAt as string,
+              }];
+            } catch {
+              console.warn('[storageAdapter] Skipping invalid favorite dishData');
+              return [];
+            }
+          });
         }
         const row = await database.getFirstAsync<SqliteRow>(
           'SELECT dishId, dishData, savedAt FROM favorites_guest WHERE dishId = ?',
@@ -175,12 +189,27 @@ export const storageAdapter = {
       return null;
     } catch (error) {
       console.error('[storageAdapter] SQLite read error:', error);
+      db = null;
+      dbReady = null;
+      sqliteFailed = true;
+      if (collection === 'favorites_guest') {
+        if (key === 'all') {
+          return [...memoryFavoritesGuest.values()].sort((a, b) =>
+            ((b as Record<string, string>)?.savedAt ?? '').localeCompare((a as Record<string, string>)?.savedAt ?? ''),
+          );
+        }
+        return memoryFavoritesGuest.get(key) ?? null;
+      }
       return null;
     }
   },
 
   async write(collection: string, key: string, data: unknown): Promise<void> {
-    if (isAuthenticated()) {
+    if (key == null) {
+      console.error(`[storageAdapter] write called with null/undefined key: collection=${collection}`);
+      return;
+    }
+    if (isAuthenticated() && !SQLITE_ONLY_COLLECTIONS.has(collection)) {
       console.log(`[storageAdapter] authed → API write: ${collection}/${key}`);
       try {
         const client = getApiClient();
@@ -191,48 +220,81 @@ export const storageAdapter = {
       return;
     }
 
-    console.log(`[storageAdapter] guest → SQLite write: ${collection}/${key}`);
-    try {
-      const database = await getDb();
-      const dataJson = JSON.stringify(data);
-      const now = new Date().toISOString();
+    // Mirror into memory immediately so reads are consistent even if SQLite fails.
+    if (collection === 'favorites_guest') {
+      memoryFavoritesGuest.set(key, {
+        dishId: key,
+        dishData: data,
+        savedAt: new Date().toISOString(),
+      });
+    }
 
-      if (collection === 'dishes_cache') {
-        await database.runAsync(
-          'INSERT OR REPLACE INTO dishes_cache (dishId, dishData, cachedAt) VALUES (?, ?, ?)',
-          [key, dataJson, now],
-        );
-      } else if (collection === 'favorites_guest') {
-        await database.runAsync(
-          'INSERT OR REPLACE INTO favorites_guest (dishId, dishData, savedAt) VALUES (?, ?, ?)',
-          [key, dataJson, now],
-        );
-      } else if (collection === 'search_history_guest') {
-        await database.runAsync(
-          'INSERT INTO search_history_guest (ingredients, createdAt) VALUES (?, ?)',
-          [dataJson, now],
-        );
-      } else if (collection === 'shopping_lists_guest') {
-        const record = data as Record<string, unknown>;
-        await database.runAsync(
-          `INSERT OR REPLACE INTO shopping_lists_guest (id, dishId, dishName, ingredients, checkedState, savedAt) VALUES (?, ?, ?, ?, ?, ?)`,
-          [
-            key,
-            (record.dishId as string) ?? null,
-            (record.dishName as string) ?? null,
-            record.ingredients ? JSON.stringify(record.ingredients) : '[]',
-            record.checkedState ? JSON.stringify(record.checkedState) : '{}',
-            now,
-          ],
-        );
+    // If SQLite previously failed, still attempt a fresh write (error may have been transient).
+    // Reset the flag so getDb() can try to reopen the database.
+    if (sqliteFailed) {
+      db = null;
+      dbReady = null;
+      sqliteFailed = false;
+    }
+
+    console.log(`[storageAdapter] SQLite write: ${collection}/${key}`);
+    const maxAttempts = 2;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const database = await getDb();
+        const dataJson = JSON.stringify(data);
+        const now = new Date().toISOString();
+
+        if (collection === 'dishes_cache') {
+          await database.runAsync(
+            'INSERT OR REPLACE INTO dishes_cache (dishId, dishData, cachedAt) VALUES (?, ?, ?)',
+            [key, dataJson, now],
+          );
+        } else if (collection === 'favorites_guest') {
+          await database.runAsync(
+            'INSERT OR REPLACE INTO favorites_guest (dishId, dishData, savedAt) VALUES (?, ?, ?)',
+            [key, dataJson, now],
+          );
+        } else if (collection === 'search_history_guest') {
+          await database.runAsync(
+            'INSERT INTO search_history_guest (ingredients, createdAt) VALUES (?, ?)',
+            [dataJson, now],
+          );
+        } else if (collection === 'shopping_lists_guest') {
+          const record = data as Record<string, unknown>;
+          await database.runAsync(
+            `INSERT OR REPLACE INTO shopping_lists_guest (id, dishId, dishName, ingredients, checkedState, savedAt) VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+              key,
+              (record.dishId as string) ?? null,
+              (record.dishName as string) ?? null,
+              record.ingredients ? JSON.stringify(record.ingredients) : '[]',
+              record.checkedState ? JSON.stringify(record.checkedState) : '{}',
+              now,
+            ],
+          );
+        }
+        return;
+      } catch (error) {
+        if (attempt < maxAttempts) {
+          console.warn(`[storageAdapter] SQLite write retry ${attempt}: collection=${collection} key=${key}`);
+          await new Promise((r) => setTimeout(r, 300));
+          db = null;
+          dbReady = null;
+        } else {
+          console.error(`[storageAdapter] SQLite write error: collection=${collection} key=${key}`, error);
+          if (collection === 'favorites_guest') {
+            console.warn('[storageAdapter] SQLite broken, falling back to in-memory for favorites_guest');
+            // Memory was already mirrored above; just mark SQLite as unavailable.
+            sqliteFailed = true;
+          }
+        }
       }
-    } catch (error) {
-      console.error('[storageAdapter] SQLite write error:', error);
     }
   },
 
   async remove(collection: string, key: string): Promise<void> {
-    if (isAuthenticated()) {
+    if (isAuthenticated() && !SQLITE_ONLY_COLLECTIONS.has(collection)) {
       console.log(`[storageAdapter] authed → API remove: ${collection}/${key}`);
       try {
         const client = getApiClient();
@@ -243,13 +305,24 @@ export const storageAdapter = {
       return;
     }
 
-    console.log(`[storageAdapter] guest → SQLite remove: ${collection}/${key}`);
+    console.log(`[storageAdapter] SQLite remove: ${collection}/${key}`);
+    if (sqliteFailed && collection === 'favorites_guest') {
+      memoryFavoritesGuest.delete(key);
+      return;
+    }
     try {
       const database = await getDb();
       const table = resolveTable(collection);
-      await database.runAsync(`DELETE FROM ${table} WHERE dishId = ?`, [key]);
+      const pkColumn = (table === 'favorites_guest' || table === 'dishes_cache') ? 'dishId' : 'id';
+      await database.runAsync(`DELETE FROM ${table} WHERE ${pkColumn} = ?`, [key]);
     } catch (error) {
       console.error('[storageAdapter] SQLite remove error:', error);
+      db = null;
+      dbReady = null;
+      sqliteFailed = true;
+      if (collection === 'favorites_guest') {
+        memoryFavoritesGuest.delete(key);
+      }
     }
   },
 
@@ -265,6 +338,7 @@ export const storageAdapter = {
 };
 
 export async function clearGuestData(): Promise<void> {
+  memoryFavoritesGuest.clear();
   try {
     const database = await getDb();
     await database.execAsync(`
@@ -289,28 +363,120 @@ function getGuestDeviceId(): string {
 export async function guestToAuthenticated(): Promise<void> {
   if (!isAuthenticated()) return;
 
-  const database = await getDb();
+  let favorites: Array<{ dishId: string; dishData: Record<string, unknown>; savedAt: string }>;
+  let history: Array<{
+    ingredients: string[];
+    tags?: string[];
+    cookTimeMax?: number;
+    resultCount?: number;
+    selectedDishId?: string;
+    createdAt?: string;
+  }>;
 
-  const favoritesRows = await database.getAllAsync<SqliteRow>(
-    'SELECT dishData, savedAt FROM favorites_guest ORDER BY savedAt DESC',
-  );
-  const favorites = favoritesRows.flatMap((r) => {
+  if (sqliteFailed) {
+    // SQLite is unavailable — drain in-memory favorites accumulated during the guest session.
+    console.warn('[storageAdapter] guestToAuthenticated: SQLite unavailable, reading from in-memory store');
+    favorites = ([...memoryFavoritesGuest.values()] as Array<{
+      dishId: string;
+      dishData: Record<string, unknown>;
+      savedAt: string;
+    }>).sort((a, b) => (b.savedAt ?? '').localeCompare(a.savedAt ?? ''));
+    history = [];
+  } else {
+    let database: SQLite.SQLiteDatabase;
     try {
-      return [{ dishData: JSON.parse(r.dishData as string) as Record<string, unknown>, savedAt: r.savedAt as string }];
-    } catch {
-      console.warn('[storageAdapter] Skipping invalid favorite dishData');
-      return [];
+      database = await getDb();
+    } catch (err) {
+      console.error('[storageAdapter] guestToAuthenticated: cannot open DB, reading from in-memory store', err);
+      favorites = ([...memoryFavoritesGuest.values()] as Array<{
+        dishId: string;
+        dishData: Record<string, unknown>;
+        savedAt: string;
+      }>).sort((a, b) => (b.savedAt ?? '').localeCompare(a.savedAt ?? ''));
+      history = [];
+      // Fall through to sync what we have.
+      const payload: Record<string, unknown> = {
+        deviceId: getGuestDeviceId(),
+        favorites,
+        history,
+        lastSyncAt: null,
+      };
+      const client = getApiClient();
+      const maxRetries = 3;
+      const delays = [1_000, 3_000, 9_000];
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          await client.post('/api/v1/sync', payload);
+          memoryFavoritesGuest.clear();
+          return;
+        } catch (syncErr) {
+          if (attempt < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+          } else {
+            console.error('[storageAdapter] guestToAuthenticated failed after retries:', syncErr);
+            throw syncErr;
+          }
+        }
+      }
+      return;
     }
-  });
 
-  const historyRows = await database.getAllAsync<SqliteRow>(
-    'SELECT * FROM search_history_guest ORDER BY createdAt DESC LIMIT 1000',
-  );
+    const favoritesRows = await database.getAllAsync<SqliteRow>(
+      'SELECT dishId, dishData, savedAt FROM favorites_guest ORDER BY savedAt DESC',
+    );
+    const sqliteFavorites = favoritesRows.flatMap((r) => {
+      try {
+        return [{
+          dishId: r.dishId as string,
+          dishData: JSON.parse(r.dishData as string) as Record<string, unknown>,
+          savedAt: r.savedAt as string,
+        }];
+      } catch {
+        console.warn('[storageAdapter] Skipping invalid favorite dishData');
+        return [];
+      }
+    });
+
+    // Merge: in-memory entries may contain items added after a transient SQLite failure
+    // that were never persisted. Deduplicate by dishId, preferring the newer savedAt.
+    const mergedMap = new Map<string, { dishId: string; dishData: Record<string, unknown>; savedAt: string }>();
+    for (const fav of sqliteFavorites) {
+      mergedMap.set(fav.dishId, fav);
+    }
+    for (const fav of memoryFavoritesGuest.values() as IterableIterator<{ dishId: string; dishData: Record<string, unknown>; savedAt: string }>) {
+      const existing = mergedMap.get(fav.dishId);
+      if (!existing || (fav.savedAt ?? '') > (existing.savedAt ?? '')) {
+        mergedMap.set(fav.dishId, fav);
+      }
+    }
+    favorites = [...mergedMap.values()].sort((a, b) => (b.savedAt ?? '').localeCompare(a.savedAt ?? ''));
+
+    const historyRows = await database.getAllAsync<SqliteRow>(
+      'SELECT * FROM search_history_guest ORDER BY createdAt DESC LIMIT 1000',
+    );
+    history = historyRows.map((r) => {
+      let ingredients: string[];
+      try {
+        const parsed = JSON.parse(r.ingredients as string);
+        ingredients = Array.isArray(parsed) ? parsed : [String(parsed)];
+      } catch {
+        ingredients = [(r.ingredients as string) ?? ''];
+      }
+      return {
+        ingredients,
+        tags: r.tags ? (r.tags as string).split(',').map((t) => t.trim()).filter(Boolean) : undefined,
+        cookTimeMax: r.cookTimeMax as number | undefined,
+        resultCount: r.resultCount as number | undefined,
+        selectedDishId: r.selectedDishId as string | undefined,
+        createdAt: r.createdAt as string | undefined,
+      };
+    });
+  }
 
   const payload: Record<string, unknown> = {
     deviceId: getGuestDeviceId(),
     favorites,
-    history: historyRows,
+    history,
     lastSyncAt: null,
   };
 

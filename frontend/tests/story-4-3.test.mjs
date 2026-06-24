@@ -84,8 +84,8 @@ test('storageAdapter getApiClient uses authStore for token injection', () => {
 // Task 5: storageAdapter complete CRUD routing
 test('storageAdapter read/write/remove route to API when authenticated', () => {
   const source = fs.readFileSync(resolveFromFrontend('stores/storageAdapter.ts'), 'utf8');
-  assert.match(source, /if \(isAuthenticated\(\)\)/);
-  const authBlocks = source.match(/if \(isAuthenticated\(\)\)/g);
+  assert.match(source, /isAuthenticated\(\) && !SQLITE_ONLY_COLLECTIONS\.has\(collection\)/);
+  const authBlocks = source.match(/isAuthenticated\(\) && !SQLITE_ONLY_COLLECTIONS\.has\(collection\)/g);
   assert.ok(authBlocks && authBlocks.length >= 3);
 });
 

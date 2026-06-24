@@ -61,8 +61,8 @@ export interface DataStore {
   fetchRecipeDetail: (dishId: string) => Promise<void>;
   fetchFavorites: (opts?: { offset?: number; limit?: number }) => Promise<void>;
   favoritesTotal: number;
-  saveFavorite: (dish: Dish) => Promise<void>;
-  removeFavorite: (dishId: string) => Promise<void>;
+  saveFavorite: (dish: Dish) => Promise<boolean>;
+  removeFavorite: (dishId: string) => Promise<boolean>;
   fetchDiscoverTrending: (cuisine?: string, price?: string) => Promise<void>;
   fetchDiscoverNearby: (lat: number, lng: number) => Promise<void>;
   fetchSurpriseMe: () => Promise<void>;
@@ -137,12 +137,16 @@ export const useDataStore = create<DataStore>((set, get) => ({
           total,
         });
       } else {
-        set((state) => ({
-          dishes: [...state.dishes, ...results],
-          resultsStatus: results.length === 0 ? 'empty' : 'success',
-          offset,
-          total,
-        }));
+        set((state) => {
+          const seen = new Set(state.dishes.map((d) => d.dishId));
+          const unique = results.filter((d: Dish) => !seen.has(d.dishId));
+          return {
+            dishes: [...state.dishes, ...unique],
+            resultsStatus: unique.length === 0 ? 'empty' as const : 'success' as const,
+            offset,
+            total,
+          };
+        });
       }
     } catch {
       set((state) => ({
@@ -238,11 +242,15 @@ export const useDataStore = create<DataStore>((set, get) => ({
         if (offset === 0) {
           set({ favorites: items, favoritesTotal: total, favoritesStatus: items.length === 0 ? 'empty' : 'success' });
         } else {
-          set((state) => ({
-            favorites: [...state.favorites, ...items],
-            favoritesTotal: total,
-            favoritesStatus: items.length === 0 ? 'empty' : 'success',
-          }));
+          set((state) => {
+            const seen = new Set(state.favorites.map((f) => f.dishId));
+            const unique = items.filter((f: Favorite) => !seen.has(f.dishId));
+            return {
+              favorites: [...state.favorites, ...unique],
+              favoritesTotal: total,
+              favoritesStatus: unique.length === 0 ? 'empty' : 'success',
+            };
+          });
         }
       } else {
         const stored = await storageAdapter.read('favorites_guest', 'all');
@@ -268,20 +276,97 @@ export const useDataStore = create<DataStore>((set, get) => ({
     }
   },
 
-  saveFavorite: async (dish) => {
-    console.log('[dataStore] stub: saveFavorite', { dishId: dish.id });
+  saveFavorite: async (dish): Promise<boolean> => {
+    const dishId = dish?.id ?? dish?.dishId;
+    console.log('[dataStore] saveFavorite', { dishId });
+    if (!dishId) {
+      console.error('[dataStore] saveFavorite: invalid dish (missing id/dishId)');
+      return false;
+    }
     const { favorites } = get();
-    if (favorites.some((f) => f.dishId === dish.id)) return;
-    await storageAdapter.write('favorites_guest', dish.id, dish);
-    set({ favorites: [...favorites, { dishId: dish.id, dishData: dish, savedAt: new Date().toISOString() }] });
+    if (favorites.some((f) => f.dishId === dishId)) return true;
+
+    const target = storageAdapter.getTarget();
+    if (target === 'api') {
+      const token = useAuthStore.getState().accessToken;
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/favorites`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ dishId, dishData: dish }),
+        });
+        if (response.status === 409) {
+          console.error('[dataStore] saveFavorite: dish already exists (409)');
+          return false;
+        }
+        if (!response.ok) {
+          console.error('[dataStore] saveFavorite API error:', response.status);
+          return false;
+        }
+        const body = await response.json() as { success: boolean; data: Favorite };
+        if (!body || typeof body.success !== 'boolean') return false;
+        if (!body.success) return false;
+        if (!body.data || !body.data.dishId) {
+          console.error('[dataStore] saveFavorite: response missing dishData');
+          return false;
+        }
+        set({ favorites: [...favorites, body.data] });
+        return true;
+      } catch (error) {
+        console.error('[dataStore] saveFavorite error:', error);
+        return false;
+      }
+    } else {
+      try {
+        await storageAdapter.write('favorites_guest', dishId, dish);
+      } catch {
+        console.error('[dataStore] saveFavorite SQLite write failed');
+        return false;
+      }
+      set({ favorites: [...favorites, { dishId, dishData: dish, savedAt: new Date().toISOString() }] });
+      return true;
+    }
   },
 
-  removeFavorite: async (dishId) => {
-    console.log('[dataStore] stub: removeFavorite', { dishId });
-    await storageAdapter.remove('favorites_guest', dishId);
+  removeFavorite: async (dishId): Promise<boolean> => {
+    console.log('[dataStore] removeFavorite', { dishId });
+    const target = storageAdapter.getTarget();
+    if (target === 'api') {
+      const { favorites } = get();
+      const fav = favorites.find((f) => f.dishId === dishId);
+      const favoriteId = fav?._id ?? dishId;
+      const token = useAuthStore.getState().accessToken;
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/favorites/${favoriteId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (!response.ok && response.status !== 404) {
+          console.error('[dataStore] removeFavorite API error:', response.status);
+          return false;
+        }
+      } catch (error) {
+        console.error('[dataStore] removeFavorite error:', error);
+        return false;
+      }
+    } else {
+      try {
+        await storageAdapter.remove('favorites_guest', dishId);
+      } catch {
+        console.error('[dataStore] removeFavorite SQLite remove failed');
+        return false;
+      }
+    }
     set((state) => ({
       favorites: state.favorites.filter((f) => f.dishId !== dishId),
     }));
+    return true;
   },
 
   fetchDiscoverTrending: async (cuisine?, price?) => {
@@ -359,21 +444,38 @@ export const useDataStore = create<DataStore>((set, get) => ({
     const target = storageAdapter.getTarget();
     if (target === 'api') {
       const token = useAuthStore.getState().accessToken;
-      const response = await fetch(`${API_BASE}/api/v1/favorites`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
+      const { favorites } = get();
+      await Promise.all(
+        favorites.map(async (fav) => {
+          const favoriteId = fav._id ?? fav.dishId;
+          try {
+            await fetch(`${API_BASE}/api/v1/favorites/${favoriteId}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+            });
+          } catch {
+            // best-effort per-item
+          }
+        }),
+      );
+    } else {
+      const stored = await storageAdapter.read('favorites_guest', 'all');
+      if (Array.isArray(stored)) {
+        await Promise.all(
+          (stored as Favorite[]).map(async (fav) => {
+            try {
+              await storageAdapter.remove('favorites_guest', fav.dishId);
+            } catch {
+              // best-effort per-item
+            }
+          }),
+        );
+      }
     }
-    try {
-      await storageAdapter.write('favorites_guest', 'all', []);
-    } catch {
-      // best-effort
-    }
-    set({ favorites: [], favoritesTotal: 0, favoritesStatus: 'idle' });
+    set({ favorites: [], favoritesTotal: 0, favoritesStatus: 'empty' });
   },
 
   clearData: async () => {

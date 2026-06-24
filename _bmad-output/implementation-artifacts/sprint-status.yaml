@@ -42,6 +42,6 @@ development_status:
   4-7-settings-api-module: done
   4-8-profile-settings-screens: done
   4-9-notification-infrastructure: done
-  4-10-authenticated-favorites-route-regression-fix: ready-for-dev
+  4-10-authenticated-favorites-route-regression-fix: done
 
-last_updated: 2026-06-24 (added 4-10 authenticated favorites regression fix; epic 4 reopened for follow-up)
+last_updated: 2026-06-24 (4-10 authenticated favorites regression fix completed, reviewed, all patches applied)
