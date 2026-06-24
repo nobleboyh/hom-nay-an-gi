@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from 'react-native';
 
 import { ChipRow } from '../../components/ChipRow';
@@ -82,7 +83,16 @@ const DEFAULT_LNG = 106.6297;
 const DEFAULT_RADIUS = 5000;
 const DEBOUNCE_MS = 500;
 
+function useColumns() {
+  const { width } = useWindowDimensions();
+  if (Platform.OS !== 'web') return 1;
+  if (width >= 1024) return 3;
+  if (width >= 640) return 2;
+  return 1;
+}
+
 export default function DiscoverScreen() {
+  const columns = useColumns();
   const [selectedTab, setSelectedTab] = useState<TabId>('tat-ca');
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
   const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
@@ -424,20 +434,21 @@ export default function DiscoverScreen() {
                       title={hasActiveFilters ? 'Không tìm thấy' : 'Trống'}
                     />
                   ) : (
-                    <View style={{ gap: Spacing.gap }}>
+                    <View style={[styles.cardGrid, { gap: Spacing.gap }]}>
                       {nearbyData.slice(0, 5).map((item, idx) => (
-                        <RestaurantCard
-                          key={`trending-${item.restaurantName}-${idx}`}
-                          accessibilityLabel={
-                            item.dishName ?? item.restaurantName
-                          }
-                          distanceMeters={item.distance ?? 0}
-                          name={item.dishName ?? item.restaurantName}
-                          restaurantName={item.restaurantName}
-                          price={item.priceRange}
-                          rating={'5.0'}
-                          onPress={() => handleNearbyCardPress(item)}
-                        />
+                        <View key={`trending-${item.restaurantName}-${idx}`} style={{ width: columns > 1 ? `${100 / columns}%` : '100%', paddingHorizontal: Platform.OS === 'web' ? Spacing.xs : 0 }}>
+                          <RestaurantCard
+                            accessibilityLabel={
+                              item.dishName ?? item.restaurantName
+                            }
+                            distanceMeters={item.distance ?? 0}
+                            name={item.dishName ?? item.restaurantName}
+                            restaurantName={item.restaurantName}
+                            price={item.priceRange}
+                            rating={'5.0'}
+                            onPress={() => handleNearbyCardPress(item)}
+                          />
+                        </View>
                       ))}
                     </View>
                   )}
@@ -485,24 +496,25 @@ export default function DiscoverScreen() {
                   title={hasActiveFilters ? 'Không tìm thấy' : 'Trống'}
                 />
               ) : (
-                <View style={{ gap: Spacing.gap }}>
+                <View style={[styles.cardGrid, { gap: Spacing.gap }]}>
                   {nearbyData.map((item, idx) => (
-                    <RestaurantCard
-                      key={`${item.restaurantName}-${idx}`}
-                      accessibilityLabel={
-                        item.dishName ?? item.restaurantName
-                      }
-                      distanceMeters={item.distance ?? 0}
-                      name={item.dishName ?? item.restaurantName}
-                      restaurantName={item.restaurantName}
-                      price={item.priceRange}
-                      rating={
-                        item.rating != null
-                          ? String(item.rating)
-                          : undefined
-                      }
-                      onPress={() => handleNearbyCardPress(item)}
-                    />
+                    <View key={`${item.restaurantName}-${idx}`} style={{ width: columns > 1 ? `${100 / columns}%` : '100%', paddingHorizontal: Platform.OS === 'web' ? Spacing.xs : 0 }}>
+                      <RestaurantCard
+                        accessibilityLabel={
+                          item.dishName ?? item.restaurantName
+                        }
+                        distanceMeters={item.distance ?? 0}
+                        name={item.dishName ?? item.restaurantName}
+                        restaurantName={item.restaurantName}
+                        price={item.priceRange}
+                        rating={
+                          item.rating != null
+                            ? String(item.rating)
+                            : undefined
+                        }
+                        onPress={() => handleNearbyCardPress(item)}
+                      />
+                    </View>
                   ))}
                 </View>
               )}
@@ -529,7 +541,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    maxWidth: Spacing.screenMaxWidth,
+    maxWidth: Platform.OS === 'web' ? 1200 : Spacing.screenMaxWidth,
     width: '100%',
     alignSelf: 'center',
   },
@@ -618,5 +630,10 @@ const styles = StyleSheet.create({
     fontWeight: Typography.meta.fontWeight,
     lineHeight: Typography.meta.lineHeight,
     color: oklchToRgba(Colors.muted),
+  },
+  cardGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: Platform.OS === 'web' ? -Spacing.xs : 0,
   },
 });

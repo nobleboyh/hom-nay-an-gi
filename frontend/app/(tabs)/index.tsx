@@ -136,28 +136,29 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
-      <Pressable
-        accessibilityLabel="Bỏ qua điều hướng, chuyển đến nội dung chính"
-        accessibilityRole="link"
-        onPress={() => {
-          if (Platform.OS === 'web') {
-            const el = document.getElementById('main-content');
-            if (el) el.focus();
-          }
-        }}
-        style={styles.skipLink}
-      >
-        <Text style={styles.skipLinkText}>Bỏ qua điều hướng → Nội dung chính</Text>
-      </Pressable>
+      <View style={styles.container}>
+        <Pressable
+          accessibilityLabel="Bỏ qua điều hướng, chuyển đến nội dung chính"
+          accessibilityRole="link"
+          onPress={() => {
+            if (Platform.OS === 'web') {
+              const el = document.getElementById('main-content');
+              if (el) el.focus();
+            }
+          }}
+          style={styles.skipLink}
+        >
+          <Text style={styles.skipLinkText}>Bỏ qua điều hướng → Nội dung chính</Text>
+        </Pressable>
 
-      <ScrollView
-        {...webMainContentProps}
-        contentContainerStyle={styles.scrollContent}
-        nativeID="main-content"
-        showsVerticalScrollIndicator={false}
-      >
-        <Text accessibilityRole="header" style={styles.appTitle}>Hôm Nay Ăn Gì</Text>
-        <Text style={styles.tagline}>Nhập nguyên liệu bạn có — để tôi gợi ý món ngon</Text>
+        <ScrollView
+          {...webMainContentProps}
+          contentContainerStyle={styles.scrollContent}
+          nativeID="main-content"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text accessibilityRole="header" style={styles.appTitle}>Hôm Nay Ăn Gì</Text>
+          <Text style={styles.tagline}>Nhập nguyên liệu bạn có — để tôi gợi ý món ngon</Text>
 
         <View style={styles.inputSection}>
           <InputField
@@ -258,7 +259,8 @@ export default function HomeScreen() {
             title="Đã xảy ra lỗi"
           />
         ) : null}
-      </ScrollView>
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -267,6 +269,12 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: oklchToRgba(Colors.bg),
+  },
+  container: {
+    flex: 1,
+    maxWidth: Platform.OS === 'web' ? 1200 : Spacing.screenMaxWidth,
+    width: '100%',
+    alignSelf: 'center',
   },
   skipLink: {
     alignSelf: 'flex-start',

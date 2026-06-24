@@ -471,11 +471,12 @@ export default function ProfileScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
-      <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(Spacing.xl2, insets.bottom + Spacing.md) }]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={styles.container}>
+        <ScrollView
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(Spacing.xl2, insets.bottom + Spacing.md) }]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
         <View style={styles.greetingCard}>
           <PlaceholderAvatar name={user?.displayName || 'U'} />
           <View style={styles.greetingTextWrap}>
@@ -659,7 +660,8 @@ export default function ProfileScreen() {
             <Text style={styles.logoutText}>{t('settings.logout')}</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       {timePickerTarget && (
         <Modal transparent animationType="fade" visible={!!timePickerTarget} onRequestClose={() => setTimePickerTarget(null)}>
@@ -720,6 +722,12 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: C_BG,
+  },
+  container: {
+    flex: 1,
+    maxWidth: Platform.OS === 'web' ? 1200 : Spacing.screenMaxWidth,
+    width: '100%',
+    alignSelf: 'center',
   },
   scrollContent: {
     padding: Spacing.md2,

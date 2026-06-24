@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -197,61 +198,63 @@ export default function FavoritesScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <Text accessibilityRole="header" style={styles.screenTitle}>
-          {t('favorites.title')}
-        </Text>
-      </View>
-
-      {!isOnline && favorites.length > 0 ? (
-        <View style={styles.offlineBanner}>
-          <Text style={styles.offlineBannerText}>{t('state.offline')}</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text accessibilityRole="header" style={styles.screenTitle}>
+            {t('favorites.title')}
+          </Text>
         </View>
-      ) : null}
 
-      <View style={styles.searchContainer}>
-        <InputField
-          accessibilityLabel={t('favorites.searchPlaceholder')}
-          iconLeft={<Text style={styles.searchIcon}>🔍</Text>}
-          iconRight={searchQuery.length > 0 ? (
-            <Pressable
-              accessibilityLabel="Xoá tìm kiếm"
-              accessibilityRole="button"
-              onPress={handleClearSearch}
-              style={styles.clearButton}
-            >
-              <Text style={styles.clearButtonText}>✕</Text>
-            </Pressable>
-          ) : undefined}
-          onChangeText={setSearchQuery}
-          placeholder={t('favorites.searchPlaceholder')}
-          value={searchQuery}
-        />
-      </View>
-
-      <View style={styles.content}>
-        {favoritesStatus === 'loading' && favorites.length === 0 ? (
-          renderSkeletons()
-        ) : favoritesStatus === 'error' ? (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{t('state.error.favorites')}</Text>
-            <Button onPress={handleRetry} variant="primary">
-              {t('state.error.retry')}
-            </Button>
+        {!isOnline && favorites.length > 0 ? (
+          <View style={styles.offlineBanner}>
+            <Text style={styles.offlineBannerText}>{t('state.offline')}</Text>
           </View>
-        ) : (
-          <FlatList
-            contentContainerStyle={[styles.listContent, { paddingBottom: Math.max(Spacing.xl2, insets.bottom + Spacing.md) }]}
-            data={filteredFavorites}
-            keyExtractor={(item) => item.dishId}
-            ListEmptyComponent={renderEmpty}
-            ListFooterComponent={renderFooter}
-            onEndReached={handleEndReached}
-            onEndReachedThreshold={0.5}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
+        ) : null}
+
+        <View style={styles.searchContainer}>
+          <InputField
+            accessibilityLabel={t('favorites.searchPlaceholder')}
+            iconLeft={<Text style={styles.searchIcon}>🔍</Text>}
+            iconRight={searchQuery.length > 0 ? (
+              <Pressable
+                accessibilityLabel="Xoá tìm kiếm"
+                accessibilityRole="button"
+                onPress={handleClearSearch}
+                style={styles.clearButton}
+              >
+                <Text style={styles.clearButtonText}>✕</Text>
+              </Pressable>
+            ) : undefined}
+            onChangeText={setSearchQuery}
+            placeholder={t('favorites.searchPlaceholder')}
+            value={searchQuery}
           />
-        )}
+        </View>
+
+        <View style={styles.content}>
+          {favoritesStatus === 'loading' && favorites.length === 0 ? (
+            renderSkeletons()
+          ) : favoritesStatus === 'error' ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{t('state.error.favorites')}</Text>
+              <Button onPress={handleRetry} variant="primary">
+                {t('state.error.retry')}
+              </Button>
+            </View>
+          ) : (
+            <FlatList
+              contentContainerStyle={[styles.listContent, { paddingBottom: Math.max(Spacing.xl2, insets.bottom + Spacing.md) }]}
+              data={filteredFavorites}
+              keyExtractor={(item) => item.dishId}
+              ListEmptyComponent={renderEmpty}
+              ListFooterComponent={renderFooter}
+              onEndReached={handleEndReached}
+              onEndReachedThreshold={0.5}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+            />
+          )}
+        </View>
       </View>
 
       {toasts.map((toast) => (
@@ -403,6 +406,12 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: oklchToRgba(Colors.bg),
+  },
+  container: {
+    flex: 1,
+    maxWidth: Platform.OS === 'web' ? 1200 : Spacing.screenMaxWidth,
+    width: '100%',
+    alignSelf: 'center',
   },
   header: {
     paddingHorizontal: Spacing.md2,
