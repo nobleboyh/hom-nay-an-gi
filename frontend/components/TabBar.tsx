@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import {
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
   },
   bar: {
     width: '100%',
-    maxWidth: 430,
+    maxWidth: Platform.OS === 'web' ? 600 : 430,
     flexDirection: 'row',
     borderTopWidth: 1,
     borderTopColor: oklchToRgba(Colors.border),

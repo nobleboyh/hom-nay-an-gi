@@ -54,22 +54,32 @@ export function ChipRow({
     }
   }
 
+  const chips = items.map((item) => (
+    <Chip
+      iconRight={iconRight}
+      key={item.id}
+      label={item.label}
+      onPress={() => handleToggle(item.id)}
+      selected={selectedIds.includes(item.id)}
+      variant={variant}
+    />
+  ));
+
+  if (Platform.OS === 'web') {
+    return (
+      <View {...props} style={[styles.wrapper, styles.wrapContainer, style]}>
+        {chips}
+      </View>
+    );
+  }
+
   return (
     <View {...props} style={[styles.wrapper, style]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         horizontal
         showsHorizontalScrollIndicator={false}>
-        {items.map((item) => (
-          <Chip
-            iconRight={iconRight}
-            key={item.id}
-            label={item.label}
-            onPress={() => handleToggle(item.id)}
-            selected={selectedIds.includes(item.id)}
-            variant={variant}
-          />
-        ))}
+        {chips}
       </ScrollView>
     </View>
   );
@@ -84,5 +94,12 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     alignItems: 'center',
     ...(Platform.OS === 'web' ? { userSelect: 'none' } : {}),
+  },
+  wrapContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    alignItems: 'center',
+    userSelect: 'none',
   },
 });
