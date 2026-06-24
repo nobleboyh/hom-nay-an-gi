@@ -136,6 +136,27 @@ describe("GET /api/v1/recipes/search", () => {
     expect(res.body.data.limit).toBe(10);
   });
 
+  it("allows guest search without authentication", async () => {
+    vi.mocked(searchByIngredients).mockResolvedValueOnce(mockSearchResult);
+
+    const app = createApp();
+    const res = await request(app).get("/api/v1/recipes/search").query({
+      tags: "salty,Việt Nam,Miền Bắc",
+      cookTime: 30,
+      offset: 0,
+      limit: 20,
+    });
+
+    expect(res.status).toBe(200);
+    expect(searchByIngredients).toHaveBeenCalledWith(
+      "",
+      "salty,Việt Nam,Miền Bắc",
+      30,
+      0,
+      20,
+    );
+  });
+
   it("uses defaults when no params provided", async () => {
     vi.mocked(searchByIngredients).mockResolvedValueOnce(mockSearchResult);
 

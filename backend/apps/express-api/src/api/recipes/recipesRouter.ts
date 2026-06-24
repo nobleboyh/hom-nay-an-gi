@@ -1,5 +1,4 @@
 import {
-  authenticate,
   DishIdParamsSchema,
   llmLimiter,
   SearchParamsSchema,
@@ -14,8 +13,6 @@ import {
 import { validateParams, validateQuery } from "./validateQuery.js";
 
 export const recipesRouter: RouterType = Router();
-
-recipesRouter.use(authenticate);
 
 recipesRouter.get(
   "/search",

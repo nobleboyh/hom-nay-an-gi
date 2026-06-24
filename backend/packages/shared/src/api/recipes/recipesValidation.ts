@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const IngredientSchema = z.object({
   name: z.string().min(1).max(100),
-  quantity: z.coerce.number().int().min(1).max(9999),
+  quantity: z.coerce.number().positive().max(9999),
   unit: z.string().min(1).max(30),
 });
 
@@ -11,7 +11,7 @@ export type Ingredient = z.infer<typeof IngredientSchema>;
 export const CookingStepSchema = z.object({
   label: z.string().min(1).max(200),
   durationMinutes: z.coerce.number().int().min(1).max(600),
-  parallelGroup: z.string().optional(),
+  parallelGroup: z.coerce.string().optional(),
 });
 
 export type CookingStep = z.infer<typeof CookingStepSchema>;
