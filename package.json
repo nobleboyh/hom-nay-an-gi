@@ -4,6 +4,11 @@
   "scripts": {
     "test": "npm test --prefix frontend & cd backend & pnpm test",
     "test:frontend": "npm test --prefix frontend",
-    "test:backend": "cd backend && pnpm test"
+    "test:backend": "cd backend && pnpm test",
+    "test:e2e": "playwright test --config tests/e2e/playwright.config.ts",
+    "test:e2e:ui": "playwright test --config tests/e2e/playwright.config.ts --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.0"
   }
 }
