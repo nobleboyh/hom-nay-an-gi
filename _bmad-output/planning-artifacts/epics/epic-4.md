@@ -243,3 +243,27 @@ So that the app prompts me at configured times without requiring a server push i
 - [ ] Wire notification functions into Story 4.8's notification toggle section
 - [ ] Add `expo-notifications` plugin to `app.json`
 - [ ] Write tests: schedule notification, cancel notification, permission denied fallback
+
+---
+
+## Story 4.10: Authenticated Favorites Route Regression Fix
+
+As a **logged-in user**,
+I want tapping save on a dish to persist to my account after login,
+So that favorites work correctly across devices instead of failing against guest-only routes.
+
+**Acceptance Criteria:**
+
+- **Given** I am authenticated and tap save on a dish from Results or Recipe detail, **When** the favorite mutation is sent, **Then** the client calls `POST /api/v1/favorites` and never `POST /api/v1/favorites_guest`.
+- **Given** I am authenticated and remove a saved dish, **When** the unsave mutation is sent, **Then** the client calls `DELETE /api/v1/favorites/:favoriteId` and never a guest-only route.
+- **Given** the app has just transitioned from guest to authenticated, **When** I save a new favorite after login succeeds, **Then** route selection is based on current auth state and the authenticated collection mapping.
+- **Given** a guest session, **When** I save or remove favorites, **Then** the app continues to use SQLite-backed guest storage without regression.
+- **Given** the authenticated favorites API responds with success, **When** the mutation completes, **Then** the UI updates saved state and the Favorites screen reflects the change without requiring app restart.
+- **Given** the authenticated favorites API responds with 401/404/409 or network failure, **When** the mutation completes, **Then** the app surfaces an error path, does not silently mark the item saved, and logs enough detail to debug route-selection failures.
+
+**Technical Tasks:**
+- [ ] Update `frontend/stores/dataStore.ts` so authenticated favorite save/remove flows use authenticated collection semantics instead of hard-coded `favorites_guest`
+- [ ] Update `frontend/stores/storageAdapter.ts` to map logical favorites operations onto SQLite guest tables for guests and `/api/v1/favorites` for authenticated users
+- [ ] Ensure `saveFavorite`, `removeFavorite`, and any optimistic UI state logic preserve correct `favoriteId` / `dishId` handling across guest and authenticated modes
+- [ ] Add regression coverage proving authenticated mutations never call `/api/v1/favorites_guest` after login and guest mode still uses SQLite/local paths
+- [ ] Verify post-login behavior from both Results and Recipe detail entry points
