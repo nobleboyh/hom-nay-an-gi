@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Browser as BrowserSentry } from 'sentry-expo';
+
+import { captureMonitoringException, prepareMonitoringException } from '../lib/monitoring';
 
 type ErrorBoundaryProps = {
   children: ReactNode;
@@ -16,11 +17,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   };
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    prepareMonitoringException(error);
     return { error };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    BrowserSentry.captureException(error, { extra: { componentStack: errorInfo.componentStack } });
+    captureMonitoringException(error, { extra: { componentStack: errorInfo.componentStack } });
     console.error('Route shell render failure', error, errorInfo);
   }
 

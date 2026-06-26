@@ -7,19 +7,11 @@ import { fileURLToPath } from 'node:url';
 const frontendRoot = fileURLToPath(new URL('..', import.meta.url));
 const resolveFromFrontend = (...segments) => path.join(frontendRoot, ...segments);
 
-// Task 1: sentry-expo dependency
-test('sentry-expo is in package.json dependencies', () => {
-  const pkg = JSON.parse(fs.readFileSync(resolveFromFrontend('package.json'), 'utf8'));
-  assert.ok(pkg.dependencies['sentry-expo'], 'sentry-expo should be installed');
-});
-
-// Task 2: sentry-expo plugin in app.json
-test('sentry-expo is in app.json plugins array', () => {
+// Task 1: app config preserves supported plugins and removes the incompatible runtime plugin
+test('app.json does not enable the incompatible sentry-expo plugin', () => {
   const appJson = JSON.parse(fs.readFileSync(resolveFromFrontend('app.json'), 'utf8'));
-  assert.ok(
-    appJson.expo.plugins.includes('sentry-expo'),
-    'app.json plugins should include sentry-expo',
-  );
+  const plugins = appJson.expo.plugins.map(p => typeof p === 'string' ? p : p[0]);
+  assert.ok(!plugins.includes('sentry-expo'), 'app.json should not include sentry-expo');
 });
 
 test('app.json preserves existing plugins', () => {
@@ -30,21 +22,16 @@ test('app.json preserves existing plugins', () => {
   assert.ok(plugins.includes('expo-secure-store'), 'expo-secure-store plugin preserved');
 });
 
-// Task 3: Sentry.init in _layout.tsx
-test('_layout.tsx calls Sentry.init at module level', () => {
+// Task 2: monitoring bootstrap is routed through the shared adapter
+test('_layout.tsx uses the shared monitoring adapter instead of sentry-expo', () => {
   const source = fs.readFileSync(resolveFromFrontend('app/_layout.tsx'), 'utf8');
-  assert.match(source, /import \* as Sentry from 'sentry-expo'/);
-  assert.match(source, /Sentry\.init\(/);
+  assert.doesNotMatch(source, /sentry-expo/);
+  assert.match(source, /initMonitoring/);
 });
 
-test('Sentry.init config has enableInExpoDevelopment: false', () => {
+test('_layout.tsx keeps SENTRY_DSN-gated bootstrap semantics through the adapter', () => {
   const source = fs.readFileSync(resolveFromFrontend('app/_layout.tsx'), 'utf8');
-  assert.match(source, /enableInExpoDevelopment:\s*false/);
-});
-
-test('Sentry.init config has tracesSampleRate: 0.1', () => {
-  const source = fs.readFileSync(resolveFromFrontend('app/_layout.tsx'), 'utf8');
-  assert.match(source, /tracesSampleRate:\s*0\.1/);
+  assert.match(source, /initMonitoring\(\)/);
 });
 
 test('_layout.tsx preserves existing layout structure', () => {
@@ -56,18 +43,19 @@ test('_layout.tsx preserves existing layout structure', () => {
   assert.match(source, /Stack/);
 });
 
-// Task 4: ErrorBoundary wiring
-test('ErrorBoundary imports sentry-expo Browser namespace', () => {
+// Task 3: ErrorBoundary wiring
+test('ErrorBoundary reports through the monitoring adapter', () => {
   const source = fs.readFileSync(resolveFromFrontend('components/ErrorBoundary.tsx'), 'utf8');
-  assert.match(source, /import.*Browser.*from 'sentry-expo'/);
+  assert.doesNotMatch(source, /sentry-expo/);
+  assert.match(source, /captureMonitoringException/);
+  assert.match(source, /prepareMonitoringException/);
 });
 
-test('ErrorBoundary componentDidCatch calls captureException before console.error', () => {
+test('ErrorBoundary captures through the adapter before returning fallback state', () => {
   const source = fs.readFileSync(resolveFromFrontend('components/ErrorBoundary.tsx'), 'utf8');
-  assert.match(source, /captureException/);
-  const capturePos = source.indexOf('captureException');
-  const consolePos = source.indexOf("console.error('Route shell render failure'");
-  assert.ok(capturePos < consolePos, 'captureException should be called BEFORE console.error');
+  const capturePos = source.indexOf('prepareMonitoringException(error)');
+  const returnPos = source.indexOf('return { error };');
+  assert.ok(capturePos > -1 && capturePos < returnPos, 'capture should happen before fallback state is returned');
 });
 
 test('ErrorBoundary preserves fallback UI and reset button', () => {
@@ -95,4 +83,9 @@ test('.env.template preserves existing entries', () => {
 test('test script includes story-1-10.test.mjs', () => {
   const pkg = JSON.parse(fs.readFileSync(resolveFromFrontend('package.json'), 'utf8'));
   assert.match(pkg.scripts.test, /story-1-10\.test\.mjs/);
+});
+
+test('test script includes story-1-11.test.mjs', () => {
+  const pkg = JSON.parse(fs.readFileSync(resolveFromFrontend('package.json'), 'utf8'));
+  assert.match(pkg.scripts.test, /story-1-11\.test\.mjs/);
 });

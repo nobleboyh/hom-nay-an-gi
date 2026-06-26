@@ -4,7 +4,7 @@ baseline_commit: 03880dd40f2c822ebbaa5e3103a5df5f9654ddb4
 
 # Story 1.11: Error Monitoring Compatibility Fix
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -22,26 +22,36 @@ So that `npm run web` and the shared app shell can boot reliably while productio
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Isolate monitoring behind a compatibility-safe adapter (AC: 1-4)
-  - [ ] Create a small monitoring module, such as `frontend/lib/monitoring.ts`, that owns init and capture behavior
-  - [ ] Remove direct `sentry-expo` imports from `frontend/app/_layout.tsx`
-  - [ ] Remove direct `sentry-expo` imports from `frontend/components/ErrorBoundary.tsx`
-  - [ ] Ensure the adapter exposes safe no-op behavior when monitoring is unavailable or intentionally disabled
+- [x] Task 1: Isolate monitoring behind a compatibility-safe adapter (AC: 1-4)
+  - [x] Create a small monitoring module, such as `frontend/lib/monitoring.ts`, that owns init and capture behavior
+  - [x] Remove direct `sentry-expo` imports from `frontend/app/_layout.tsx`
+  - [x] Remove direct `sentry-expo` imports from `frontend/components/ErrorBoundary.tsx`
+  - [x] Ensure the adapter exposes safe no-op behavior when monitoring is unavailable or intentionally disabled
 
-- [ ] Task 2: Replace the incompatible runtime path with a supported integration choice (AC: 1-3, 5)
-  - [ ] Audit the current dependency/config path (`frontend/package.json`, `frontend/app.json`, lockfile) and select the supported monitoring SDK/plugin combination for the current Expo stack
-  - [ ] If the current package is unsupported, migrate to the supported package or temporarily stub production monitoring behind the adapter until the supported package is installed
-  - [ ] Preserve `SENTRY_DSN` or equivalent env-based configuration semantics where possible
+- [x] Task 2: Replace the incompatible runtime path with a supported integration choice (AC: 1-3, 5)
+  - [x] Audit the current dependency/config path (`frontend/package.json`, `frontend/app.json`, lockfile) and select the supported monitoring SDK/plugin combination for the current Expo stack
+  - [x] If the current package is unsupported, migrate to the supported package or temporarily stub production monitoring behind the adapter until the supported package is installed
+  - [x] Preserve `SENTRY_DSN` or equivalent env-based configuration semantics where possible
 
-- [ ] Task 3: Keep root layout behavior intact (AC: 1, 3)
-  - [ ] Preserve `SafeAreaProvider`, `NetworkStatusProvider`, `ErrorBoundary`, `StatusBar`, `Stack`, and notification listener setup in `frontend/app/_layout.tsx`
-  - [ ] Ensure monitoring bootstrap cannot block route rendering even when env vars are missing or the monitoring SDK is unavailable
+- [x] Task 3: Keep root layout behavior intact (AC: 1, 3)
+  - [x] Preserve `SafeAreaProvider`, `NetworkStatusProvider`, `ErrorBoundary`, `StatusBar`, `Stack`, and notification listener setup in `frontend/app/_layout.tsx`
+  - [x] Ensure monitoring bootstrap cannot block route rendering even when env vars are missing or the monitoring SDK is unavailable
 
-- [ ] Task 4: Add regression coverage and update story tests (AC: 1-5)
-  - [ ] Replace Story 1.10 structural assertions that require `import * as Sentry from 'sentry-expo'`
-  - [ ] Add tests proving `_layout.tsx` does not depend on the incompatible module path directly
-  - [ ] Add tests proving `ErrorBoundary` reports through the shared monitoring adapter
-  - [ ] Add tests or documentation checks for the chosen compatibility approach
+- [x] Task 4: Add regression coverage and update story tests (AC: 1-5)
+  - [x] Replace Story 1.10 structural assertions that require `import * as Sentry from 'sentry-expo'`
+  - [x] Add tests proving `_layout.tsx` does not depend on the incompatible module path directly
+  - [x] Add tests proving `ErrorBoundary` reports through the shared monitoring adapter
+  - [x] Add tests or documentation checks for the chosen compatibility approach
+
+### Review Findings
+
+- [x] [Review][Patch] Monitoring stays disabled even with a real `SENTRY_DSN`, so production error capture is silently dropped [frontend/lib/monitoring.ts:14]
+- [x] [Review][Patch] `ErrorBoundary` reports after the fallback UI state is set, which does not satisfy the story's required reporting order [frontend/components/ErrorBoundary.tsx:19]
+- [x] [Review][Patch] Regression tests only assert import structure and no-op text, not runtime startup safety or the configured-DSN execution path [frontend/tests/story-1-10.test.mjs:25]
+- [x] [Review][Patch] `initMonitoring()` can still break startup in unsupported native/dev environments because `client.init(...)` is unguarded and the returned state still reads enabled when the SDK cannot initialize [frontend/lib/monitoring.ts:91]
+- [x] [Review][Patch] `captureMonitoringException()` can throw inside `getDerivedStateFromError()`, which risks breaking the error boundary before the fallback UI renders [frontend/lib/monitoring.ts:127]
+- [x] [Review][Patch] Moving capture into `getDerivedStateFromError()` dropped `componentStack` context and can emit duplicate reports on retries/remounts [frontend/components/ErrorBoundary.tsx:19]
+- [x] [Review][Patch] Runtime tests still miss the required fail-closed cases where monitoring init or capture throws in unsupported environments [frontend/tests/story-1-11.test.mjs:61]
 
 ## Dev Notes
 
@@ -100,3 +110,38 @@ Minor
 ## Handoff
 
 Route to Developer agent for direct implementation.
+
+## Dev Agent Record
+
+### Implementation Plan
+
+- Replace direct `sentry-expo` imports with a shared adapter that can fail closed without blocking Expo Router startup.
+- Keep the root layout structure and notification listener wiring unchanged while moving boot-time monitoring initialization behind `initMonitoring()`.
+- Update structural regression tests to validate the adapter path, configuration decision, and error-boundary reporting flow.
+
+### Debug Log
+
+- Added failing Story 1.10 and Story 1.11 regression checks before implementation to lock the desired compatibility behavior.
+- Verified the safe adapter path with `npm test` and `npx expo export --platform web` after removing the direct runtime import and plugin usage.
+
+### Completion Notes
+
+- Implemented `frontend/lib/monitoring.ts` as the single monitoring adapter with documented Expo SDK 54 compatibility fallback and preserved `SENTRY_DSN` semantics.
+- Updated `frontend/app/_layout.tsx` to initialize monitoring through the adapter and preserved providers, `StatusBar`, `Stack`, and notification response handling.
+- Updated `frontend/components/ErrorBoundary.tsx` to report through the shared adapter before rendering the fallback UI.
+- Removed the `sentry-expo` plugin from `frontend/app.json` and rewrote Story 1.10 tests plus new Story 1.11 regression checks around the compatibility-safe path.
+- Validation passed with `npm test`, `npm run lint` (warnings only in `frontend/app/(tabs)/favorites.tsx`), and `npx expo export --platform web`.
+
+## File List
+
+- `frontend/lib/monitoring.ts`
+- `frontend/app/_layout.tsx`
+- `frontend/components/ErrorBoundary.tsx`
+- `frontend/app.json`
+- `frontend/package.json`
+- `frontend/tests/story-1-10.test.mjs`
+- `frontend/tests/story-1-11.test.mjs`
+
+## Change Log
+
+- 2026-06-26: Replaced direct `sentry-expo` shell imports with a compatibility-safe monitoring adapter, removed the incompatible Expo plugin path, and added regression coverage for safe web startup.

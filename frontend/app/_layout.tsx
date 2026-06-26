@@ -1,7 +1,6 @@
 import 'react-native-reanimated';
 import { useEffect } from 'react';
 
-import * as Sentry from 'sentry-expo';
 import { StatusBar } from 'expo-status-bar';
 import { Stack, useRouter } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -11,17 +10,10 @@ import {
 } from 'expo-notifications';
 
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { initMonitoring } from '../lib/monitoring';
 import { NetworkStatusProvider } from '../lib/networkStatus';
 
-const sentryDsn = process.env.SENTRY_DSN;
-if (sentryDsn && !sentryDsn.startsWith('replace-with-')) {
-  Sentry.init({
-    dsn: sentryDsn,
-    enableInExpoDevelopment: false,
-    debug: false,
-    tracesSampleRate: 0.1,
-  });
-}
+initMonitoring();
 
 export default function RootLayout() {
   const router = useRouter();
@@ -47,7 +39,7 @@ export default function RootLayout() {
     return () => {
       responseListener.remove();
     };
-  }, []);
+  }, [router]);
 
   return (
     <SafeAreaProvider>
