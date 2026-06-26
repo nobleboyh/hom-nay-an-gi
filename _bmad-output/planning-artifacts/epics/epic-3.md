@@ -87,3 +87,31 @@ So that I can discover new food near me without entering ingredients.
 - [ ] Add skeleton GPS loading spinner while location resolves
 - [ ] Add accessibility: location card as `region` landmark, grid as list with `accessibilityLabel` per card
 - [ ] Reference UX-DR31 (banned interactions) — no carousels, no hero animations, no parallax on this screen
+
+---
+
+## Story 3.4: Discover Nearby Location Relevance Regression Fix
+
+As a **user**,
+I want the Discover "Gần tôi" results to stay consistent with the location I selected,
+So that switching to places like Cầu Giấy, Hà Nội does not still show restaurants from Hồ Chí Minh.
+
+**Acceptance Criteria:**
+
+- **Given** I change Discover location to a different district, city, or saved/manual location (for example Cầu Giấy, Hà Nội), **When** `GET /api/v1/discovery/nearby` returns results, **Then** every result must be geographically consistent with the selected coordinates and configured radius instead of falling back to unrelated Hồ Chí Minh seed data.
+- **Given** HERE Maps and Overpass both fail or return no nearby matches for the selected location, **When** the nearby request completes, **Then** the API returns an empty result set (or a location-appropriate degraded state) rather than injecting hardcoded restaurants from another city.
+- **Given** I switch between current GPS, manual district selection, and other location options in the picker, **When** the next nearby fetch runs, **Then** the request uses the newly selected coordinates and replaces the previous nearby list instead of preserving stale results from the last city.
+- **Given** nearby results are returned from external providers, **When** the backend assembles the response, **Then** each item must include trustworthy distance/location fields and be filtered against the requested radius before being returned.
+- **Given** Discover has zero nearby matches for the selected location or filters, **When** the nearby section renders, **Then** it shows the defined empty/error state for that location instead of unrelated restaurant cards.
+- **Given** regression tests run for Discover nearby behavior, **When** they exercise provider failure, empty-provider responses, and location changes, **Then** they verify that cross-city leakage and stale-location results do not reappear.
+
+**Technical Tasks:**
+- [ ] Remove or strictly gate the hardcoded nearby seed fallback so it cannot return restaurants from unrelated coordinates
+- [ ] Tighten `getNearby()` to preserve requested location semantics on provider failure/empty responses
+- [ ] Add location-consistency validation for nearby results using requested coordinates, returned item coordinates, and radius checks
+- [ ] Verify DiscoverScreen replaces nearby data when the user changes location and does not silently retain the previous city's list
+- [ ] Add regression coverage for:
+  - [ ] switching from Hồ Chí Minh to Hà Nội/Cầu Giấy
+  - [ ] provider failure returning empty-state instead of HCMC seed data
+  - [ ] manual location picker changes replacing prior nearby results
+  - [ ] zero-result filtered states rendering correctly

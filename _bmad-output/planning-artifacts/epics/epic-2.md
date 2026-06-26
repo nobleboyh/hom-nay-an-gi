@@ -181,3 +181,34 @@ So that I can go shopping efficiently without forgetting anything.
 - [ ] Wire post-completion state — when all items checked, show completion banner
 - [ ] Implement 5 UX states: loading, error, offline, empty, success (all checked state)
 - [ ] Add accessibility: checkboxes with proper `<label>` association, list structure
+
+---
+
+## Story 2.7: Search Relevance Guardrails
+
+As a **user**,
+I want recipe search results to only show dishes that are actually related to the ingredients I entered,
+So that tapping "Tìm món" does not return irrelevant dishes that break trust in the search experience.
+
+**Acceptance Criteria:**
+
+- **Given** I search with one or more ingredients, **When** the backend returns result cards, **Then** every returned dish must share at least one normalized ingredient token with the user input or be explicitly classified as a partial match fallback with a low `matchPercentage`.
+- **Given** the LLM returns dishes whose ingredient lists do not overlap the user's normalized ingredients, **When** the search service validates the response, **Then** those dishes are discarded before the API response is sent or cached.
+- **Given** the LLM returns no valid overlapping dishes after relevance validation, **When** the service completes the search, **Then** it falls back to the seed matcher / deterministic ingredient-overlap path instead of returning unrelated dishes.
+- **Given** a search result is shown in ResultsScreen, **When** the card renders, **Then** the `matchPercentage` is derived from real ingredient overlap rules and stays consistent with the returned ingredient list.
+- **Given** cached search data exists for an ingredient+tag+cookTime combination, **When** the cache was generated before the relevance guardrail fix or contains invalid non-overlapping dishes, **Then** the service bypasses or refreshes that cache entry so stale irrelevant dishes are not served.
+- **Given** regression tests run for recipe search, **When** they exercise LLM, degraded, and cached result paths, **Then** they verify that non-overlapping dishes are rejected and that partial matches remain available only when relevant.
+
+**Technical Tasks:**
+- [ ] Add a shared relevance validator for ingredient search results in `backend/packages/shared/src/services/seedMatcher.ts` or a nearby shared search utility
+- [ ] Normalize Vietnamese and English ingredient tokens consistently across user input, seed recipes, and LLM-returned ingredient lists
+- [ ] Update `backend/apps/express-api/src/api/recipes/recipesService.ts` to validate LLM dishes before caching or returning them
+- [ ] Add a deterministic fallback path when all LLM dishes fail relevance validation
+- [ ] Version or invalidate recipe-search cache keys so stale pre-fix results are not reused
+- [ ] Tighten `backend/packages/shared/src/services/prompts.ts` so the LLM is instructed to only return dishes with real ingredient overlap and truthful `matchPercentage`
+- [ ] Add regression tests for:
+  - [ ] LLM result with zero ingredient overlap is dropped
+  - [ ] Mixed LLM payload keeps overlapping dishes and discards unrelated dishes
+  - [ ] Empty validated LLM payload falls back to seed matching
+  - [ ] Cached invalid payload is refreshed or ignored
+  - [ ] Unknown ingredient still returns low-score partial matches rather than unrelated dishes

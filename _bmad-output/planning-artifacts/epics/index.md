@@ -16,6 +16,7 @@
   - Story 1.8: Common Backend Infrastructure
   - Story 1.9: CI/CD Workflows & Zustand Store Scaffold
   - Story 1.10: Client Error Monitoring
+  - Story 1.11: Error Monitoring Compatibility Fix
 - [Epic 2: Core Search — Từ Nguyên Liệu Đến Món Ăn](./epic-2.md)
   - Story 2.1: LLM Integration
   - Story 2.2: Recipes API Module
@@ -23,10 +24,12 @@
   - Story 2.4: ResultsScreen
   - Story 2.5: RecipeScreen
   - Story 2.6: ShoppingListScreen
+  - Story 2.7: Search Relevance Guardrails
 - [Epic 3: Discovery — Khám Phá](./epic-3.md)
   - Story 3.1: HERE Maps Client
   - Story 3.2: Discovery API Module
   - Story 3.3: DiscoverScreen
+  - Story 3.4: Discover Nearby Location Relevance Regression Fix
 - [Epic 4: Accounts, Favorites & Personalization — Tài Khoản & Cá Nhân Hóa](./epic-4.md)
   - Story 4.1: Auth API Module
   - Story 4.2: LoginScreen
@@ -37,6 +40,8 @@
   - Story 4.7: Settings API Module
   - Story 4.8: Profile/Settings Screens
   - Story 4.9: Notification Infrastructure
+  - Story 4.10: Authenticated Favorites Route Regression Fix
+  - Story 4.11: Disliked Ingredients Search Filter Regression Fix
 - [Quality Stories & Cross-Epic Touchpoints](./epic-quality.md)
   - Story Q.1: Accessibility Audit
   - Story Q.2: Performance Validation

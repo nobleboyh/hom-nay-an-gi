@@ -317,3 +317,26 @@ So that production errors are captured, grouped, and actionable before users rep
 - [ ] Add `SENTRY_DSN` to `frontend/.env.template` with documentation link
 - [ ] Add `sentry-expo` to `app.json` plugins (Expo plugin for native crash reporting on iOS/Android)
 - [ ] Verify: throw a test error in dev → not reported; build production → error appears in Sentry dashboard
+
+---
+
+## Story 1.11: Error Monitoring Compatibility Fix
+
+As a **developer**,
+I want the client error monitoring integration to stop breaking Expo web startup,
+So that `npm run web` and the shared app shell can boot reliably while production error reporting remains available through a supported integration path.
+
+**Acceptance Criteria:**
+
+- **Given** a developer runs `cd frontend && npm run web`, **When** Expo serves the web app and evaluates `_layout.tsx`, **Then** startup does not throw `Error: Cannot pipe to a closed or destroyed stream`, `TypeError: Cannot read property '__extends' of undefined`, or any equivalent module-load crash from the error-monitoring import path.
+- **Given** client error monitoring is enabled for production builds, **When** the monitoring SDK initializes, **Then** it uses an Expo SDK 54 / Expo Router / React Native Web compatible integration path that does not depend on the failing `sentry-expo` runtime import.
+- **Given** development builds and Expo Go, **When** monitoring is unavailable or intentionally disabled, **Then** the app shell still renders and the monitoring setup fails closed without crashing navigation, providers, or notification wiring.
+- **Given** the root layout and ErrorBoundary, **When** a render error occurs after boot, **Then** the error is still reported through the selected monitoring adapter or a documented no-op fallback, and the fallback UI still renders.
+- **Given** the story is complete, **When** I review tests and configuration, **Then** they verify the incompatible import path was removed or isolated, startup remains safe, and the chosen monitoring integration is documented for future maintenance.
+
+**Technical Tasks:**
+- [ ] Replace the direct `sentry-expo` boot-time dependency in `frontend/app/_layout.tsx` with a compatibility-safe monitoring bootstrap (supported SDK or an adapter wrapper)
+- [ ] Update `frontend/components/ErrorBoundary.tsx` to report through the same monitoring adapter instead of importing the incompatible runtime directly
+- [ ] Review `frontend/app.json`, `frontend/package.json`, and lockfile dependencies so the selected monitoring path matches the current Expo SDK/runtime constraints
+- [ ] Add regression coverage proving the root layout no longer imports the incompatible module path directly and that error-monitoring setup cannot crash app startup
+- [ ] Document the compatibility decision, including whether monitoring is migrated, downgraded, lazy-loaded, or temporarily stubbed in unsupported environments

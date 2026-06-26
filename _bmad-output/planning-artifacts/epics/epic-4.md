@@ -267,3 +267,31 @@ So that favorites work correctly across devices instead of failing against guest
 - [ ] Ensure `saveFavorite`, `removeFavorite`, and any optimistic UI state logic preserve correct `favoriteId` / `dishId` handling across guest and authenticated modes
 - [ ] Add regression coverage proving authenticated mutations never call `/api/v1/favorites_guest` after login and guest mode still uses SQLite/local paths
 - [ ] Verify post-login behavior from both Results and Recipe detail entry points
+
+---
+
+## Story 4.11: Disliked Ingredients Search Filter Regression Fix
+
+As a **logged-in user**,
+I want dishes that contain my disliked ingredients to be excluded from ingredient-search recommendations after login,
+So that my saved food dislikes actually personalize the search results I see.
+
+**Acceptance Criteria:**
+
+- **Given** I am authenticated and my preferences contain one or more `dislikedIngredients`, **When** I call ingredient search from Home or Results refresh/load-more flows, **Then** the request is treated as authenticated and the search logic applies my saved dislikes before returning dishes.
+- **Given** a candidate dish contains an ingredient that overlaps a normalized value from my `dislikedIngredients`, **When** search results are assembled, **Then** that dish is excluded from the response even if it otherwise matches my entered ingredients, tags, or cook-time filter.
+- **Given** I update `dislikedIngredients` in Settings and then perform a new search, **When** the next search request completes, **Then** the newly saved dislikes affect the results without requiring app restart or logout/login.
+- **Given** cached search data exists for the same ingredient+filter combination, **When** the cached payload contains dishes that should be excluded for the authenticated user's disliked ingredients, **Then** the service bypasses, filters, or versions that cache path so disliked dishes are not served back to that user.
+- **Given** I am a guest user or an authenticated user with an empty `dislikedIngredients` list, **When** I search, **Then** the existing guest/default behavior is preserved with no unintended filtering regression.
+- **Given** regression tests run for authenticated search, **When** they exercise request routing, cached results, and preference updates, **Then** they verify disliked ingredients are excluded only for the correct authenticated user context.
+
+**Technical Tasks:**
+- [ ] Update the search request path so authenticated users send the credentials/context needed for the backend to resolve their saved preferences during `GET /api/v1/recipes/search`
+- [ ] Extend recipe search handling to load authenticated user preferences and exclude dishes whose normalized ingredient lists overlap `dislikedIngredients`
+- [ ] Reuse shared ingredient-normalization logic so dislike matching is consistent with existing ingredient search and preference entry behavior
+- [ ] Adjust cache strategy for personalized search so user-specific dislike filters cannot leak stale shared results back to authenticated users
+- [ ] Add regression coverage for:
+  - [ ] authenticated search excluding disliked ingredients
+  - [ ] preference update followed by immediate new search
+  - [ ] cached payload revalidation/filtering for disliked ingredients
+  - [ ] guest or empty-preference searches remaining unchanged
