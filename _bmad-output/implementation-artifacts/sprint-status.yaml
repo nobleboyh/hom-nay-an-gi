@@ -46,6 +46,6 @@ development_status:
   4-8-profile-settings-screens: done
   4-9-notification-infrastructure: done
   4-10-authenticated-favorites-route-regression-fix: done
-  4-11-disliked-ingredients-search-filter-regression-fix: ready-for-dev
+  4-11-disliked-ingredients-search-filter-regression-fix: done
 
-last_updated: 2026-06-26 (1-11 error monitoring compatibility fix reviewed and completed)
+last_updated: 2026-06-27 (4-11 disliked ingredients search filter regression fix completed)

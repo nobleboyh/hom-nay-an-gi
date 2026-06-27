@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
 import {
   asyncHandler,
+  env,
   ServiceResponse,
   type ValidatedRequest,
 } from "@hom-nay-an-gi/shared";
 import type { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import {
   getRecipe,
   searchByIngredients,
@@ -14,6 +16,23 @@ import {
 function getRequestId(req: Request): string {
   const rid = (req as unknown as Record<string, unknown>).requestId;
   return typeof rid === "string" ? rid : randomUUID();
+}
+
+function resolveOptionalUserId(req: Request): string | undefined {
+  const isStubMode = env.JWT_SECRET === "replace-with-a-long-secret";
+  if (isStubMode) {
+    return req.headers["x-user-id"] as string | undefined;
+  }
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) return undefined;
+  try {
+    const payload = jwt.verify(authHeader.slice(7), env.JWT_SECRET) as {
+      sub: string;
+    };
+    return payload.sub;
+  } catch {
+    return undefined;
+  }
 }
 
 export const searchRecipes = asyncHandler(
@@ -28,12 +47,15 @@ export const searchRecipes = asyncHandler(
       }>
     ).validated;
 
+    const userId = resolveOptionalUserId(req);
+
     const result = await searchByIngredients(
       validated.ingredients ?? "",
       validated.tags ?? "",
       validated.cookTime,
       validated.offset,
       validated.limit,
+      userId,
     );
 
     const meta: Record<string, unknown> = {

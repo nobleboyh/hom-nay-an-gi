@@ -134,6 +134,14 @@ describe("GET /api/v1/recipes/search", () => {
     expect(res.body.data.total).toBe(1);
     expect(res.body.data.offset).toBe(0);
     expect(res.body.data.limit).toBe(10);
+    expect(searchByIngredients).toHaveBeenCalledWith(
+      "chicken,broccoli",
+      "Vietnamese",
+      30,
+      0,
+      10,
+      "test-user",
+    );
   });
 
   it("allows guest search without authentication", async () => {
@@ -154,6 +162,7 @@ describe("GET /api/v1/recipes/search", () => {
       30,
       0,
       20,
+      undefined,
     );
   });
 
@@ -261,6 +270,75 @@ describe("GET /api/v1/recipes/search", () => {
     expect(res.body.data.offset).toBe(5);
     expect(res.body.data.limit).toBe(5);
     expect(res.body.data.dishes).toHaveLength(2);
+  });
+
+  it("passes userId to service when x-user-id header is set (AC 1)", async () => {
+    vi.mocked(searchByIngredients).mockResolvedValueOnce(mockSearchResult);
+
+    const app = createApp();
+    await request(app)
+      .get("/api/v1/recipes/search")
+      .query({ ingredients: "chicken", offset: 0, limit: 10 })
+      .set("x-user-id", "user-abc");
+
+    expect(searchByIngredients).toHaveBeenCalledWith(
+      "chicken",
+      "",
+      undefined,
+      0,
+      10,
+      "user-abc",
+    );
+  });
+
+  it("passes undefined userId for guest requests (AC 5)", async () => {
+    vi.mocked(searchByIngredients).mockResolvedValueOnce(mockSearchResult);
+
+    const app = createApp();
+    await request(app)
+      .get("/api/v1/recipes/search")
+      .query({ ingredients: "chicken", offset: 0, limit: 10 });
+
+    expect(searchByIngredients).toHaveBeenCalledWith(
+      "chicken",
+      "",
+      undefined,
+      0,
+      10,
+      undefined,
+    );
+  });
+
+  it("handles pagination with authenticated user context (AC 1 subtask)", async () => {
+    const paginatedResult = {
+      ...mockSearchResult,
+      dishes: [
+        makeDish(),
+        makeDish({ dishId: "dish-2", name: "Dish 2", nameEn: "Dish 2" }),
+      ],
+      total: 20,
+      offset: 10,
+      limit: 10,
+    };
+    vi.mocked(searchByIngredients).mockResolvedValueOnce(paginatedResult);
+
+    const app = createApp();
+    const res = await request(app)
+      .get("/api/v1/recipes/search")
+      .query({ ingredients: "chicken", offset: 10, limit: 10 })
+      .set("x-user-id", "user-123");
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.offset).toBe(10);
+    expect(res.body.data.limit).toBe(10);
+    expect(searchByIngredients).toHaveBeenCalledWith(
+      "chicken",
+      "",
+      undefined,
+      10,
+      10,
+      "user-123",
+    );
   });
 });
 
