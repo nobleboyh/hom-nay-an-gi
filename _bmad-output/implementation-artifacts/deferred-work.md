@@ -129,3 +129,13 @@
 - **searchDishes Date.now() ID collision risk** — Two searches in same millisecond produce identical `id` values. Pre-existing.
 - **storageAdapter.write API path silently swallows all errors** — When authenticated and collection not in SQLITE_ONLY_COLLECTIONS, API write catches all errors and returns `void`. Pre-existing design.
 - **Tests only static regex matching, no runtime verification** — All tests assert source code patterns. This is the project's existing test convention.
+
+## Deferred from: code review of 4-11-disliked-ingredients-search-filter-regression-fix (2026-06-27)
+
+- **Unicode NFC normalization not applied in `normalizeIngredientName`** [recipesService.ts:87-95] — Regex only matches NFC codepoints. NFD-formatted Vietnamese text will not be normalized, causing silent filter failures.
+- **Stub mode auto-enables header-based auth bypass** [recipesController.ts:22-24] — If deployed to staging/production with default JWT_SECRET, any client can impersonate any user via x-user-id header.
+- **`x-user-id` header value not validated in stub mode** [recipesController.ts:24] — Raw header value passed directly to MongoDB query without sanitization.
+- **Multi-value Authorization header not handled** [recipesController.ts:28-35] — `req.headers.authorization` can be string[]; `startsWith` check fails on array.
+- **`fetchSurpriseMe` always sends x-guest-id** [dataStore.ts:163-164] — Authenticated user's surprise request treated as anonymous on server.
+- **`fetchRecipeDetail` always sends x-guest-id** [dataStore.ts:190-191] — Authenticated user's recipe detail request has no userId context.
+- **JWT `sub` claim not runtime-validated as string** [recipesController.ts:29-32] — TypeScript cast provides zero runtime protection; crafted payload could cause unexpected MongoDB query behavior.

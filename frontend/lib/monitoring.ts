@@ -136,7 +136,7 @@ export function initMonitoring(): MonitoringState {
 
   try {
     client.init({
-      dsn: state.dsn,
+      dsn: state.dsn!,
       enableInExpoDevelopment: false,
       debug: false,
       tracesSampleRate: 0.1,

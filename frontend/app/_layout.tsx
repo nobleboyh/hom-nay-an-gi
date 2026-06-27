@@ -12,11 +12,17 @@ import {
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { initMonitoring } from '../lib/monitoring';
 import { NetworkStatusProvider } from '../lib/networkStatus';
+import { useAuthStore } from '../stores/authStore';
 
 initMonitoring();
 
 export default function RootLayout() {
   const router = useRouter();
+
+  useEffect(() => {
+    // Handle Google OAuth redirect callback on web
+    useAuthStore.getState().handleGoogleCallback();
+  }, []);
 
   useEffect(() => {
     setNotificationHandler({

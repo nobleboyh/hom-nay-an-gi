@@ -112,8 +112,13 @@ export const useDataStore = create<DataStore>((set, get) => ({
       params.set('offset', String(offset));
       params.set('limit', '20');
 
+      const token = useAuthStore.getState().accessToken;
+      const headers: Record<string, string> = token
+        ? { Authorization: `Bearer ${token}` }
+        : { 'x-guest-id': 'web' };
+
       const response = await fetch(`${API_BASE}/api/v1/recipes/search?${params.toString()}`, {
-        headers: { 'x-guest-id': 'web' },
+        headers,
       });
       if (!response.ok) throw new Error(`API error: ${response.status}`);
 

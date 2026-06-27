@@ -3,6 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
+import * as Crypto from 'expo-crypto';
 import type { User } from '../types/user';
 
 const ACCESS_TOKEN_KEY = 'auth_access_token';
@@ -33,6 +35,7 @@ export interface AuthStore {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, displayName: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  handleGoogleCallback: () => Promise<void>;
   logout: () => Promise<void>;
   performTokenRefresh: () => Promise<void>;
 }
@@ -277,27 +280,75 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return;
     }
 
+    // Generate nonce for Google OIDC (required for response_type=id_token)
+    const nonce = Crypto.randomUUID();
+
+    if (Platform.OS === 'web') {
+      // Web: use redirect flow back to the app origin.
+      // Ensure http://localhost:8081 is registered as an Authorized redirect URI
+      // AND Authorized JavaScript origin in Google Cloud Console.
+      const redirectUri = window.location.origin;
+      console.log('[authStore] Google OAuth redirectUri (web):', redirectUri);
+
+      // Store nonce so handleGoogleCallback can verify it
+      try {
+        await AsyncStorage.setItem('auth_nonce', nonce);
+      } catch {
+        // best-effort
+      }
+
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
+        client_id: googleClientId,
+        redirect_uri: redirectUri,
+        response_type: 'id_token',
+        scope: 'openid profile email',
+        nonce,
+      }).toString()}`;
+
+      window.location.href = authUrl;
+      return;
+    }
+
+    // Native (Android / iOS):
     const redirectUri = AuthSession.makeRedirectUri({ scheme: 'hom-nay-an-gi' });
-    const discovery = {
-      authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-      tokenEndpoint: 'https://oauth2.googleapis.com/token',
-    };
+    console.log('[authStore] Google OAuth redirectUri (native):', redirectUri);
 
-    const request = new AuthSession.AuthRequest({
-      clientId: googleClientId,
-      redirectUri,
-      scopes: ['openid', 'profile', 'email'],
-      responseType: AuthSession.ResponseType.IdToken,
-      usePKCE: false,
-    });
+    // Store nonce for callback verification
+    try {
+      await SecureStore.setItemAsync('auth_nonce', nonce);
+    } catch {
+      // best-effort
+    }
 
-    const result = await request.promptAsync(discovery);
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
+      client_id: googleClientId,
+      redirect_uri: redirectUri,
+      response_type: 'id_token',
+      scope: 'openid profile email',
+      nonce,
+    }).toString()}`;
 
-    if (result.type !== 'success') {
+    const authResult = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+    if (authResult.type !== 'success') {
       throw new LoginError('AUTH_INVALID_CREDENTIALS', 'Google sign-in cancelled');
     }
 
-    const idToken = result.params.id_token;
+    let idToken: string;
+    if (authResult.url) {
+      // The Expo proxy returns the token in the fragment
+      const fragment = authResult.url.split('#')[1];
+      if (!fragment) {
+        throw new LoginError('AUTH_INVALID_CREDENTIALS', 'No auth fragment in redirect');
+      }
+      const params = new URLSearchParams(fragment);
+      idToken = params.get('id_token') ?? '';
+      if (!idToken) {
+        throw new LoginError('AUTH_INVALID_CREDENTIALS', 'No id_token in redirect');
+      }
+    } else {
+      throw new LoginError('AUTH_INVALID_CREDENTIALS', 'No redirect URL');
+    }
+
     const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
     const controller = new AbortController();
@@ -357,6 +408,60 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         console.error('[authStore] guestToAuthenticated failed after Google login:', err),
       ),
     );
+  },
+
+  handleGoogleCallback: async () => {
+    if (Platform.OS !== 'web') return;
+
+    const hash = window.location.hash;
+    if (!hash || !hash.includes('id_token')) return;
+
+    const params = new URLSearchParams(hash.substring(1));
+    const idToken = params.get('id_token');
+
+    if (!idToken) return;
+
+    // Clean URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15_000);
+
+    try {
+      const response = await fetch(`${apiBase}/api/v1/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      const body = await response.json();
+
+      // Server returns body.data.tokens.accessToken (consistent with login/register)
+      if (!response.ok || !body?.data?.tokens?.accessToken || !body?.data?.user) {
+        console.error('[authStore] Google callback auth failed:', body);
+        return;
+      }
+
+      const { user, tokens } = body.data;
+      await saveSecureStore(tokens.accessToken, tokens.refreshToken, user);
+      set({
+        authState: 'authenticated',
+        user,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      });
+
+      import('./storageAdapter').then((mod) =>
+        mod.guestToAuthenticated().catch((err: unknown) =>
+          console.error('[authStore] guestToAuthenticated failed after Google callback:', err),
+        ),
+      );
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.error('[authStore] Google callback error:', err);
+    }
   },
 
   logout: async () => {
