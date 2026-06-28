@@ -1,12 +1,15 @@
 import { env, logger } from "@hom-nay-an-gi/shared";
 
+export interface LlmErrorMeta {
+  degraded: boolean;
+  source: "llm" | "seed";
+  provider?: string;
+  error?: string;
+}
+
 interface LlmResult<T> {
   data: T | null;
-  meta: {
-    degraded: boolean;
-    source: "llm" | "seed";
-    provider?: string;
-  };
+  meta: LlmErrorMeta;
 }
 
 const LLM_PROXY_URL = env.LLM_PROXY_URL;
@@ -27,8 +30,19 @@ export async function complete<T>(
     });
 
     if (!response.ok) {
-      logger.warn({ status: response.status }, "LLM proxy returned error");
-      return { data: null, meta: { degraded: true, source: "seed" } };
+      const errorBody = await response.text().catch(() => "unknown");
+      logger.error(
+        { status: response.status, body: errorBody },
+        "LLM proxy returned error",
+      );
+      return {
+        data: null,
+        meta: {
+          degraded: true,
+          source: "seed",
+          error: `LLM proxy returned status ${response.status}`,
+        },
+      };
     }
 
     const json = (await response.json()) as {
@@ -38,7 +52,15 @@ export async function complete<T>(
     };
 
     if (!json.success || json.data === null || json.data === undefined) {
-      return { data: null, meta: { degraded: true, source: "seed" } };
+      logger.error({ json }, "LLM proxy returned unsuccessful response");
+      return {
+        data: null,
+        meta: {
+          degraded: true,
+          source: "seed",
+          error: "LLM proxy returned unsuccessful response",
+        },
+      };
     }
 
     const data = schema.parse(json.data);
@@ -51,7 +73,11 @@ export async function complete<T>(
     }
     return { data, meta };
   } catch (error) {
-    logger.warn({ err: error }, "LLM proxy call failed");
-    return { data: null, meta: { degraded: true, source: "seed" } };
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error({ err: error }, "LLM proxy call failed");
+    return {
+      data: null,
+      meta: { degraded: true, source: "seed", error: message },
+    };
   }
 }

@@ -15,7 +15,8 @@ describe("prompts", () => {
       expect(result.system).toContain("đầu bếp người Việt Nam");
       expect(result.system).toContain("QUY TẮC");
       expect(result.user).toContain("nguyên liệu: thịt gà, hành");
-      expect(result.user).toContain("Ví dụ");
+      expect(result.user).toContain("dishId");
+      expect(result.user).toContain("nameEn");
     });
 
     it("returns English prompt when language is en", () => {
@@ -27,7 +28,7 @@ describe("prompts", () => {
       expect(result.system).toContain("Vietnamese chef");
       expect(result.system).toContain("RULES");
       expect(result.user).toContain("ingredients: chicken, onion");
-      expect(result.user).toContain("Example");
+      expect(result.user).toContain("dishId");
     });
 
     it("includes tags when provided", () => {
@@ -59,14 +60,14 @@ describe("prompts", () => {
       expect(result.user).not.toContain("cooking time");
     });
 
-    it("includes few-shot examples", () => {
+    it("includes field description in user prompt", () => {
       const result = buildIngredientSearchPrompt(
         { ingredients: "chicken" },
         "en",
       );
 
       expect(result.user).toContain("dishId");
-      expect(result.user).toContain("matchPercentage");
+      expect(result.user).toContain("totalCookTimeMinutes");
     });
   });
 

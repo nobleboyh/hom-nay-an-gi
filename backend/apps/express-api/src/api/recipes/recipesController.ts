@@ -67,6 +67,12 @@ export const searchRecipes = asyncHandler(
     if (result.meta.degraded) {
       meta.degraded = true;
     }
+    if (result.meta.error) {
+      meta.llmError = result.meta.error;
+    }
+    if (result.meta.source) {
+      meta.source = result.meta.source;
+    }
 
     res.status(200).json({
       success: true,
@@ -91,7 +97,7 @@ export const getSurpriseDish = asyncHandler(
 export const getDishById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const dishId = req.params.dishId as string;
-    const dish = getRecipe(dishId);
+    const dish = await getRecipe(dishId);
     res.status(200).json(ServiceResponse.success(dish, getRequestId(req)));
   },
 );

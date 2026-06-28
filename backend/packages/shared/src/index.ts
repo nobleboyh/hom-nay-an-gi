@@ -95,6 +95,12 @@ export {
   buildSurprisePrompt,
 } from "./services/prompts.js";
 export {
+  buildDishIngredientTokens,
+  computeOverlap,
+  normalizeIngredientName,
+  tokenize,
+} from "./services/relevanceValidator.js";
+export {
   buildIngredientTokens,
   getRandomSeedRecipe,
   jaccardSimilarity,

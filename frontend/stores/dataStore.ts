@@ -191,6 +191,26 @@ export const useDataStore = create<DataStore>((set, get) => ({
   fetchRecipeDetail: async (dishId) => {
     console.log('[dataStore] fetchRecipeDetail', { dishId });
     set({ recipeStatus: 'loading' });
+
+    const existing = get().dishes.find((d) => d.dishId === dishId);
+    if (existing) {
+      const detail: RecipeDetail = {
+        dishId: existing.dishId,
+        name: existing.name,
+        nameEn: existing.nameEn ?? '',
+        cuisine: existing.cuisine,
+        cookTimeMinutes: existing.cookTimeMinutes,
+        caloriesPerServing: existing.caloriesPerServing,
+        tags: existing.tags ?? [],
+        imageDescription: existing.imageDescription ?? '',
+        totalCookTimeMinutes: (existing as unknown as Record<string, unknown>).totalCookTimeMinutes as number ?? existing.cookTimeMinutes,
+        ingredients: (existing as unknown as Record<string, unknown>).ingredients as RecipeDetail['ingredients'] ?? [],
+        steps: (existing as unknown as Record<string, unknown>).steps as RecipeDetail['steps'] ?? [],
+      };
+      set({ recipeStatus: 'success', recipeDetail: detail });
+      return;
+    }
+
     try {
       const response = await fetch(`${API_BASE}/api/v1/recipes/${encodeURIComponent(dishId)}`, {
         headers: { 'x-guest-id': 'web' },

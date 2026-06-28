@@ -17,7 +17,7 @@ test('ci-backend.yml exists and contains required steps', () => {
   assert.match(workflow, /pnpm lint/);
   assert.match(workflow, /pnpm test/);
   assert.match(workflow, /node-version:\s*22/);
-  assert.match(workflow, /pnpm\/action-setup@v4/);
+  assert.match(workflow, /pnpm\/action-setup@v6/);
 });
 
 test('ci-frontend.yml exists and contains required steps', () => {

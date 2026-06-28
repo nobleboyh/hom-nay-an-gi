@@ -1,5 +1,6 @@
 import type { Dish } from "../api/recipes/recipesValidation.js";
 import type { SeedRecipe } from "../data/seed-recipes.schema.js";
+import { computeOverlap } from "./relevanceValidator.js";
 
 const VIETNAMESE_DIACRITICS: Record<string, string> = {
   à: "a",
@@ -182,6 +183,11 @@ export function searchSeedRecipes(
     })
     .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
     .filter((entry) => entry.matchPercentage > 0)
+    .filter((entry) => {
+      if (userIngredients.length === 0) return true;
+      const overlap = computeOverlap(userIngredients, entry.recipe.ingredients);
+      return overlap.hasOverlap;
+    })
     .sort((a, b) => b.matchPercentage - a.matchPercentage);
 
   const total = scored.length;
