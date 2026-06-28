@@ -29,6 +29,8 @@ const mockShared = vi.hoisted(() => {
 
   return {
     redis: mockRedis,
+    cacheGet: vi.fn().mockResolvedValue(null),
+    cacheSet: vi.fn().mockResolvedValue(undefined),
     logger: { warn: vi.fn(), error: vi.fn(), debug: vi.fn(), info: vi.fn() },
     env: {
       LLM_PROXY_URL: "http://localhost:3001",
@@ -60,6 +62,63 @@ import {
   getTrending,
 } from "../../src/api/discovery/discoveryService.js";
 
+const LLM_SUCCESS_RESPONSE = {
+  ok: true,
+  status: 200,
+  json: vi.fn().mockResolvedValue({
+    success: true,
+    data: {
+      content: JSON.stringify([
+        {
+          dishId: "api-1",
+          name: "Phở bò",
+          nameEn: "Beef Pho",
+          cuisine: "Vietnamese",
+          priceRange: "45.000đ – 65.000đ",
+          trendingRank: 1,
+          imageDescription: "Bowl of beef pho with herbs",
+        },
+        {
+          dishId: "api-2",
+          name: "Bún chả",
+          nameEn: "Grilled Pork Noodles",
+          cuisine: "Vietnamese",
+          priceRange: "35.000đ – 50.000đ",
+          trendingRank: 2,
+          imageDescription: "Grilled pork with rice noodles",
+        },
+        {
+          dishId: "api-3",
+          name: "Bánh mì thịt",
+          nameEn: "Vietnamese Baguette",
+          cuisine: "Vietnamese",
+          priceRange: "25.000đ – 45.000đ",
+          trendingRank: 3,
+          imageDescription: "Vietnamese baguette sandwich",
+        },
+        {
+          dishId: "api-4",
+          name: "Cà phê sữa đá",
+          nameEn: "Iced Coffee",
+          cuisine: "Vietnamese",
+          priceRange: "15.000đ – 29.000đ",
+          trendingRank: 4,
+          imageDescription: "Iced Vietnamese coffee",
+        },
+        {
+          dishId: "api-5",
+          name: "Cơm tấm",
+          nameEn: "Broken Rice",
+          cuisine: "Vietnamese",
+          priceRange: "30.000đ – 50.000đ",
+          trendingRank: 5,
+          imageDescription: "Broken rice with grilled pork",
+        },
+      ]),
+    },
+  }),
+} as unknown as Response;
+
 describe("getTrending", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -75,15 +134,12 @@ describe("getTrending", () => {
     vi.restoreAllMocks();
   });
 
-  it("should return seed data when cache is empty and LLM fails", async () => {
+  it("should throw TRENDING_UNAVAILABLE when cache is empty and LLM fails", async () => {
     mockRedis.get.mockResolvedValue(null);
 
-    const result = await getTrending("Vietnamese", undefined, 0, 10);
-
-    expect(result.items.length).toBeGreaterThan(0);
-    expect(result.total).toBeGreaterThan(0);
-    expect(result.items[0]).toHaveProperty("dishId");
-    expect(result.items[0]).toHaveProperty("name");
+    await expect(getTrending("Vietnamese", undefined, 0, 5)).rejects.toThrow(
+      "Trending data is currently unavailable",
+    );
   });
 
   it("should return cached data when Redis has it", async () => {
@@ -101,12 +157,12 @@ describe("getTrending", () => {
       ],
       total: 1,
       offset: 0,
-      limit: 10,
+      limit: 5,
     };
 
     mockRedis.get.mockResolvedValue(JSON.stringify(cachedData));
 
-    const result = await getTrending(undefined, undefined, 0, 10);
+    const result = await getTrending(undefined, undefined, 0, 5);
 
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.dishId).toBe("cached-1");
@@ -126,12 +182,12 @@ describe("getTrending", () => {
       ],
       total: 1,
       offset: 0,
-      limit: 10,
+      limit: 5,
     };
 
     mockRedis.get.mockResolvedValue(JSON.stringify(cachedData));
 
-    await getTrending(undefined, undefined, 0, 10);
+    await getTrending(undefined, undefined, 0, 5);
 
     expect(global.fetch).not.toHaveBeenCalled();
   });
@@ -139,7 +195,7 @@ describe("getTrending", () => {
   it("should use cache key with cuisine and price", async () => {
     mockRedis.get.mockResolvedValue(null);
 
-    await expect(getTrending("Vietnamese", "mid", 0, 10)).rejects.toThrow(
+    await expect(getTrending("Vietnamese", "mid", 0, 5)).rejects.toThrow(
       "Trending data is currently unavailable",
     );
 
@@ -148,30 +204,61 @@ describe("getTrending", () => {
     );
   });
 
-  it("should paginate results correctly", async () => {
+  it("should return data from LLM API when cache is empty", async () => {
     mockRedis.get.mockResolvedValue(null);
+    (global.fetch as Mock).mockResolvedValue(LLM_SUCCESS_RESPONSE);
+
+    const result = await getTrending(undefined, undefined, 0, 5);
+
+    expect(result.items).toHaveLength(5);
+    expect(result.items[0]?.dishId).toBe("api-1");
+    expect(result.total).toBe(5);
+  });
+
+  it("should paginate results from LLM API correctly", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    (global.fetch as Mock).mockResolvedValue(LLM_SUCCESS_RESPONSE);
 
     const result = await getTrending(undefined, undefined, 0, 3);
 
-    expect(result.items.length).toBeLessThanOrEqual(3);
+    expect(result.items).toHaveLength(3);
     expect(result.offset).toBe(0);
     expect(result.limit).toBe(3);
   });
 
-  it("should fall back to seed data when LLM call fails", async () => {
+  it("should throw TRENDING_UNAVAILABLE when LLM call fails", async () => {
     mockRedis.get.mockResolvedValue(null);
     (global.fetch as Mock).mockRejectedValue(new Error("Network error"));
 
-    const result = await getTrending(undefined, undefined, 0, 10);
-
-    expect(result.items.length).toBeGreaterThan(0);
-    expect(result.total).toBeGreaterThan(0);
+    await expect(getTrending(undefined, undefined, 0, 5)).rejects.toThrow(
+      "Trending data is currently unavailable",
+    );
   });
 
-  it("should filter by cuisine from seed fallback", async () => {
+  it("should filter by cuisine via LLM API", async () => {
     mockRedis.get.mockResolvedValue(null);
+    const mockFilteredResponse = {
+      ok: true,
+      status: 200,
+      json: vi.fn().mockResolvedValue({
+        success: true,
+        data: {
+          content: JSON.stringify([
+            {
+              dishId: "api-1",
+              name: "Phở bò",
+              nameEn: "Beef Pho",
+              cuisine: "Vietnamese",
+              priceRange: "45.000đ – 65.000đ",
+              trendingRank: 1,
+            },
+          ]),
+        },
+      }),
+    } as unknown as Response;
+    (global.fetch as Mock).mockResolvedValue(mockFilteredResponse);
 
-    const result = await getTrending("Vietnamese", undefined, 0, 10);
+    const result = await getTrending("Vietnamese", undefined, 0, 5);
 
     expect(
       result.items.every(
@@ -180,36 +267,47 @@ describe("getTrending", () => {
     ).toBe(true);
   });
 
-  it("should use seed fallback when cached data is corrupted", async () => {
+  it("should throw TRENDING_UNAVAILABLE when cached data is corrupted and LLM fails", async () => {
     mockRedis.get.mockResolvedValue("not-valid-json");
 
-    const result = await getTrending(undefined, undefined, 0, 10);
-
-    expect(result.items.length).toBeGreaterThan(0);
-    expect(result.total).toBeGreaterThan(0);
-    expect(global.fetch).not.toHaveBeenCalled();
+    await expect(getTrending(undefined, undefined, 0, 5)).rejects.toThrow(
+      "Trending data is currently unavailable",
+    );
   });
 
-  it("should use seed fallback when cached JSON shape is invalid", async () => {
+  it("should throw TRENDING_UNAVAILABLE when cached JSON shape is invalid and LLM fails", async () => {
     mockRedis.get.mockResolvedValue(JSON.stringify({ invalid: true }));
 
-    const result = await getTrending(undefined, undefined, 0, 10);
+    await expect(getTrending(undefined, undefined, 0, 5)).rejects.toThrow(
+      "Trending data is currently unavailable",
+    );
+  });
 
-    expect(result.items.length).toBeGreaterThan(0);
-    expect(result.total).toBeGreaterThan(0);
-    expect(global.fetch).not.toHaveBeenCalled();
+  it("should recover from corrupted cache and return LLM data", async () => {
+    mockRedis.get.mockResolvedValue("not-valid-json");
+    (global.fetch as Mock).mockResolvedValue(LLM_SUCCESS_RESPONSE);
+
+    const result = await getTrending(undefined, undefined, 0, 5);
+
+    expect(result.items).toHaveLength(5);
+    expect(result.items[0]?.dishId).toBe("api-1");
+  });
+
+  it("should default limit to 5 for trending", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    (global.fetch as Mock).mockResolvedValue(LLM_SUCCESS_RESPONSE);
+
+    const result = await getTrending();
+
+    expect(result.items).toHaveLength(5);
+    expect(result.limit).toBe(5);
   });
 });
 
 describe("getForYou", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(global, "fetch").mockResolvedValue({
-      ok: false,
-      status: 502,
-      json: vi.fn(),
-      text: vi.fn(),
-    } as unknown as Response);
+    vi.spyOn(global, "fetch").mockResolvedValue(LLM_SUCCESS_RESPONSE);
   });
 
   afterEach(() => {
@@ -222,7 +320,7 @@ describe("getForYou", () => {
     );
   });
 
-  it("should return trending data for authenticated user in stub mode", async () => {
+  it("should return trending data for authenticated user", async () => {
     mockRedis.get.mockResolvedValue(null);
 
     const result = await getForYou("test-user-id");
@@ -241,12 +339,12 @@ describe("getForYou", () => {
     expect(result.source).toBe("trending");
   });
 
-  it("should use default offset 0 and limit 10 when not provided", async () => {
+  it("should use default offset 0 and limit 5 when not provided", async () => {
     mockRedis.get.mockResolvedValue(null);
 
     const result = await getForYou("test-user-id");
 
-    expect(result.items.length).toBeLessThanOrEqual(10);
+    expect(result.items.length).toBeLessThanOrEqual(5);
     expect(result.source).toBe("trending");
   });
 });
