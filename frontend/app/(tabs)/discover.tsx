@@ -255,7 +255,7 @@ export default function DiscoverScreen() {
     await fetchNearby(location.lat, location.lng, activeCuisine, activePrice, getNearbyLimit());
     await fetchTrending(activeCuisine, activePrice);
     setRefreshing(false);
-  }, [selectedTab, selectedCuisines, selectedPrices, location, getNearbyLimit]);
+  }, [selectedCuisines, selectedPrices, location, getNearbyLimit]);
 
   const showTrending =
     !locationChanging && !showNewLocationResults && (selectedTab === 'tat-ca' || selectedTab === 'dang-thinh-hanh' || selectedTab === 'mon-moi' || selectedTab === 'danh-gia-cao');

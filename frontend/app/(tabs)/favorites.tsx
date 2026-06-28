@@ -7,8 +7,8 @@ import {
   StyleSheet,
   Text,
   View,
+  FlatList,
 } from 'react-native';
-import { FlatList } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
