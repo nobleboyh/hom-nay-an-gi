@@ -230,7 +230,10 @@ export async function getTrending(
       return paginate(parsed.items, offset, limit);
     }
   } catch (error) {
-    logger.warn({ error, cacheKey }, "trending cache read failed, falling back to API");
+    logger.warn(
+      { error, cacheKey },
+      "trending cache read failed, falling back to API",
+    );
   }
 
   let llmResult: TrendingDish[];
