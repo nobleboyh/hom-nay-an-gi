@@ -1,6 +1,8 @@
 import {
   AppError,
   AuthenticationError,
+  cacheGet,
+  cacheSet,
   getLlmConfig,
   LLMError,
   logger,
@@ -17,218 +19,10 @@ import {
 } from "./discoveryValidation.js";
 import { TRENDING_PROMPT_EN } from "./prompts.js";
 
-const TRENDING_SEED: TrendingDish[] = [
-  {
-    dishId: "trend-1",
-    name: "Phở bò",
-    nameEn: "Beef Pho",
-    cuisine: "Vietnamese",
-    priceRange: "45.000đ – 65.000đ",
-    trendingRank: 1,
-    imageDescription: "Bowl of beef pho with herbs",
-  },
-  {
-    dishId: "trend-2",
-    name: "Bún chả",
-    nameEn: "Grilled Pork Noodles",
-    cuisine: "Vietnamese",
-    priceRange: "35.000đ – 50.000đ",
-    trendingRank: 2,
-    imageDescription: "Grilled pork with rice noodles",
-  },
-  {
-    dishId: "trend-3",
-    name: "Bánh mì thịt",
-    nameEn: "Vietnamese Baguette",
-    cuisine: "Vietnamese",
-    priceRange: "25.000đ – 45.000đ",
-    trendingRank: 3,
-    imageDescription: "Vietnamese baguette sandwich",
-  },
-  {
-    dishId: "trend-4",
-    name: "Cà phê sữa đá",
-    nameEn: "Iced Coffee",
-    cuisine: "Vietnamese",
-    priceRange: "15.000đ – 29.000đ",
-    trendingRank: 4,
-    imageDescription: "Iced Vietnamese coffee",
-  },
-  {
-    dishId: "trend-5",
-    name: "Cơm tấm",
-    nameEn: "Broken Rice",
-    cuisine: "Vietnamese",
-    priceRange: "30.000đ – 50.000đ",
-    trendingRank: 5,
-    imageDescription: "Broken rice with grilled pork",
-  },
-  {
-    dishId: "trend-6",
-    name: "Bún bò Huế",
-    nameEn: "Hue Beef Noodles",
-    cuisine: "Vietnamese",
-    priceRange: "40.000đ – 60.000đ",
-    trendingRank: 6,
-    imageDescription: "Spicy beef noodle soup",
-  },
-  {
-    dishId: "trend-7",
-    name: "Gỏi cuốn",
-    nameEn: "Spring Rolls",
-    cuisine: "Vietnamese",
-    priceRange: "20.000đ – 35.000đ",
-    trendingRank: 7,
-    imageDescription: "Fresh spring rolls",
-  },
-  {
-    dishId: "trend-8",
-    name: "Chả giò",
-    nameEn: "Fried Spring Rolls",
-    cuisine: "Vietnamese",
-    priceRange: "25.000đ – 40.000đ",
-    trendingRank: 8,
-    imageDescription: "Crispy fried spring rolls",
-  },
-];
-
-const NEARBY_SEED: NearbyResult[] = [
-  {
-    restaurantName: "Phở Hòa Pasteur",
-    dishName: "Phở bò tái chín",
-    distance: 250,
-    rating: 4.5,
-    priceRange: "45.000đ – 65.000đ",
-    cuisine: "Vietnamese",
-    externalUrl: null,
-    lat: 10.8215,
-    lng: 106.628,
-  },
-  {
-    restaurantName: "Bún Chả Hương Liên",
-    dishName: "Bún chả",
-    distance: 380,
-    rating: 4.3,
-    priceRange: "35.000đ – 50.000đ",
-    cuisine: "Vietnamese",
-    externalUrl: null,
-    lat: 10.825,
-    lng: 106.631,
-  },
-  {
-    restaurantName: "Bánh Mì Huỳnh Hoa",
-    dishName: "Bánh mì đặc biệt",
-    distance: 180,
-    rating: 4.7,
-    priceRange: "25.000đ – 45.000đ",
-    cuisine: "Vietnamese",
-    externalUrl: null,
-    lat: 10.822,
-    lng: 106.6285,
-  },
-  {
-    restaurantName: "Cộng Cà Phê",
-    dishName: "Cà phê sữa đá",
-    distance: 420,
-    rating: 4.2,
-    priceRange: "15.000đ – 29.000đ",
-    cuisine: "Vietnamese",
-    externalUrl: null,
-    lat: 10.8245,
-    lng: 106.626,
-  },
-  {
-    restaurantName: "Cơm Tấm Bụi Sài Gòn",
-    dishName: "Cơm tấm sườn bì chả",
-    distance: 310,
-    rating: 4.4,
-    priceRange: "30.000đ – 50.000đ",
-    cuisine: "Vietnamese",
-    externalUrl: null,
-    lat: 10.8235,
-    lng: 106.6315,
-  },
-  {
-    restaurantName: "Bún Bò Huế 3A3",
-    dishName: "Bún bò Huế",
-    distance: 550,
-    rating: 4.1,
-    priceRange: "40.000đ – 60.000đ",
-    cuisine: "Vietnamese",
-    externalUrl: null,
-    lat: 10.82,
-    lng: 106.625,
-  },
-  {
-    restaurantName: "Nha Trang BBQ",
-    dishName: "Hải sản nướng",
-    distance: 720,
-    rating: 4.6,
-    priceRange: "100.000đ – 200.000đ",
-    cuisine: "Vietnamese",
-    externalUrl: null,
-    lat: 10.827,
-    lng: 106.633,
-  },
-  {
-    restaurantName: "Kichi Kichi Lê Văn Sỹ",
-    dishName: "Lẩu băng chuyền",
-    distance: 890,
-    rating: 4.0,
-    priceRange: "100.000đ – 200.000đ",
-    cuisine: "Chinese",
-    externalUrl: null,
-    lat: 10.818,
-    lng: 106.622,
-  },
-  {
-    restaurantName: "Sushi KA",
-    dishName: "Sushi combo",
-    distance: 650,
-    rating: 4.5,
-    priceRange: "tren-200k",
-    cuisine: "Japanese",
-    externalUrl: null,
-    lat: 10.826,
-    lng: 106.63,
-  },
-  {
-    restaurantName: "Hanuri BBQ",
-    dishName: "Thịt nướng Hàn Quốc",
-    distance: 480,
-    rating: 4.3,
-    priceRange: "100.000đ – 200.000đ",
-    cuisine: "Korean",
-    externalUrl: null,
-    lat: 10.823,
-    lng: 106.634,
-  },
-  {
-    restaurantName: "Pizza Hut Đồng Khởi",
-    dishName: "Pizza hải sản",
-    distance: 1100,
-    rating: 4.1,
-    priceRange: "100.000đ – 200.000đ",
-    cuisine: "Italian",
-    externalUrl: null,
-    lat: 10.815,
-    lng: 106.624,
-  },
-  {
-    restaurantName: "Phở 2000",
-    dishName: "Phở gà",
-    distance: 340,
-    rating: 4.2,
-    priceRange: "45.000đ – 65.000đ",
-    cuisine: "Vietnamese",
-    externalUrl: null,
-    lat: 10.8238,
-    lng: 106.6265,
-  },
-];
-
 const TRENDING_CACHE_TTL = 21600;
 const TRENDING_CACHE_PREFIX = "trending";
+const NEARBY_CACHE_TTL = 3600;
+const NEARBY_CACHE_PREFIX = "nearby";
 
 function buildCacheKey(cuisine?: string, price?: string): string {
   const parts = [TRENDING_CACHE_PREFIX];
@@ -237,10 +31,19 @@ function buildCacheKey(cuisine?: string, price?: string): string {
   return parts.join(":");
 }
 
-function filterSeed(items: TrendingDish[], cuisine?: string): TrendingDish[] {
-  if (!cuisine) return items;
-  const lower = cuisine.toLowerCase();
-  return items.filter((d) => d.cuisine.toLowerCase() === lower);
+function buildNearbyCacheKey(
+  lat: number,
+  lng: number,
+  radius: number,
+  cuisine?: string,
+  price?: string,
+): string {
+  const roundedLat = lat.toFixed(3);
+  const roundedLng = lng.toFixed(3);
+  const parts = [NEARBY_CACHE_PREFIX, roundedLat, roundedLng, String(radius)];
+  if (cuisine) parts.push(`c:${cuisine.toLowerCase()}`);
+  if (price) parts.push(`p:${price.toLowerCase()}`);
+  return parts.join(":");
 }
 
 function paginate<T>(items: T[], offset: number, limit: number) {
@@ -252,22 +55,6 @@ function paginate<T>(items: T[], offset: number, limit: number) {
     offset,
     limit: Math.min(limit, 50),
   };
-}
-
-function fallbackToSeed(
-  cuisine?: string,
-  price?: string,
-  offset = 0,
-  limit = 10,
-) {
-  const items = filterSeed(TRENDING_SEED, cuisine);
-  const filtered = price
-    ? items.filter((d) =>
-        d.priceRange?.toLowerCase().includes(price.toLowerCase()),
-      )
-    : items;
-  logger.warn({ cuisine, price }, "using seed fallback for trending");
-  return paginate(filtered, offset, limit);
 }
 
 async function callLlmForTrending(
@@ -431,7 +218,7 @@ export async function getTrending(
   cuisine?: string,
   price?: string,
   offset = 0,
-  limit = 10,
+  limit = 5,
 ) {
   const cacheKey = buildCacheKey(cuisine, price);
 
@@ -443,27 +230,19 @@ export async function getTrending(
       return paginate(parsed.items, offset, limit);
     }
   } catch (error) {
-    logger.warn({ error, cacheKey }, "trending cache read failed, using seed");
-    return fallbackToSeed(cuisine, price, offset, limit);
+    logger.warn({ error, cacheKey }, "trending cache read failed, falling back to API");
   }
 
   let llmResult: TrendingDish[];
   try {
     llmResult = await callLlmForTrending(cuisine, price);
   } catch (error) {
-    logger.error(
-      { error },
-      "trending LLM generation failed, using seed fallback",
+    logger.error({ error }, "trending LLM generation failed");
+    throw new AppError(
+      "TRENDING_UNAVAILABLE",
+      503,
+      "Trending data is currently unavailable",
     );
-    const seed = fallbackToSeed(cuisine, price, offset, limit);
-    if (seed.items.length === 0) {
-      throw new AppError(
-        "TRENDING_UNAVAILABLE",
-        503,
-        "Trending data is currently unavailable",
-      );
-    }
-    return seed;
   }
 
   const validated = {
@@ -483,30 +262,6 @@ export async function getTrending(
   return paginate(validated.items, offset, limit);
 }
 
-function nearbySeedFilter(cuisine?: string, price?: string): NearbyResult[] {
-  let items = NEARBY_SEED;
-  if (cuisine) {
-    const lower = cuisine.toLowerCase();
-    items = items.filter((r) => r.cuisine.toLowerCase() === lower);
-  }
-  if (price) {
-    items = items.filter((r) => {
-      if (!r.priceRange) return false;
-      const p = price.toLowerCase();
-      if (p === "low")
-        return r.priceRange.includes("25.") || r.priceRange.includes("15.");
-      if (p === "mid")
-        return r.priceRange.includes("35.") || r.priceRange.includes("45.");
-      if (p === "high") return r.priceRange.includes("100.");
-      if (p === "premium") return r.priceRange.includes("200");
-      return r.priceRange.toLowerCase().includes(p);
-    });
-  }
-  return items
-    .map((r) => ({ ...r, distance: Math.round(r.distance) }))
-    .sort((a, b) => a.distance - b.distance);
-}
-
 export async function getNearby(
   lat: number,
   lng: number,
@@ -515,6 +270,14 @@ export async function getNearby(
   price?: string,
   limit = 20,
 ) {
+  const cacheKey = buildNearbyCacheKey(lat, lng, radius, cuisine, price);
+
+  const cached = await cacheGet<NearbyResult[]>(cacheKey);
+  if (cached) {
+    logger.debug({ cacheKey }, "nearby cache hit");
+    return cached.sort((a, b) => a.distance - b.distance).slice(0, limit);
+  }
+
   let results: NearbyResult[];
 
   try {
@@ -526,13 +289,8 @@ export async function getNearby(
       price: price ?? null,
     });
   } catch (error) {
-    logger.warn({ error }, "nearby API clients failed, using seed fallback");
+    logger.warn({ error }, "nearby API clients failed");
     results = [];
-  }
-
-  if (results.length === 0) {
-    logger.warn({ cuisine, price }, "using seed fallback for nearby");
-    results = nearbySeedFilter(cuisine, price);
   }
 
   const capped = results
@@ -543,6 +301,10 @@ export async function getNearby(
     { lat, lng, radius, cuisine, limit, count: capped.length },
     "nearby query results",
   );
+
+  if (results.length > 0) {
+    await cacheSet(cacheKey, capped, NEARBY_CACHE_TTL);
+  }
 
   return capped;
 }

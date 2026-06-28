@@ -28,6 +28,8 @@ const mockShared = vi.hoisted(() => {
 
   return {
     redis: mockRedis,
+    cacheGet: vi.fn().mockResolvedValue(null),
+    cacheSet: vi.fn().mockResolvedValue(undefined),
     logger: { warn: vi.fn(), error: vi.fn(), debug: vi.fn(), info: vi.fn() },
     env: {
       LLM_PROXY_URL: "http://localhost:3001",
@@ -118,15 +120,63 @@ vi.mock("../../src/services/index.js", () => ({
 import request from "supertest";
 import { buildApp } from "../../src/server.js";
 
+const LLM_SUCCESS_RESPONSE: Response = {
+  ok: true,
+  status: 200,
+  json: vi.fn().mockResolvedValue({
+    success: true,
+    data: {
+      content: JSON.stringify([
+        {
+          dishId: "api-1",
+          name: "Phở bò",
+          nameEn: "Beef Pho",
+          cuisine: "Vietnamese",
+          priceRange: "45.000đ – 65.000đ",
+          trendingRank: 1,
+          imageDescription: "Bowl of beef pho with herbs",
+        },
+        {
+          dishId: "api-2",
+          name: "Bún chả",
+          nameEn: "Grilled Pork Noodles",
+          cuisine: "Vietnamese",
+          priceRange: "35.000đ – 50.000đ",
+          trendingRank: 2,
+        },
+        {
+          dishId: "api-3",
+          name: "Bánh mì thịt",
+          nameEn: "Vietnamese Baguette",
+          cuisine: "Vietnamese",
+          priceRange: "25.000đ – 45.000đ",
+          trendingRank: 3,
+        },
+        {
+          dishId: "api-4",
+          name: "Cà phê sữa đá",
+          nameEn: "Iced Coffee",
+          cuisine: "Vietnamese",
+          priceRange: "15.000đ – 29.000đ",
+          trendingRank: 4,
+        },
+        {
+          dishId: "api-5",
+          name: "Cơm tấm",
+          nameEn: "Broken Rice",
+          cuisine: "Vietnamese",
+          priceRange: "30.000đ – 50.000đ",
+          trendingRank: 5,
+        },
+      ]),
+    },
+  }),
+} as unknown as Response;
+
 describe("Discovery Router - Trending", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(global, "fetch").mockResolvedValue({
-      ok: false,
-      status: 502,
-      json: vi.fn(),
-      text: vi.fn(),
-    } as unknown as Response);
+    vi.spyOn(global, "fetch").mockResolvedValue(LLM_SUCCESS_RESPONSE);
   });
 
   afterEach(() => {
@@ -195,12 +245,7 @@ describe("Discovery Router - Nearby", () => {
 describe("Discovery Router - For You", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(global, "fetch").mockResolvedValue({
-      ok: false,
-      status: 502,
-      json: vi.fn(),
-      text: vi.fn(),
-    } as unknown as Response);
+    vi.spyOn(global, "fetch").mockResolvedValue(LLM_SUCCESS_RESPONSE);
   });
 
   afterEach(() => {

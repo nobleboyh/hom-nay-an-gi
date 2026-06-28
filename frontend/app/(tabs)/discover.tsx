@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import { ChipRow } from '../../components/ChipRow';
+import { DishCard } from '../../components/DishCard';
 import { EmptyState } from '../../components/EmptyState';
 import { LocationPicker, type LocationOption } from '../../components/LocationPicker';
 import { RestaurantCard } from '../../components/RestaurantCard';
@@ -36,6 +37,16 @@ type NearbyItem = {
   lat?: number;
   lng?: number;
   externalUrl?: string;
+};
+
+type TrendingDish = {
+  dishId: string;
+  name: string;
+  nameEn: string;
+  cuisine: string;
+  priceRange?: string;
+  trendingRank: number;
+  imageDescription?: string;
 };
 
 type TabId = 'tat-ca' | 'dang-thinh-hanh' | 'gan-toi' | 'mon-moi' | 'danh-gia-cao';
@@ -100,6 +111,9 @@ export default function DiscoverScreen() {
   const [nearbyData, setNearbyData] = useState<NearbyItem[]>([]);
   const [isLoadingNearby, setIsLoadingNearby] = useState(true);
   const [errorNearby, setErrorNearby] = useState<string | null>(null);
+  const [trendingData, setTrendingData] = useState<TrendingDish[]>([]);
+  const [isLoadingTrending, setIsLoadingTrending] = useState(true);
+  const [errorTrending, setErrorTrending] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const [location, setLocation] = useState<{
@@ -113,8 +127,24 @@ export default function DiscoverScreen() {
   });
   const [isLocating, setIsLocating] = useState(false);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [locationChanging, setLocationChanging] = useState(false);
+  const [showNewLocationResults, setShowNewLocationResults] = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const locationRef = useRef(location);
+  const prevDataRef = useRef<{
+    trending: TrendingDish[];
+    nearby: NearbyItem[];
+    isLoadingTrending: boolean;
+    isLoadingNearby: boolean;
+    errorTrending: string | null;
+    errorNearby: string | null;
+    showNewLocationResults: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
 
   const webMainContentProps =
     Platform.OS === 'web'
@@ -157,11 +187,34 @@ export default function DiscoverScreen() {
     }
   }
 
+  async function fetchTrending(cuisine?: string, price?: string) {
+    try {
+      setIsLoadingTrending(true);
+      setErrorTrending(null);
+      const params = new URLSearchParams();
+      if (cuisine) params.set('cuisine', cuisine);
+      if (price) params.set('price', price);
+      const res = await apiClient.get<{ items: TrendingDish[] }>(
+        `/api/v1/discovery/trending?${params}`,
+      );
+      setTrendingData(res.data.items);
+    } catch (err) {
+      const apiErr = err as ApiError;
+      setErrorTrending(
+        apiErr.message || 'Không thể tải món đang thịnh hành',
+      );
+    } finally {
+      setIsLoadingTrending(false);
+    }
+  }
+
   const fetchAll = useCallback(
     (cuisine?: string, price?: string) => {
-      void fetchNearby(location.lat, location.lng, cuisine, price, getNearbyLimit());
+      const loc = locationRef.current;
+      void fetchNearby(loc.lat, loc.lng, cuisine, price, getNearbyLimit());
+      void fetchTrending(cuisine, price);
     },
-    [location.lat, location.lng, getNearbyLimit],
+    [getNearbyLimit],
   );
 
   useEffect(() => {
@@ -187,7 +240,7 @@ export default function DiscoverScreen() {
         clearTimeout(debounceRef.current);
       }
     };
-  }, [selectedCuisines, selectedPrices, fetchAll]);
+  }, [selectedTab, selectedCuisines, selectedPrices, fetchAll]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -200,15 +253,17 @@ export default function DiscoverScreen() {
         ? priceParamMap[selectedPrices[0]]
         : undefined;
     await fetchNearby(location.lat, location.lng, activeCuisine, activePrice, getNearbyLimit());
+    await fetchTrending(activeCuisine, activePrice);
     setRefreshing(false);
-  }, [selectedCuisines, selectedPrices, location, getNearbyLimit]);
+  }, [selectedTab, selectedCuisines, selectedPrices, location, getNearbyLimit]);
 
   const showTrending =
-    selectedTab === 'tat-ca' || selectedTab === 'dang-thinh-hanh';
+    !locationChanging && !showNewLocationResults && (selectedTab === 'tat-ca' || selectedTab === 'dang-thinh-hanh' || selectedTab === 'mon-moi' || selectedTab === 'danh-gia-cao');
   const showNearby =
-    selectedTab === 'gan-toi' || selectedTab === 'tat-ca';
+    !locationChanging && !showNewLocationResults && (selectedTab === 'gan-toi' || selectedTab === 'tat-ca');
 
   async function handleGetLocation() {
+    prevDataRef.current = null;
     setIsLocating(true);
     try {
       if (Platform.OS === 'web') {
@@ -229,6 +284,9 @@ export default function DiscoverScreen() {
               district: 'Vị trí hiện tại',
             });
             void fetchNearby(pos.coords.latitude, pos.coords.longitude, activeCuisine, activePrice, getNearbyLimit());
+            void fetchTrending(activeCuisine, activePrice);
+            setShowLocationPicker(false);
+            setLocationChanging(false);
           },
           () => {
             setLocation((prev) => ({
@@ -253,19 +311,24 @@ export default function DiscoverScreen() {
         const activeCuisine = selectedCuisines.length > 0 ? cuisineParamMap[selectedCuisines[0]] : undefined;
         const activePrice = selectedPrices.length > 0 ? priceParamMap[selectedPrices[0]] : undefined;
         void fetchNearby(pos.coords.latitude, pos.coords.longitude, activeCuisine, activePrice, getNearbyLimit());
+        void fetchTrending(activeCuisine, activePrice);
+        setShowLocationPicker(false);
+        setLocationChanging(false);
       }
     } catch {
       setLocation((prev) => ({
         ...prev,
         district: 'Đang cập nhật vị trí...',
       }));
+      setShowLocationPicker(false);
+      setLocationChanging(false);
     } finally {
       setIsLocating(false);
     }
   }
 
   function handleLocationSelected(option: LocationOption) {
-    setShowLocationPicker(false);
+    prevDataRef.current = null;
     if (option.label.includes('Vị trí hiện tại')) {
       void handleGetLocation();
       return;
@@ -278,11 +341,55 @@ export default function DiscoverScreen() {
     const activeCuisine = selectedCuisines.length > 0 ? cuisineParamMap[selectedCuisines[0]] : undefined;
     const activePrice = selectedPrices.length > 0 ? priceParamMap[selectedPrices[0]] : undefined;
     void fetchNearby(option.lat, option.lng, activeCuisine, activePrice, getNearbyLimit());
+    void fetchTrending(activeCuisine, activePrice);
+    setSelectedTab('tat-ca');
+    setShowNewLocationResults(true);
+    setShowLocationPicker(false);
+    setLocationChanging(false);
+  }
+
+  function openMap(name: string, lat?: number, lng?: number) {
+    const encodedName = encodeURIComponent(name);
+    const hasCoords = lat != null && lng != null;
+    const query = hasCoords ? `${lat},${lng}` : encodedName;
+
+    let url: string;
+    if (hasCoords) {
+      if (Platform.OS === 'ios') {
+        url = `maps://?ll=${lat},${lng}&q=${encodedName}`;
+      } else if (Platform.OS === 'android') {
+        url = `geo:${lat},${lng}?q=${lat},${lng}(${encodedName})`;
+      } else {
+        url = `https://www.google.com/maps/search/?api=1&query=${query}`;
+      }
+    } else {
+      if (Platform.OS === 'ios') {
+        url = `maps://?q=${encodedName}`;
+      } else if (Platform.OS === 'android') {
+        url = `geo:0,0?q=${encodedName}`;
+      } else {
+        url = `https://www.google.com/maps/search/?api=1&query=${query}`;
+      }
+    }
+
+    Linking.openURL(url).catch(() => {
+      Linking.openURL(
+        `https://www.google.com/maps/search/?api=1&query=${query}`,
+      );
+    });
+  }
+
+  function handleTrendingCardPress(item: TrendingDish) {
+    openMap(`${item.name} ${item.nameEn}`);
   }
 
   function handleNearbyCardPress(item: NearbyItem) {
-    if (item.externalUrl) {
+    if (item.lat != null && item.lng != null) {
+      openMap(item.dishName ?? item.restaurantName, item.lat, item.lng);
+    } else if (item.externalUrl) {
       Linking.openURL(item.externalUrl);
+    } else {
+      openMap(item.dishName ?? item.restaurantName);
     }
   }
 
@@ -294,7 +401,7 @@ export default function DiscoverScreen() {
   const hasActiveFilters =
     selectedCuisines.length > 0 || selectedPrices.length > 0;
   const shouldRenderFilters =
-    selectedTab === 'tat-ca' || selectedTab === 'dang-thinh-hanh';
+    selectedTab === 'tat-ca' || selectedTab === 'dang-thinh-hanh' || selectedTab === 'mon-moi' || selectedTab === 'danh-gia-cao';
 
   function renderNearbySkeleton() {
     return (
@@ -349,7 +456,22 @@ export default function DiscoverScreen() {
               <Pressable
                 accessibilityLabel="Thay đổi vị trí"
                 accessibilityRole="button"
-                onPress={() => setShowLocationPicker(true)}
+                onPress={() => {
+                  prevDataRef.current = {
+                    trending: trendingData,
+                    nearby: nearbyData,
+                    isLoadingTrending,
+                    isLoadingNearby,
+                    errorTrending,
+                    errorNearby,
+                    showNewLocationResults,
+                  };
+                  setTrendingData([]);
+                  setNearbyData([]);
+                  setShowNewLocationResults(false);
+                  setLocationChanging(true);
+                  setShowLocationPicker(true);
+                }}
                 style={({ pressed }) => [
                   styles.locationBtn,
                   { opacity: pressed ? 0.7 : 1 },
@@ -362,9 +484,14 @@ export default function DiscoverScreen() {
           <ChipRow
             items={TAB_ITEMS}
             mode="singleSelect"
-            onSelectionChange={(ids) =>
-              setSelectedTab((ids[0] || 'tat-ca') as TabId)
-            }
+            onSelectionChange={(ids) => {
+              const tab = (ids[0] || 'tat-ca') as TabId;
+              setSelectedTab(tab);
+              setShowNewLocationResults(false);
+              if (tab === 'gan-toi') {
+                void handleGetLocation();
+              }
+            }}
             selectedIds={[selectedTab]}
             style={styles.chipRowPadding}
           />
@@ -402,11 +529,19 @@ export default function DiscoverScreen() {
                     </Text>
                   </View>
 
-                  {isLoadingNearby && !refreshing ? (
-                    renderNearbySkeleton()
-                  ) : errorNearby ? (
+                  {isLoadingTrending && !refreshing ? (
+                    <View style={{ gap: Spacing.gap }}>
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <Skeleton
+                          key={i}
+                          variant="card"
+                          style={{ width: '100%', height: 160, borderRadius: Radius.sm }}
+                        />
+                      ))}
+                    </View>
+                  ) : errorTrending ? (
                     <EmptyState
-                      description={errorNearby}
+                      description={errorTrending}
                       icon="⚠️"
                       onCtaPress={() =>
                         fetchAll(
@@ -421,32 +556,29 @@ export default function DiscoverScreen() {
                       ctaLabel="Thử lại"
                       title="Không thể tải"
                     />
-                  ) : nearbyData.length === 0 ? (
+                  ) : trendingData.length === 0 ? (
                     <EmptyState
                       description={
                         hasActiveFilters
-                          ? 'Không có nhà hàng nào phù hợp'
-                          : 'Không có nhà hàng nào gần đây'
+                          ? 'Không có món ăn nào phù hợp'
+                          : 'Không có món ăn nào đang thịnh hành'
                       }
-                      icon="📍"
+                      icon="🍽️"
                       onCtaPress={hasActiveFilters ? clearFilters : undefined}
                       ctaLabel={hasActiveFilters ? 'Xoá bộ lọc' : undefined}
                       title={hasActiveFilters ? 'Không tìm thấy' : 'Trống'}
                     />
                   ) : (
                     <View style={[styles.cardGrid, { gap: Spacing.gap }]}>
-                      {nearbyData.slice(0, 5).map((item, idx) => (
-                        <View key={`trending-${item.restaurantName}-${idx}`} style={{ width: columns > 1 ? `${100 / columns}%` : '100%', paddingHorizontal: Platform.OS === 'web' ? Spacing.xs : 0 }}>
-                          <RestaurantCard
-                            accessibilityLabel={
-                              item.dishName ?? item.restaurantName
-                            }
-                            distanceMeters={item.distance ?? 0}
-                            name={item.dishName ?? item.restaurantName}
-                            restaurantName={item.restaurantName}
+                      {trendingData.map((item) => (
+                        <View key={item.dishId} style={{ width: columns > 1 ? `${100 / columns}%` : '100%', paddingHorizontal: Platform.OS === 'web' ? Spacing.xs : 0 }}>
+                          <DishCard
+                            accessibilityLabel={item.name}
+                            dishName={item.name}
                             price={item.priceRange}
-                            rating={'5.0'}
-                            onPress={() => handleNearbyCardPress(item)}
+                            rating={String(item.trendingRank)}
+                            restaurantName={item.nameEn}
+                            onPress={() => handleTrendingCardPress(item)}
                           />
                         </View>
                       ))}
@@ -521,11 +653,67 @@ export default function DiscoverScreen() {
             </View>
           ) : null}
 
+          {showNewLocationResults && selectedTab === 'tat-ca' ? (
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>
+                  Kết quả tại {location.district}
+                </Text>
+              </View>
+
+              {isLoadingNearby ? (
+                <View style={{ gap: Spacing.gap }}>
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton
+                      key={i}
+                      variant="card"
+                      style={{ width: '100%', height: 120, borderRadius: Radius.sm }}
+                    />
+                  ))}
+                </View>
+              ) : nearbyData.length === 0 ? (
+                <EmptyState
+                  description="Không tìm thấy nhà hàng nào tại khu vực này"
+                  icon="📍"
+                  title="No result found"
+                />
+              ) : (
+                <View style={{ gap: Spacing.gap }}>
+                  {nearbyData.map((item, idx) => (
+                    <RestaurantCard
+                      key={`nearby-${idx}`}
+                      accessibilityLabel={item.dishName ?? item.restaurantName}
+                      distanceMeters={item.distance ?? 0}
+                      name={item.dishName ?? item.restaurantName}
+                      restaurantName={item.restaurantName}
+                      price={item.priceRange}
+                      rating={item.rating != null ? String(item.rating) : undefined}
+                      onPress={() => handleNearbyCardPress(item)}
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
+          ) : null}
+
           <View style={{ height: Spacing.xl }} />
         </ScrollView>
 
         <LocationPicker
-          onClose={() => setShowLocationPicker(false)}
+          onClose={() => {
+            if (prevDataRef.current) {
+              setTrendingData(prevDataRef.current.trending);
+              setNearbyData(prevDataRef.current.nearby);
+              setIsLoadingTrending(prevDataRef.current.isLoadingTrending);
+              setIsLoadingNearby(prevDataRef.current.isLoadingNearby);
+              setErrorTrending(prevDataRef.current.errorTrending);
+              setErrorNearby(prevDataRef.current.errorNearby);
+              setShowNewLocationResults(prevDataRef.current.showNewLocationResults);
+              prevDataRef.current = null;
+            }
+            setShowLocationPicker(false);
+            setLocationChanging(false);
+          }}
           onSelect={handleLocationSelected}
           visible={showLocationPicker}
         />
