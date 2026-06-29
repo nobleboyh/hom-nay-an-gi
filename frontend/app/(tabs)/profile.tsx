@@ -788,6 +788,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.sm,
+    alignItems: 'flex-start',
   },
   toggleRow: {
     flexDirection: 'row',
