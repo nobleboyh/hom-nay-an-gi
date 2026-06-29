@@ -52,6 +52,10 @@ test('story 1.3 wires Vietnamese tabs, placeholders, and the API base env file',
   assert.match(tabsLayout, /Cá nhân/);
   assert.match(homeScreen, /Bỏ qua điều hướng/);
   assert.match(homeScreen, /main-content/);
+  assert.match(homeScreen, /Platform\.OS === 'web' \? \(/);
+  assert.match(homeScreen, /skipLinkHidden/);
+  assert.match(homeScreen, /translateY: -16/);
+  assert.doesNotMatch(homeScreen, /position: 'relative'/);
   assert.match(profileScreen, /LoginScreen/);
   assert.match(profileScreen, /useAuthStore/);
   assert.match(recipeScreen, /handleBack/);

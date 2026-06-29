@@ -65,6 +65,7 @@ export default function HomeScreen() {
   const { resultsStatus: searchStatus, fetchDishes, fetchSurpriseMe } = useDataStore();
   const [inputValue, setInputValue] = useState('');
   const [ingredientChips, setIngredientChips] = useState<string[]>([]);
+  const [skipFocused, setSkipFocused] = useState(false);
 
   const webMainContentProps = Platform.OS === 'web'
     ? ({ id: 'main-content', tabIndex: -1 } as { id: string; tabIndex: number })
@@ -137,19 +138,23 @@ export default function HomeScreen() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       <View style={styles.container}>
-        <Pressable
-          accessibilityLabel="Bỏ qua điều hướng, chuyển đến nội dung chính"
-          accessibilityRole="link"
-          onPress={() => {
-            if (Platform.OS === 'web') {
-              const el = document.getElementById('main-content');
-              if (el) el.focus();
-            }
-          }}
-          style={styles.skipLink}
-        >
-          <Text style={styles.skipLinkText}>Bỏ qua điều hướng → Nội dung chính</Text>
-        </Pressable>
+        {Platform.OS === 'web' ? (
+          <Pressable
+            accessibilityLabel="Bỏ qua điều hướng, chuyển đến nội dung chính"
+            accessibilityRole="link"
+            onBlur={() => setSkipFocused(false)}
+            onFocus={() => setSkipFocused(true)}
+            onPress={() => {
+              if (typeof document !== 'undefined') {
+                const el = document.getElementById('main-content');
+                if (el) el.focus();
+              }
+            }}
+            style={[styles.skipLink, skipFocused ? styles.skipLinkVisible : styles.skipLinkHidden]}
+          >
+            <Text style={styles.skipLinkText}>Bỏ qua điều hướng → Nội dung chính</Text>
+          </Pressable>
+        ) : null}
 
         <ScrollView
           {...webMainContentProps}
@@ -278,12 +283,28 @@ const styles = StyleSheet.create({
   },
   skipLink: {
     alignSelf: 'flex-start',
-    marginHorizontal: Spacing.md2,
-    marginBottom: Spacing.gap,
     borderRadius: Radius.sm,
     backgroundColor: oklchToRgba(Colors.fg),
     paddingHorizontal: Spacing.gap,
     paddingVertical: Spacing.sm2,
+  },
+  skipLinkHidden: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    opacity: 0,
+    transform: [{ translateY: -16 }],
+    zIndex: 10,
+  },
+  skipLinkVisible: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    borderWidth: 2,
+    borderColor: oklchToRgba(Colors.accentStrong),
+    opacity: 1,
+    transform: [{ translateY: 0 }],
+    zIndex: 10,
   },
   skipLinkText: {
     color: oklchToRgba(Colors.surface),
