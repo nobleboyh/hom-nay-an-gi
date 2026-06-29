@@ -1110,5 +1110,130 @@
     "caloriesPerServing": 220,
     "tags": ["Việt Nam", "Có thịt", "Món xào", "Thanh đạm"],
     "imageDescription": "Đĩa mực xào chua ngọt với mực cuộn tròn trắng tinh, cà chua đỏ, dứa vàng và rau củ sặc sỡ"
+  },
+  {
+    "dishId": "fa114704-b47b-4527-baf5-200bbf40993f",
+    "name": "Ếch Xào Sả Ớt",
+    "nameEn": "Lemongrass Chili Frog",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Ếch", "quantity": 400, "unit": "g" },
+      { "name": "Sả", "quantity": 3, "unit": "cây" },
+      { "name": "Ớt", "quantity": 2, "unit": "quả" },
+      { "name": "Tỏi", "quantity": 3, "unit": "tép" },
+      { "name": "Nước mắm", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Dầu ăn", "quantity": 2, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      { "label": "Sơ chế ếch: làm sạch, chặt miếng vừa ăn", "durationMinutes": 10 },
+      { "label": "Băm nhỏ sả, ớt, tỏi", "durationMinutes": 5, "parallelGroup": "prep" },
+      { "label": "Ướp ếch với nước mắm, tiêu, sả, ớt, tỏi trong 10 phút", "durationMinutes": 10 },
+      { "label": "Phi thơm tỏi, xào ếch lửa lớn đến khi chín vàng", "durationMinutes": 12 },
+      { "label": "Trình bày ra đĩa, rắc thêm sả ớt lên trên", "durationMinutes": 3 }
+    ],
+    "totalCookTimeMinutes": 25,
+    "caloriesPerServing": 350,
+    "tags": ["Việt Nam", "Có thịt", "Món xào"],
+    "imageDescription": "Thịt ếch vàng óng với sả ớt trên đĩa trắng"
+  },
+  {
+    "dishId": "6b2759bb-081a-4d68-98f7-d2371a8203b7",
+    "name": "Ếch Chiên Bơ",
+    "nameEn": "Butter Fried Frog",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Ếch", "quantity": 400, "unit": "g" },
+      { "name": "Bơ", "quantity": 50, "unit": "g" },
+      { "name": "Tỏi", "quantity": 3, "unit": "tép" },
+      { "name": "Bột chiên giòn", "quantity": 100, "unit": "g" },
+      { "name": "Trứng gà", "quantity": 1, "unit": "quả" },
+      { "name": "Muối", "quantity": 1, "unit": "muỗng cà phê" }
+    ],
+    "steps": [
+      { "label": "Sơ chế ếch, chặt miếng vừa ăn", "durationMinutes": 10 },
+      { "label": "Ướp ếch với muối, tiêu", "durationMinutes": 5, "parallelGroup": "prep" },
+      { "label": "Nhúng ếch qua trứng, lăn bột chiên giòn", "durationMinutes": 5 },
+      { "label": "Chiên ếch trong bơ lửa vừa đến khi vàng giòn", "durationMinutes": 12 },
+      { "label": "Trình bày ra đĩa", "durationMinutes": 3 }
+    ],
+    "totalCookTimeMinutes": 25,
+    "caloriesPerServing": 400,
+    "tags": ["Việt Nam", "Có thịt", "Món chiên"],
+    "imageDescription": "Thịt ếch chiên giòn rụm với bơ trên đĩa"
+  },
+  {
+    "dishId": "42063558-b4cb-420c-925e-f895750451f5",
+    "name": "Ếch Rang Muối",
+    "nameEn": "Salt Roasted Frog",
+    "cuisine": "Miền Trung",
+    "ingredients": [
+      { "name": "Ếch", "quantity": 400, "unit": "g" },
+      { "name": "Muối hột", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Tiêu", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Tỏi", "quantity": 3, "unit": "tép" },
+      { "name": "Dầu ăn", "quantity": 1, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      { "label": "Sơ chế ếch, để ráo", "durationMinutes": 10 },
+      { "label": "Giã nhuyễn muối hột với tiêu và tỏi", "durationMinutes": 5, "parallelGroup": "prep" },
+      { "label": "Rang muối tiêu trên chảo cho thơm", "durationMinutes": 5 },
+      { "label": "Cho ếch vào rang lửa lớn đến khi vàng giòn", "durationMinutes": 12 },
+      { "label": "Trình bày ra đĩa", "durationMinutes": 3 }
+    ],
+    "totalCookTimeMinutes": 28,
+    "caloriesPerServing": 380,
+    "tags": ["Việt Nam", "Có thịt", "Món rang"],
+    "imageDescription": "Thịt ếch rang muối giòn thơm trên đĩa"
+  },
+  {
+    "dishId": "d6fabb4c-82e4-4c72-90c5-12c76ffa2dad",
+    "name": "Lẩu Ếch",
+    "nameEn": "Frog Hotpot",
+    "cuisine": "Miền Nam",
+    "ingredients": [
+      { "name": "Ếch", "quantity": 500, "unit": "g" },
+      { "name": "Rau muống", "quantity": 200, "unit": "g" },
+      { "name": "Me", "quantity": 50, "unit": "g" },
+      { "name": "Sả", "quantity": 3, "unit": "cây" },
+      { "name": "Cà chua", "quantity": 2, "unit": "quả" },
+      { "name": "Hành tím", "quantity": 3, "unit": "củ" },
+      { "name": "Ớt", "quantity": 2, "unit": "quả" },
+      { "name": "Nước mắm", "quantity": 3, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      { "label": "Sơ chế ếch và rau", "durationMinutes": 15 },
+      { "label": "Phi thơm hành tím, xào ếch sơ qua", "durationMinutes": 5, "parallelGroup": "prep" },
+      { "label": "Nấu nước lẩu với me, cà chua, sả", "durationMinutes": 15 },
+      { "label": "Cho ếch vào nấu chín", "durationMinutes": 10 },
+      { "label": "Thưởng thức với rau muống và bún", "durationMinutes": 5 }
+    ],
+    "totalCookTimeMinutes": 45,
+    "caloriesPerServing": 320,
+    "tags": ["Việt Nam", "Có thịt", "Món lẩu"],
+    "imageDescription": "Nồi lẩu ếch sôi sùng sục với rau"
+  },
+  {
+    "dishId": "838f5701-ede5-4291-a24c-56fd03fb5c08",
+    "name": "Ếch Hấp Gừng",
+    "nameEn": "Steamed Ginger Frog",
+    "cuisine": "Miền Bắc",
+    "ingredients": [
+      { "name": "Ếch", "quantity": 400, "unit": "g" },
+      { "name": "Gừng", "quantity": 30, "unit": "g" },
+      { "name": "Hành tím", "quantity": 2, "unit": "củ" },
+      { "name": "Nước mắm", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Hành lá", "quantity": 20, "unit": "g" }
+    ],
+    "steps": [
+      { "label": "Sơ chế ếch, cắt miếng vừa ăn", "durationMinutes": 10 },
+      { "label": "Thái sợi gừng, băm nhỏ hành tím", "durationMinutes": 5, "parallelGroup": "prep" },
+      { "label": "Ướp ếch với gừng, hành tím, nước mắm", "durationMinutes": 10 },
+      { "label": "Hấp cách thuỷ 15 phút đến khi chín", "durationMinutes": 15 },
+      { "label": "Trình bày ra đĩa, rắc hành lá lên trên", "durationMinutes": 3 }
+    ],
+    "totalCookTimeMinutes": 28,
+    "caloriesPerServing": 280,
+    "tags": ["Việt Nam", "Có thịt", "Món hấp", "Thanh đạm"],
+    "imageDescription": "Ếch hấp gừng thơm lừng trên đĩa"
   }
 ]

@@ -5,6 +5,38 @@ const TIMEOUT_MS = 120_000;
 const RETRY_DELAY_MS = 2_000;
 const CIRCUIT_BREAKER_THRESHOLD = 3;
 const CIRCUIT_BREAKER_RESET_MS = 60_000;
+const OLLAMA_NUM_PREDICT = 4096;
+
+function extractJson(text: string): Record<string, unknown> {
+  if (!text || text === "{}") return {};
+
+  try {
+    return JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    // Not direct JSON — try markdown code block
+  }
+
+  const codeBlockMatch = text.match(/```(?:json)?\s*\n?([\s\S]*?)```/);
+  const codeBlockContent = codeBlockMatch?.[1];
+  if (codeBlockContent) {
+    try {
+      return JSON.parse(codeBlockContent.trim()) as Record<string, unknown>;
+    } catch {
+      // Fall through to generic regex
+    }
+  }
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      return JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+    } catch {
+      logger.warn({ text }, "Failed to parse JSON from LLM response");
+    }
+  }
+
+  return {};
+}
 
 interface ProviderAdapter {
   complete(
@@ -226,9 +258,7 @@ function createAnthropicAdapter(apiKey: string): ProviderAdapter {
       };
 
       const text = data.content?.[0]?.text ?? "{}";
-
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      return JSON.parse(jsonMatch?.[0] ?? "{}") as Record<string, unknown>;
+      return extractJson(text);
     },
   };
 }
@@ -253,8 +283,9 @@ function createOllamaAdapter(): ProviderAdapter {
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
           ],
-          temperature: 0.3,
+          temperature: 0.7,
           stream: false,
+          num_predict: OLLAMA_NUM_PREDICT,
         }),
       });
 
@@ -270,8 +301,7 @@ function createOllamaAdapter(): ProviderAdapter {
       };
 
       const text = data.choices?.[0]?.message?.content ?? "{}";
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      return JSON.parse(jsonMatch?.[0] ?? "{}") as Record<string, unknown>;
+      return extractJson(text);
     },
   };
 }
@@ -377,10 +407,18 @@ async function tryProvider<T>(
   schema: ZodSchema<T>,
 ): Promise<TryResult<T>> {
   if (isCircuitOpen(providerName)) {
-    return { success: false };
+    logger.warn(
+      { provider: providerName },
+      "Circuit breaker open, skipping LLM call",
+    );
+    return { success: false, error: "Circuit breaker open" };
   }
 
   if (apiKey.length === 0 && providerName !== "ollama") {
+    logger.error(
+      { provider: providerName },
+      "No API key configured for provider",
+    );
     return { success: false, error: "No API key configured" };
   }
 

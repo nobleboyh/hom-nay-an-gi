@@ -35,8 +35,35 @@ export type Dish = z.infer<typeof DishSchema>;
 
 export const DishArraySchema = z.array(DishSchema).min(0).max(50);
 
+const LlmIngredientSchema = z.object({
+  name: z.string().min(1).max(100).default(""),
+  quantity: z.coerce.number().positive().max(9999).default(1),
+  unit: z.string().min(1).max(30).default("phần"),
+});
+
+const LlmCookingStepSchema = z.object({
+  label: z.string().min(1).max(200).default(""),
+  durationMinutes: z.coerce.number().int().min(1).max(600).default(10),
+  parallelGroup: z.coerce.string().optional(),
+});
+
+const LlmDishSchema = z.object({
+  dishId: z.string().min(1).default(""),
+  name: z.string().min(1).max(200),
+  nameEn: z.string().min(1).max(200).default(""),
+  cuisine: z.string().min(1).max(100).default("Việt Nam"),
+  matchPercentage: z.coerce.number().int().min(0).max(100).default(50),
+  cookTimeMinutes: z.coerce.number().int().min(1).max(1200).default(30),
+  caloriesPerServing: z.coerce.number().int().min(1).max(5000).default(300),
+  tags: z.array(z.string().min(1).max(50)).min(0).max(20).default(["Việt Nam"]),
+  imageDescription: z.string().min(1).max(500).default(""),
+  ingredients: z.array(LlmIngredientSchema).min(0).max(30).default([]),
+  steps: z.array(LlmCookingStepSchema).min(0).max(30).default([]),
+  totalCookTimeMinutes: z.coerce.number().int().min(1).max(1200).default(30),
+});
+
 export const LlmDishResponseSchema = z.object({
-  dishes: DishArraySchema,
+  dishes: z.array(LlmDishSchema).min(0).max(50).default([]),
 });
 
 export type LlmDishResponse = z.infer<typeof LlmDishResponseSchema>;

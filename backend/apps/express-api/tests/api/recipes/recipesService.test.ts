@@ -1,6 +1,40 @@
 import type { Dish } from "@hom-nay-an-gi/shared";
-import { describe, expect, it } from "vitest";
-import { filterDislikedDishes } from "../../../src/api/recipes/recipesService.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { mockComplete, mockGetSeedRecipes, mockCacheGet, mockCacheSet } =
+  vi.hoisted(() => ({
+    mockComplete: vi.fn(),
+    mockGetSeedRecipes: vi.fn(),
+    mockCacheGet: vi.fn(),
+    mockCacheSet: vi.fn(),
+  }));
+
+vi.mock("../../../src/services/llmClient.js", () => ({
+  complete: mockComplete,
+}));
+
+vi.mock("../../../src/data/seedLoader.js", () => ({
+  getSeedRecipes: mockGetSeedRecipes,
+  getSeedRecipeById: vi.fn(),
+  loadSeedRecipes: vi.fn(),
+  isSeedDataLoaded: vi.fn(() => true),
+}));
+
+vi.mock("@hom-nay-an-gi/shared", async () => {
+  const actual = await vi.importActual<Record<string, unknown>>(
+    "@hom-nay-an-gi/shared",
+  );
+  return {
+    ...actual,
+    cacheGet: mockCacheGet,
+    cacheSet: mockCacheSet,
+  };
+});
+
+import {
+  filterDislikedDishes,
+  searchByIngredients,
+} from "../../../src/api/recipes/recipesService.js";
 
 function makeDish(
   overrides: Partial<{
@@ -123,4 +157,236 @@ describe("filterDislikedDishes", () => {
     const result = filterDislikedDishes([dish], ["thịt bò"]);
     expect(result).toHaveLength(0);
   });
+});
+
+function makeSeedRecipe(
+  overrides: Partial<{
+    dishId: string;
+    name: string;
+    nameEn: string;
+    cuisine: string;
+    matchPercentage: number;
+    cookTimeMinutes: number;
+    caloriesPerServing: number;
+    tags: string[];
+    imageDescription: string;
+    ingredients: { name: string; quantity: number; unit: string }[];
+  }> = {},
+) {
+  return {
+    dishId: "550e8400-e29b-41d4-a716-446655440001",
+    name: "Phở Bò",
+    nameEn: "Beef Pho",
+    cuisine: "Miền Bắc",
+    totalCookTimeMinutes: 70,
+    caloriesPerServing: 450,
+    tags: ["súp", "món chính", "bò"],
+    imageDescription: "Bát phở bò",
+    ingredients: [
+      { name: "Bánh phở", quantity: 200, unit: "g" },
+      { name: "Thịt bò", quantity: 150, unit: "g" },
+    ],
+    steps: [{ label: "Nấu nước dùng", durationMinutes: 60 }],
+    ...overrides,
+  };
+}
+
+function makeRelevantDish(
+  overrides: Partial<{
+    dishId: string;
+    name: string;
+    ingredients: { name: string; quantity: number; unit: string }[];
+  }> = {},
+) {
+  return {
+    dishId: "llm-dish-1",
+    name: "Phở bò",
+    nameEn: "Beef Pho",
+    cuisine: "Miền Bắc",
+    matchPercentage: 90,
+    cookTimeMinutes: 75,
+    caloriesPerServing: 450,
+    tags: ["Việt Nam", "Món nước"],
+    imageDescription: "Tô phở bò",
+    ingredients: [
+      { name: "Bánh phở", quantity: 500, unit: "g" },
+      { name: "Thịt bò", quantity: 200, unit: "g" },
+    ],
+    steps: [{ label: "Nấu nước dùng", durationMinutes: 60 }],
+    totalCookTimeMinutes: 75,
+    ...overrides,
+  };
+}
+
+function makeIrrelevantDish(
+  overrides: Partial<{
+    dishId: string;
+    name: string;
+    ingredients: { name: string; quantity: number; unit: string }[];
+  }> = {},
+) {
+  return {
+    dishId: "llm-dish-2",
+    name: "Cá kho tộ",
+    nameEn: "Braised Fish",
+    cuisine: "Miền Nam",
+    matchPercentage: 85,
+    cookTimeMinutes: 45,
+    caloriesPerServing: 380,
+    tags: ["Việt Nam", "Món kho"],
+    imageDescription: "Nồi cá kho",
+    ingredients: [
+      { name: "Cá lóc", quantity: 300, unit: "g" },
+      { name: "Nước mắm", quantity: 30, unit: "ml" },
+    ],
+    steps: [{ label: "Kho cá", durationMinutes: 40 }],
+    totalCookTimeMinutes: 45,
+    ...overrides,
+  };
+}
+
+describe("searchByIngredients (relevance guardrails)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSeedRecipes.mockReturnValue([makeSeedRecipe()]);
+    mockCacheGet.mockResolvedValue(null);
+  });
+
+  it("filters out zero-overlap LLM dishes and falls back to seed (AC 2, AC 3)", async () => {
+    mockComplete.mockResolvedValue({
+      data: { dishes: [makeIrrelevantDish()] },
+      meta: { degraded: false },
+    });
+
+    const result = await searchByIngredients("thịt bò", "", undefined, 0, 10);
+
+    expect(result.meta.source).toBe("seed");
+    expect(result.meta.degraded).toBe(true);
+  }, 15000);
+
+  it("keeps only relevant dishes from mixed LLM payload (AC 2)", async () => {
+    mockComplete.mockResolvedValue({
+      data: {
+        dishes: [
+          makeRelevantDish({
+            dishId: "rel-1",
+            ingredients: [{ name: "Thịt bò", quantity: 200, unit: "g" }],
+          }),
+          makeIrrelevantDish({ dishId: "irr-1" }),
+          makeRelevantDish({
+            dishId: "rel-2",
+            ingredients: [{ name: "Bánh phở", quantity: 500, unit: "g" }],
+          }),
+        ],
+      },
+      meta: { degraded: false },
+    });
+
+    const result = await searchByIngredients(
+      "thịt bò, bánh phở",
+      "",
+      undefined,
+      0,
+      10,
+    );
+
+    const dishIds = result.dishes.map((d) => d.dishId);
+    expect(dishIds).not.toContain("irr-1");
+    expect(dishIds).toContain("rel-1");
+    expect(dishIds).toContain("rel-2");
+  }, 15000);
+
+  it("recalculates matchPercentage based on actual ingredient overlap (AC 5)", async () => {
+    mockComplete.mockResolvedValue({
+      data: {
+        dishes: [
+          makeRelevantDish({
+            dishId: "rel-1",
+            matchPercentage: 95,
+            ingredients: [{ name: "Thịt bò", quantity: 200, unit: "g" }],
+          }),
+        ],
+      },
+      meta: { degraded: false },
+    });
+
+    const result = await searchByIngredients(
+      "thịt bò, bánh phở, hành lá",
+      "",
+      undefined,
+      0,
+      10,
+    );
+
+    expect(result.dishes[0]?.matchPercentage).not.toBe(95);
+    expect(result.dishes[0]?.matchPercentage).toBeGreaterThan(0);
+  }, 15000);
+
+  it("keeps only relevant dishes removes irrelevant from LLM payload (AC 2)", async () => {
+    mockComplete.mockResolvedValue({
+      data: {
+        dishes: [
+          makeRelevantDish({
+            dishId: "rel-1",
+            ingredients: [{ name: "Thịt bò", quantity: 200, unit: "g" }],
+          }),
+          makeIrrelevantDish({ dishId: "irr-1" }),
+        ],
+      },
+      meta: { degraded: false },
+    });
+
+    const result = await searchByIngredients("thịt bò", "", undefined, 0, 10);
+
+    expect(result.dishes).toHaveLength(1);
+    expect(result.dishes[0]?.dishId).toBe("rel-1");
+  }, 15000);
+
+  it("re-validates cached dishes on read and filters stale irrelevant data (cache path)", async () => {
+    const staleIrrelevant = makeIrrelevantDish({ dishId: "stale-irrelevant" });
+    const relevant = makeRelevantDish({
+      dishId: "rel-1",
+      ingredients: [{ name: "Thịt bò", quantity: 200, unit: "g" }],
+    });
+
+    mockCacheGet.mockResolvedValue({
+      dishes: [staleIrrelevant, relevant],
+      total: 2,
+    });
+
+    const result = await searchByIngredients("thịt bò", "", undefined, 0, 10);
+
+    expect(result.meta.source).toBe("cache");
+    expect(result.dishes).toHaveLength(1);
+    expect(result.dishes[0]?.dishId).toBe("rel-1");
+    expect(mockComplete).not.toHaveBeenCalled();
+  }, 15000);
+
+  it("bypasses cache and falls through to LLM when all cached dishes are stale and filtered out", async () => {
+    const staleIrrelevant1 = makeIrrelevantDish({ dishId: "stale-1" });
+    const staleIrrelevant2 = makeIrrelevantDish({ dishId: "stale-2" });
+
+    mockCacheGet.mockResolvedValue({
+      dishes: [staleIrrelevant1, staleIrrelevant2],
+      total: 2,
+    });
+
+    mockComplete.mockResolvedValue({
+      data: {
+        dishes: [
+          makeRelevantDish({
+            dishId: "rel-1",
+            ingredients: [{ name: "Thịt bò", quantity: 200, unit: "g" }],
+          }),
+        ],
+      },
+      meta: { degraded: false },
+    });
+
+    const result = await searchByIngredients("thịt bò", "", undefined, 0, 10);
+
+    expect(result.meta.source).toBe("llm");
+    expect(result.dishes).toHaveLength(1);
+    expect(result.dishes[0]?.dishId).toBe("rel-1");
+  }, 15000);
 });
