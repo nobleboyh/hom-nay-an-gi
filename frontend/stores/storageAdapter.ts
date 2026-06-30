@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { createApiClient, type ApiClient } from '../lib/api';
+import { getApiBaseUrlOrThrow } from '../lib/env';
 import { useAuthStore } from './authStore';
 
 export type StorageTarget = 'sqlite' | 'api';
@@ -59,7 +60,7 @@ async function getDb(): Promise<SQLite.SQLiteDatabase> {
 function getApiClient(): ApiClient {
   if (!apiClient) {
     apiClient = createApiClient({
-      baseUrl: process.env.API_BASE_URL || 'http://localhost:8080',
+      baseUrl: getApiBaseUrlOrThrow(),
       getToken: async () => {
         const { accessToken } = useAuthStore.getState();
         return accessToken;

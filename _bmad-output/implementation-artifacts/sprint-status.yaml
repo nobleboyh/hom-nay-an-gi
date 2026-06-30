@@ -47,5 +47,6 @@ development_status:
   4-9-notification-infrastructure: done
   4-10-authenticated-favorites-route-regression-fix: done
   4-11-disliked-ingredients-search-filter-regression-fix: done
+  q-4-expo-go-api-connectivity-contract-fix: done
 
-last_updated: 2026-06-27 (4-11 disliked ingredients search filter regression fix completed)
+last_updated: 2026-06-30 (Q.4 Expo Go API connectivity contract fix done after code review fixes)

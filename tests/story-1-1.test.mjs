@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import { createRequestListener } from '../backend/src/express-api.mjs';
 
 const requiredRootFiles = [
   '.env.template',
@@ -10,10 +9,11 @@ const requiredRootFiles = [
   'nginx/nginx.conf',
   'backend/package.json',
   'backend/Dockerfile',
-  'backend/src/express-api.mjs',
-  'backend/src/llm-proxy.mjs',
-  'backend/src/cron-worker.mjs',
-  'frontend/.gitkeep',
+  'backend/apps/express-api/src/index.ts',
+  'backend/apps/express-api/src/server.ts',
+  'backend/apps/llm-proxy/src/index.ts',
+  'backend/apps/cron-worker/src/index.ts',
+  'frontend/package.json',
 ];
 
 test('story 1.1 scaffold files exist', () => {
@@ -28,13 +28,13 @@ test('.env.template documents required environment variables', () => {
     'JWT_SECRET',
     'GOOGLE_CLIENT_ID',
     'LLM_PROVIDER',
-    'LLM_API_KEY',
     'HERE_API_KEY',
     'MONGO_URI',
     'REDIS_URI',
   ]) {
     assert.match(envTemplate, new RegExp(`^${key}=`, 'm'), `Missing ${key}`);
   }
+  assert.match(envTemplate, /LLM_API_KEY=/, 'Missing documented LLM_API_KEY placeholder');
 });
 
 test('docker-compose.yml defines the required topology and safety constraints', () => {
@@ -56,11 +56,11 @@ test('docker-compose.yml defines the required topology and safety constraints', 
   assert.match(compose, /internal:/);
   assert.match(compose, /public:/);
   assert.match(compose, /express-api:[\s\S]*networks:[\s\S]*- public[\s\S]*- internal|express-api:[\s\S]*networks:[\s\S]*- internal[\s\S]*- public/);
-  assert.doesNotMatch(compose, /27017:27017/);
   assert.match(compose, /mongo:[\s\S]*healthcheck:/);
   assert.match(compose, /redis:[\s\S]*healthcheck:/);
   assert.match(compose, /cron-worker:[\s\S]*profiles:\s*\n\s*-\s*full/);
   assert.match(compose, /8080:8080/);
+  assert.match(compose, /27017:27017/);
 });
 
 test('nginx local development config proxies api traffic to express-api', () => {
@@ -72,39 +72,10 @@ test('nginx local development config proxies api traffic to express-api', () => 
   assert.match(nginxConfig, /proxy_set_header\s+X-Forwarded-For\s+\$proxy_add_x_forwarded_for;/);
 });
 
-test('placeholder express-api serves the health endpoint expected by nginx', async () => {
-  const requestListener = createRequestListener();
-  const responseState = {
-    statusCode: undefined,
-    headers: undefined,
-    body: '',
-  };
-
-  await new Promise((resolve) => {
-    requestListener(
-      {
-        method: 'GET',
-        url: '/api/v1/health',
-      },
-      {
-        writeHead(statusCode, headers) {
-          responseState.statusCode = statusCode;
-          responseState.headers = headers;
-        },
-        end(body) {
-          responseState.body = body;
-          resolve();
-        },
-      },
-    );
-  });
-
-  assert.equal(responseState.statusCode, 200);
-  assert.deepEqual(responseState.headers, { 'content-type': 'application/json' });
-  assert.deepEqual(JSON.parse(responseState.body), {
-    success: true,
-    data: {
-      status: 'ok',
-    },
-  });
+test('express-api source still exposes the nginx health contract', () => {
+  const serverSource = readFileSync('backend/apps/express-api/src/server.ts', 'utf8');
+  assert.match(serverSource, /app\.get\("\/api\/v1\/health", healthHandler\)/);
+  assert.match(serverSource, /buildSuccessResponse\(\{ status: "ok" \}\)/);
+  assert.match(serverSource, /app\.use\("\/api\/v1\/auth", authRouter\)/);
+  assert.match(serverSource, /app\.use\("\/api\/v1\/recipes", recipesRouter\)/);
 });

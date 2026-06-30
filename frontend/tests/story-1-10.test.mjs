@@ -75,7 +75,7 @@ test('.env.template has SENTRY_DSN with documentation link', () => {
 
 test('.env.template preserves existing entries', () => {
   const envTemplate = fs.readFileSync(resolveFromFrontend('.env.template'), 'utf8');
-  assert.match(envTemplate, /API_BASE_URL=http:\/\/localhost:8080/);
+  assert.match(envTemplate, /API_BASE_URL=http:\/\/<LAN_IP>:8080/);
   assert.match(envTemplate, /GOOGLE_CLIENT_ID=replace-with-your-google-client-id/);
 });
 

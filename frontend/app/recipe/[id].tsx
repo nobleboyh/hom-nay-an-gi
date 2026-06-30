@@ -14,6 +14,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Button, EmptyState, ServingAdjuster, Skeleton, Timeline, Toast } from '../../components';
 import type { TimelineStep } from '../../components/Timeline';
 import { formatTime } from '../../lib/formatTime';
+import { isApiBaseUrlConfigurationError } from '../../lib/env';
 import { t } from '../../lib/i18n';
 import { useNetworkStatus } from '../../lib/networkStatus';
 import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../../lib/tokens';
@@ -135,9 +136,15 @@ export default function RecipeDetailScreen() {
 
   useEffect(() => {
     if (id) {
-      fetchRecipeDetail(id);
+      void fetchRecipeDetail(id).catch((error) => {
+        if (isApiBaseUrlConfigurationError(error)) {
+          addToast(error.message, 'error');
+          return;
+        }
+        addToast(t('state.error.recipe'), 'error');
+      });
     }
-  }, [id, fetchRecipeDetail]);
+  }, [id, fetchRecipeDetail, addToast]);
 
   const offlineToastShown = useRef(false);
   const prevRecipeStatus = useRef(recipeStatus);
@@ -242,7 +249,11 @@ export default function RecipeDetailScreen() {
           addToast(t('state.error.generic'), 'error');
         }
       }
-    } catch {
+    } catch (error) {
+      if (isApiBaseUrlConfigurationError(error)) {
+        addToast(error.message, 'error');
+        return;
+      }
       addToast(t('state.error.generic'), 'error');
     }
   }, [recipeDetail, dishes, isSaved, removeFavorite, saveFavorite, addToast]);

@@ -5,6 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import * as Crypto from 'expo-crypto';
+import { getApiBaseUrlOrThrow, isApiBaseUrlConfigurationError } from '../lib/env';
 import type { User } from '../types/user';
 
 const ACCESS_TOKEN_KEY = 'auth_access_token';
@@ -98,6 +99,10 @@ async function clearSecureStore() {
   await Promise.all(keys.map((k) => SecureStore.deleteItemAsync(k))).catch(() => {});
 }
 
+function buildApiUrl(path: string): string {
+  return `${getApiBaseUrlOrThrow()}${path}`;
+}
+
 export const useAuthStore = create<AuthStore>((set, get) => ({
   authState: 'loading',
   user: null,
@@ -116,7 +121,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       const refreshToken = stored.refreshToken;
       if (refreshToken) {
         try {
-          const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080'}/api/v1/auth/refresh`, {
+          const response = await fetch(buildApiUrl('/api/v1/auth/refresh'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refreshToken }),
@@ -130,7 +135,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
               set({ accessToken: newAccessToken, refreshToken: newRefreshToken });
             }
           }
-        } catch {
+        } catch (error) {
+          if (isApiBaseUrlConfigurationError(error)) {
+            console.error('[authStore] initialize config error:', error);
+            return;
+          }
           // Best-effort: continue with stored tokens if refresh fails
         }
       }
@@ -140,15 +149,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   login: async (email: string, password: string) => {
-    const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
-
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
     let response: Response;
     let body: any;
     try {
-      response = await fetch(`${apiBase}/api/v1/auth/login`, {
+      response = await fetch(buildApiUrl('/api/v1/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -158,6 +165,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       body = await response.json();
     } catch (err) {
       clearTimeout(timeoutId);
+      if (isApiBaseUrlConfigurationError(err)) {
+        throw new LoginError('NETWORK_ERROR', err.message);
+      }
       if (err instanceof DOMException && err.name === 'AbortError') {
         throw new LoginError('NETWORK_ERROR', 'Request timed out');
       }
@@ -202,15 +212,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   register: async (email: string, password: string, displayName: string) => {
-    const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
-
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
     let response: Response;
     let body: any;
     try {
-      response = await fetch(`${apiBase}/api/v1/auth/register`, {
+      response = await fetch(buildApiUrl('/api/v1/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, displayName }),
@@ -220,6 +228,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       body = await response.json();
     } catch (err) {
       clearTimeout(timeoutId);
+      if (isApiBaseUrlConfigurationError(err)) {
+        throw new LoginError('NETWORK_ERROR', err.message);
+      }
       if (err instanceof DOMException && err.name === 'AbortError') {
         throw new LoginError('NETWORK_ERROR', 'Request timed out');
       }
@@ -349,15 +360,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       throw new LoginError('AUTH_INVALID_CREDENTIALS', 'No redirect URL');
     }
 
-    const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
-
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
     let response: Response;
     let body: any;
     try {
-      response = await fetch(`${apiBase}/api/v1/auth/google`, {
+      response = await fetch(buildApiUrl('/api/v1/auth/google'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken }),
@@ -367,6 +376,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       body = await response.json();
     } catch (err) {
       clearTimeout(timeoutId);
+      if (isApiBaseUrlConfigurationError(err)) {
+        throw new LoginError('NETWORK_ERROR', err.message);
+      }
       if (err instanceof DOMException && err.name === 'AbortError') {
         throw new LoginError('NETWORK_ERROR', 'Request timed out');
       }
@@ -424,12 +436,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     // Clean URL
     window.history.replaceState({}, document.title, window.location.pathname);
 
-    const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
     try {
-      const response = await fetch(`${apiBase}/api/v1/auth/google`, {
+      const response = await fetch(buildApiUrl('/api/v1/auth/google'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken }),
@@ -460,6 +471,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       );
     } catch (err) {
       clearTimeout(timeoutId);
+      if (isApiBaseUrlConfigurationError(err)) {
+        console.error('[authStore] Google callback config error:', err);
+        return;
+      }
       console.error('[authStore] Google callback error:', err);
     }
   },
@@ -467,16 +482,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   logout: async () => {
     const { accessToken } = get();
     if (accessToken) {
-      const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
       try {
-        await fetch(`${apiBase}/api/v1/auth/logout`, {
+        await fetch(buildApiUrl('/api/v1/auth/logout'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,
           },
         });
-      } catch {
+      } catch (error) {
+        if (isApiBaseUrlConfigurationError(error)) {
+          console.error('[authStore] logout config error:', error);
+        }
         // Best-effort: continue with local cleanup even if API is unreachable
       }
     }
@@ -502,15 +519,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return;
     }
 
-    const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
-
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
     let response: Response;
     let body: any;
     try {
-      response = await fetch(`${apiBase}/api/v1/auth/refresh`, {
+      response = await fetch(buildApiUrl('/api/v1/auth/refresh'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: current.refreshToken }),
@@ -518,7 +533,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       });
       clearTimeout(timeoutId);
       body = await response.json();
-    } catch {
+    } catch (error) {
+      if (isApiBaseUrlConfigurationError(error)) {
+        throw error;
+      }
       clearTimeout(timeoutId);
       await current.logout();
       return;

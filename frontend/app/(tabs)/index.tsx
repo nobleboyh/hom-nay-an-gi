@@ -19,6 +19,7 @@ import { CollapsibleSection } from '../../components/CollapsibleSection';
 import { EmptyState } from '../../components/EmptyState';
 import { InputField } from '../../components/InputField';
 import { Skeleton } from '../../components/Skeleton';
+import { isApiBaseUrlConfigurationError } from '../../lib/env';
 import { parseIngredients } from '../../lib/parseIngredients';
 import { useReducedMotion } from '../../lib/accessibility';
 import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../../lib/tokens';
@@ -111,26 +112,42 @@ export default function HomeScreen() {
   }, [prefersReducedMotion]);
 
   const handleSearch = useCallback(async () => {
-    await fetchDishes(ingredientChips, activeFilters);
-    const { resultsStatus: status } = useDataStore.getState();
-    if (status === 'error') {
+    try {
+      await fetchDishes(ingredientChips, activeFilters);
+      const { resultsStatus: status } = useDataStore.getState();
+      if (status === 'error') {
+        addToast('Không thể tìm món. Vui lòng thử lại.', 'error');
+        return;
+      }
+      if (!prefersReducedMotion) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      }
+      router.push('/(tabs)/results');
+    } catch (error) {
+      if (isApiBaseUrlConfigurationError(error)) {
+        addToast(error.message, 'error');
+        return;
+      }
       addToast('Không thể tìm món. Vui lòng thử lại.', 'error');
-      return;
     }
-    if (!prefersReducedMotion) {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    }
-    router.push('/(tabs)/results');
   }, [ingredientChips, activeFilters, fetchDishes, prefersReducedMotion, router, addToast]);
 
   const handleSurprise = useCallback(async () => {
-    await fetchSurpriseMe();
-    const { homeStatus } = useDataStore.getState();
-    if (homeStatus === 'error') {
+    try {
+      await fetchSurpriseMe();
+      const { homeStatus } = useDataStore.getState();
+      if (homeStatus === 'error') {
+        addToast('Không thể tải món bất ngờ. Vui lòng thử lại.', 'error');
+        return;
+      }
+      router.push('/recipe/surprise');
+    } catch (error) {
+      if (isApiBaseUrlConfigurationError(error)) {
+        addToast(error.message, 'error');
+        return;
+      }
       addToast('Không thể tải món bất ngờ. Vui lòng thử lại.', 'error');
-      return;
     }
-    router.push('/recipe/surprise');
   }, [fetchSurpriseMe, router, addToast]);
 
   const selectedCookTime = activeFilters.cookTime ? String(activeFilters.cookTime) : '30';

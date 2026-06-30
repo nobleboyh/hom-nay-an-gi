@@ -18,14 +18,25 @@ import { LocationPicker, type LocationOption } from '../../components/LocationPi
 import { RestaurantCard } from '../../components/RestaurantCard';
 import { Skeleton } from '../../components/Skeleton';
 import { createApiClient, type ApiError } from '../../lib/api';
+import { getApiBaseUrlOrThrow, isApiBaseUrlConfigurationError } from '../../lib/env';
 import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../../lib/tokens';
 
-const apiClient = createApiClient({
-  baseUrl: process.env.API_BASE_URL || 'http://localhost:8080',
+let apiClient = createApiClient({
+  baseUrl: '',
   getToken: async () => null,
   onTokenExpired: async () => {},
   onUnauthenticated: () => {},
 });
+
+function getDiscoverApiClient() {
+  apiClient = createApiClient({
+    baseUrl: getApiBaseUrlOrThrow(),
+    getToken: async () => null,
+    onTokenExpired: async () => {},
+    onUnauthenticated: () => {},
+  });
+  return apiClient;
+}
 
 type NearbyItem = {
   restaurantName: string;
@@ -173,11 +184,15 @@ export default function DiscoverScreen() {
       if (cuisine) params.set('cuisine', cuisine);
       if (price) params.set('price', price);
       if (limit != null) params.set('limit', String(limit));
-      const res = await apiClient.get<NearbyItem[]>(
+      const res = await getDiscoverApiClient().get<NearbyItem[]>(
         `/api/v1/discovery/nearby?${params}`,
       );
       setNearbyData(res.data);
     } catch (err) {
+      if (isApiBaseUrlConfigurationError(err)) {
+        setErrorNearby(err.message);
+        return;
+      }
       const apiErr = err as ApiError;
       setErrorNearby(
         apiErr.message || 'Không thể tải nhà hàng gần đây',
@@ -194,11 +209,15 @@ export default function DiscoverScreen() {
       const params = new URLSearchParams();
       if (cuisine) params.set('cuisine', cuisine);
       if (price) params.set('price', price);
-      const res = await apiClient.get<{ items: TrendingDish[] }>(
+      const res = await getDiscoverApiClient().get<{ items: TrendingDish[] }>(
         `/api/v1/discovery/trending?${params}`,
       );
       setTrendingData(res.data.items);
     } catch (err) {
+      if (isApiBaseUrlConfigurationError(err)) {
+        setErrorTrending(err.message);
+        return;
+      }
       const apiErr = err as ApiError;
       setErrorTrending(
         apiErr.message || 'Không thể tải món đang thịnh hành',

@@ -24,6 +24,10 @@ const benefits = [
   { icon: '🛒', text: t('benefits.shoppingLists') },
 ];
 
+function getConfigAwareLoginMessage(error: LoginError, fallback: string): string {
+  return error.message.startsWith('[env]') ? error.message : fallback;
+}
+
 export function LoginScreen() {
   const login = useAuthStore((s) => s.login);
   const loginWithGoogle = useAuthStore((s) => s.loginWithGoogle);
@@ -93,7 +97,7 @@ export function LoginScreen() {
           setIsRateLimited(true);
           rateLimitTimerRef.current = setTimeout(clearRateLimit, 5 * 60 * 1000);
         } else if (err.code === 'NETWORK_ERROR') {
-          setErrorMessage(t('login.offline'));
+          setErrorMessage(getConfigAwareLoginMessage(err, t('login.offline')));
         } else if (err.code === 'UNKNOWN') {
           addToast(t('state.error.generic'), 'error');
         } else {
@@ -133,7 +137,7 @@ export function LoginScreen() {
       successRedirectRef.current = setTimeout(() => router.replace('/(tabs)'), 800);
     } catch (err) {
       if (err instanceof LoginError && err.code === 'NETWORK_ERROR') {
-        setErrorMessage(t('login.offline'));
+        setErrorMessage(getConfigAwareLoginMessage(err, t('login.offline')));
       } else {
         addToast(t('state.error.generic'), 'error');
       }

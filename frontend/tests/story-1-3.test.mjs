@@ -60,5 +60,5 @@ test('story 1.3 wires Vietnamese tabs, placeholders, and the API base env file',
   assert.match(profileScreen, /useAuthStore/);
   assert.match(recipeScreen, /handleBack/);
   assert.match(placeholderScreen, /‹/);
-  assert.match(envTemplate, /API_BASE_URL=http:\/\/localhost:8080/);
+  assert.match(envTemplate, /API_BASE_URL=http:\/\/<LAN_IP>:8080/);
 });

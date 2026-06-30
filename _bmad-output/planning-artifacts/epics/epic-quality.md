@@ -77,6 +77,33 @@ So that regressions in the ingredient-to-recipe flow are caught before reaching 
 
 ---
 
+## Story Q.4: Expo Go API Connectivity Contract Fix
+
+As a **developer testing on Expo Go**,
+I want every mobile API call path to use one shared backend base URL contract derived from canonical `API_BASE_URL`,
+So that physical-device testing does not fail because some screens point at `localhost` or a second env variable.
+
+**Acceptance Criteria:**
+
+- **Given** a physical device running Expo Go, **When** canonical `API_BASE_URL` is set to a reachable LAN host, **Then** Home, Discover, Auth, Favorites, Profile, and sync-backed actions all call that host successfully.
+- **Given** any frontend module needs the API base URL, **When** it resolves the host, **Then** it uses one shared env/helper module instead of reading `process.env` ad hoc in screens or stores.
+- **Given** Expo runtime needs the backend host, **When** the app boots, **Then** the canonical `API_BASE_URL` is exposed through one explicit Expo config bridge instead of a separate public env variable contract.
+- **Given** the app starts without a valid canonical `API_BASE_URL`, **When** a networked screen attempts an API call in development, **Then** it surfaces a clear developer-facing configuration error instead of silently falling back to a broken physical-device host.
+- **Given** regression tests or static checks run, **When** frontend source is scanned, **Then** direct `process.env.API_BASE_URL` and `process.env.EXPO_PUBLIC_API_BASE_URL` usage in Expo runtime code is rejected and the shared resolver contract is enforced.
+- **Given** onboarding docs are followed, **When** a developer sets up Docker-backed or local-process backend access for Expo Go, **Then** the frontend instructions use one consistent variable name and one clearly documented host/port contract.
+
+**Technical Tasks:**
+
+- [ ] Create `frontend/lib/env.ts` or equivalent shared resolver for API base URL.
+- [ ] Add an Expo config bridge (`app.config.ts`, `expo.extra`, or equivalent) so Expo runtime can consume canonical `API_BASE_URL` without renaming it to `EXPO_PUBLIC_API_BASE_URL`.
+- [ ] Replace direct `process.env.API_BASE_URL` and duplicated `process.env.EXPO_PUBLIC_API_BASE_URL` reads with the shared resolver across screens, stores, and API helpers.
+- [ ] Remove or gate unsafe mobile fallbacks to `http://localhost:8080` so physical-device Expo Go does not silently target the wrong host.
+- [ ] Add regression tests or static checks that fail if Expo runtime code reads `process.env.API_BASE_URL` or `process.env.EXPO_PUBLIC_API_BASE_URL` directly.
+- [ ] Update `frontend/.env.template`, README setup steps, and architecture docs to use the same Expo-safe variable and physical-device LAN guidance.
+- [ ] Validate on Expo Go on a physical device against a LAN-hosted backend.
+
+---
+
 # Cross-Epic Touchpoints
 
 | Touchpoint | Handled By | How |

@@ -31,12 +31,11 @@
  */
 
 import { create } from 'zustand';
+import { getApiBaseUrlOrThrow, isApiBaseUrlConfigurationError } from '../lib/env';
 import type { Dish, Favorite, RecipeDetail, SearchHistoryItem, UserPreference } from '../types/dish';
 import type { FilterState } from './uiStore';
 import { storageAdapter, clearGuestData } from './storageAdapter';
 import { useAuthStore } from './authStore';
-
-const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
 export type ScreenStatus = 'idle' | 'loading' | 'success' | 'error' | 'empty';
 
@@ -72,6 +71,10 @@ export interface DataStore {
   clearData: () => Promise<void>;
   syncPreferences: (prefs: Partial<UserPreference>) => Promise<void>;
   fetchPreferences: () => Promise<void>;
+}
+
+function buildApiUrl(path: string): string {
+  return `${getApiBaseUrlOrThrow()}${path}`;
 }
 
 export const useDataStore = create<DataStore>((set, get) => ({
@@ -117,7 +120,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
         ? { Authorization: `Bearer ${token}` }
         : { 'x-guest-id': 'web' };
 
-      const response = await fetch(`${API_BASE}/api/v1/recipes/search?${params.toString()}`, {
+      const response = await fetch(buildApiUrl(`/api/v1/recipes/search?${params.toString()}`), {
         headers,
       });
       if (!response.ok) throw new Error(`API error: ${response.status}`);
@@ -153,7 +156,14 @@ export const useDataStore = create<DataStore>((set, get) => ({
           };
         });
       }
-    } catch {
+    } catch (error) {
+      if (isApiBaseUrlConfigurationError(error)) {
+        set((state) => ({
+          ...(offset === 0 ? { homeStatus: 'error' as const } : {}),
+          resultsStatus: 'error' as const,
+        }));
+        throw error;
+      }
       set((state) => ({
         ...(offset === 0 ? { homeStatus: 'error' as const } : {}),
         resultsStatus: 'error' as const,
@@ -165,7 +175,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
     console.log('[dataStore] fetchSurpriseMe');
     set({ homeStatus: 'loading' });
     try {
-      const response = await fetch(`${API_BASE}/api/v1/recipes/surprise`, {
+      const response = await fetch(buildApiUrl('/api/v1/recipes/surprise'), {
         headers: { 'x-guest-id': 'web' },
       });
       if (!response.ok) throw new Error(`API error: ${response.status}`);
@@ -183,7 +193,11 @@ export const useDataStore = create<DataStore>((set, get) => ({
         dishes: [body.data],
         homeStatus: 'success',
       });
-    } catch {
+    } catch (error) {
+      if (isApiBaseUrlConfigurationError(error)) {
+        set({ homeStatus: 'error' });
+        throw error;
+      }
       set({ homeStatus: 'error' });
     }
   },
@@ -212,7 +226,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
     }
 
     try {
-      const response = await fetch(`${API_BASE}/api/v1/recipes/${encodeURIComponent(dishId)}`, {
+      const response = await fetch(buildApiUrl(`/api/v1/recipes/${encodeURIComponent(dishId)}`), {
         headers: { 'x-guest-id': 'web' },
       });
       if (!response.ok) throw new Error(`API error: ${response.status}`);
@@ -229,7 +243,11 @@ export const useDataStore = create<DataStore>((set, get) => ({
       await storageAdapter.write('dishes_cache', dishId, detail as unknown as Record<string, unknown>);
 
       set({ recipeStatus: 'success', recipeDetail: detail });
-    } catch {
+    } catch (error) {
+      if (isApiBaseUrlConfigurationError(error)) {
+        set({ recipeStatus: 'error', recipeDetail: null });
+        throw error;
+      }
       set({ recipeStatus: 'error', recipeDetail: null });
     }
   },
@@ -254,7 +272,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
         params.set('offset', String(offset));
         params.set('limit', String(limit));
         const response = await fetch(
-          `${API_BASE}/api/v1/favorites?${params.toString()}`,
+          buildApiUrl(`/api/v1/favorites?${params.toString()}`),
           { headers },
         );
         if (!response.ok) throw new Error(`API error: ${response.status}`);
@@ -296,7 +314,11 @@ export const useDataStore = create<DataStore>((set, get) => ({
           set({ favorites: [], favoritesTotal: 0, favoritesStatus: 'empty' });
         }
       }
-    } catch {
+    } catch (error) {
+      if (isApiBaseUrlConfigurationError(error)) {
+        set({ favoritesStatus: 'error' });
+        throw error;
+      }
       set({ favoritesStatus: 'error' });
     }
   },
@@ -315,7 +337,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
     if (target === 'api') {
       const token = useAuthStore.getState().accessToken;
       try {
-        const response = await fetch(`${API_BASE}/api/v1/favorites`, {
+        const response = await fetch(buildApiUrl('/api/v1/favorites'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -341,6 +363,9 @@ export const useDataStore = create<DataStore>((set, get) => ({
         set({ favorites: [...favorites, body.data] });
         return true;
       } catch (error) {
+        if (isApiBaseUrlConfigurationError(error)) {
+          throw error;
+        }
         console.error('[dataStore] saveFavorite error:', error);
         return false;
       }
@@ -365,7 +390,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
       const favoriteId = fav?._id ?? dishId;
       const token = useAuthStore.getState().accessToken;
       try {
-        const response = await fetch(`${API_BASE}/api/v1/favorites/${favoriteId}`, {
+        const response = await fetch(buildApiUrl(`/api/v1/favorites/${favoriteId}`), {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -377,6 +402,9 @@ export const useDataStore = create<DataStore>((set, get) => ({
           return false;
         }
       } catch (error) {
+        if (isApiBaseUrlConfigurationError(error)) {
+          throw error;
+        }
         console.error('[dataStore] removeFavorite error:', error);
         return false;
       }
@@ -452,14 +480,17 @@ export const useDataStore = create<DataStore>((set, get) => ({
     if (target === 'api') {
       const token = useAuthStore.getState().accessToken;
       try {
-        await fetch(`${API_BASE}/api/v1/settings/search-history`, {
+        await fetch(buildApiUrl('/api/v1/settings/search-history'), {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
         });
-      } catch {
+      } catch (error) {
+        if (isApiBaseUrlConfigurationError(error)) {
+          throw error;
+        }
         // best-effort — local state already cleared
       }
     }
@@ -474,14 +505,17 @@ export const useDataStore = create<DataStore>((set, get) => ({
         favorites.map(async (fav) => {
           const favoriteId = fav._id ?? fav.dishId;
           try {
-            await fetch(`${API_BASE}/api/v1/favorites/${favoriteId}`, {
+            await fetch(buildApiUrl(`/api/v1/favorites/${favoriteId}`), {
               method: 'DELETE',
               headers: {
                 'Content-Type': 'application/json',
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
               },
             });
-          } catch {
+          } catch (error) {
+            if (isApiBaseUrlConfigurationError(error)) {
+              throw error;
+            }
             // best-effort per-item
           }
         }),
@@ -535,14 +569,14 @@ export const useDataStore = create<DataStore>((set, get) => ({
         let token = useAuthStore.getState().accessToken;
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
         if (token) { headers['Authorization'] = `Bearer ${token}`; }
-        let response = await fetch(`${API_BASE}/api/v1/settings/preferences`, { headers });
+        let response = await fetch(buildApiUrl('/api/v1/settings/preferences'), { headers });
 
         if (response.status === 401) {
           await useAuthStore.getState().performTokenRefresh();
           token = useAuthStore.getState().accessToken;
           if (token) {
             headers['Authorization'] = `Bearer ${token}`;
-            response = await fetch(`${API_BASE}/api/v1/settings/preferences`, { headers });
+            response = await fetch(buildApiUrl('/api/v1/settings/preferences'), { headers });
           }
         }
 
@@ -558,7 +592,11 @@ export const useDataStore = create<DataStore>((set, get) => ({
           set({ preferencesStatus: 'idle' });
         }
       }
-    } catch {
+    } catch (error) {
+      if (isApiBaseUrlConfigurationError(error)) {
+        set({ preferencesStatus: 'error' });
+        throw error;
+      }
       set({ preferencesStatus: 'error' });
     }
   },
@@ -601,7 +639,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
 
       const chain = async () => {
         const token = useAuthStore.getState().accessToken;
-        const response = await fetch(`${API_BASE}/api/v1/settings/preferences`, {
+        const response = await fetch(buildApiUrl('/api/v1/settings/preferences'), {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -612,11 +650,16 @@ export const useDataStore = create<DataStore>((set, get) => ({
         if (!response.ok) throw new Error(`API error: ${response.status}`);
       };
 
-      pending = (pending ?? Promise.resolve()).then(chain).catch(() => {
+      const run = (pending ?? Promise.resolve()).then(chain);
+      pending = run.catch(() => undefined);
+      try {
+        await run;
+      } catch (error) {
+        if (isApiBaseUrlConfigurationError(error)) {
+          throw error;
+        }
         // best-effort — optimistic UI already applied
-      });
-
-      await pending;
+      }
     };
   })(),
 }));

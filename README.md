@@ -150,10 +150,10 @@ cd frontend
 npm run web
 ```
 
-Make sure `frontend/.env` points to the Docker-exposed backend:
+Recommended default for Expo Go and shared frontend testing: point `frontend/.env` at the Docker-exposed nginx host on your LAN:
 
 ```env
-API_BASE_URL=http://localhost:8080
+API_BASE_URL=http://<LAN_IP>:8080
 ```
 
 ### 4. Run the frontend in Expo Go on a physical device
@@ -171,10 +171,10 @@ Then:
 - Open Expo Go on the phone
 - Scan the QR code shown by Expo in the terminal or browser
 
-For Expo Go on a physical device, `frontend/.env` must use your machine's LAN IP instead of `localhost`:
+For Expo Go on a physical device, `frontend/.env` must use your machine's LAN IP and keep the same canonical variable:
 
 ```env
-API_BASE_URL=http://YOUR_LAN_IP:8080
+API_BASE_URL=http://<LAN_IP>:8080
 ```
 
 Example:
@@ -250,11 +250,13 @@ cd frontend
 npm run web
 ```
 
-For non-Docker mode, point the frontend directly to the API process:
+For non-Docker mode, the backend API listens directly on `:3000`, so point the frontend to the API process on your LAN if you need Expo Go:
 
 ```env
-API_BASE_URL=http://localhost:3000
+API_BASE_URL=http://<LAN_IP>:3000
 ```
+
+For Expo web-only testing on the same machine, `localhost` is acceptable, but Expo Go on a physical device must not use `localhost`.
 
 Other Expo targets:
 
@@ -283,7 +285,7 @@ Then:
 For non-Docker mode on a physical device, point the frontend to your machine's LAN IP:
 
 ```env
-API_BASE_URL=http://YOUR_LAN_IP:3000
+API_BASE_URL=http://<LAN_IP>:3000
 ```
 
 Example:
@@ -322,7 +324,7 @@ docker compose exec redis redis-cli ping
 docker compose exec mongo mongosh --quiet --eval "db.adminCommand('ping')"
 ```
 
-4. Open the frontend from the Expo web terminal output and confirm it can call the API with `API_BASE_URL=http://localhost:8080`.
+4. Open the frontend from the Expo web terminal output and confirm it can call the API with `API_BASE_URL=http://<LAN_IP>:8080` for Expo Go, or `http://localhost:8080` only for same-machine web testing.
 
 ### Verify The Non-Docker Startup Flow
 
@@ -344,7 +346,7 @@ Expected API response:
 - Confirm MongoDB is listening on `127.0.0.1:27017`
 - Confirm Redis is listening on `127.0.0.1:6379`
 
-3. Open the frontend from the Expo web terminal output and confirm it can call the API with `API_BASE_URL=http://localhost:3000`.
+3. Open the frontend from the Expo web terminal output and confirm it can call the API with `API_BASE_URL=http://<LAN_IP>:3000` for Expo Go, or `http://localhost:3000` only for same-machine web testing.
 
 ### Code-Level Verification Commands
 

@@ -133,7 +133,8 @@ hom-nay-an-gi/
 │
 ├── frontend/                              # Expo (npm)
 │   ├── package.json
-│   ├── app.json                           # Expo config
+│   ├── app.json                           # Base Expo config
+│   ├── app.config.ts                      # Bridges canonical API_BASE_URL into Expo extra.apiBaseUrl
 │   ├── tsconfig.json
 │   ├── .env.template
 │   ├── .env                               # gitignored
@@ -178,6 +179,7 @@ hom-nay-an-gi/
 │   │   └── storageAdapter.ts              # Routes reads/writes between expo-sqlite and API
 │   │
 │   ├── lib/                               # Utilities
+│   │   ├── env.ts                         # Shared API base URL resolver + Expo config guardrails
 │   │   ├── tokens.ts                      # OKLCH→RGBA, fonts, spacing, radii, shadows, z-index, animation
 │   │   ├── api.ts                         # Centralized fetch wrapper (auth, envelope, retry, timeout)
 │   │   ├── i18n.ts                        # Flat key-value string catalog (vi/en)
@@ -343,7 +345,7 @@ pnpm dev                 # tsx --watch on port 3000
 
 # 3. Frontend
 cd frontend && npm install
-cp .env.template .env    # API_BASE_URL=http://localhost:3000
+cp .env.template .env    # API_BASE_URL=http://<LAN_IP>:3000 for Expo Go, localhost only for same-machine web
 npx expo start           # Expo dev server
 
 # 4. Infrastructure (for local dev, run DBs + Redis)

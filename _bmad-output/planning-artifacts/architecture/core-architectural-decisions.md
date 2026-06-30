@@ -27,6 +27,7 @@
 | ID-7 | Location | HERE Maps Places API (250K free req/month) + Overpass API fallback |
 | ID-8 | Frontend Components | 18 custom RN components. **Primitives (9):** `<Card>`, `<Chip>`, `<Button>`, `<Timeline>`, `<TabBar>`, `<Badge>`, `<Toast>`, `<InputField>`, `<ServingAdjuster>`. **Composites (9):** `<ChipRow>`, `<ResultCard>`, `<SortDropdown>`, `<EmptyState>`, `<Skeleton>`, `<DishCard>`, `<RestaurantCard>`, `<CollapsibleSection>`, `<BenefitsCard>`, `<TipCard>`. Ship primitives first for core loop; composites can follow or be deferred. |
 | ID-9 | SQLite Library | expo-sqlite (official Expo module) |
+| ID-10 | Frontend Env Contract | Canonical `API_BASE_URL` bridged through Expo `extra.apiBaseUrl`, resolved only via shared `frontend/lib/env.ts` |
 
 **Deferred Decisions (Post-MVP):**
 

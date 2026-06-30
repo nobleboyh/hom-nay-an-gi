@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useDataStore } from '../../stores/dataStore';
 import { useUIStore } from '../../stores/uiStore';
+import { isApiBaseUrlConfigurationError } from '../../lib/env';
 import { useNetworkStatus } from '../../lib/networkStatus';
 import { useReducedMotion } from '../../lib/accessibility';
 import { t } from '../../lib/i18n';
@@ -83,10 +84,20 @@ export default function FavoritesScreen() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const handleConfigError = useCallback((error: unknown) => {
+    if (isApiBaseUrlConfigurationError(error)) {
+      addToast(error.message, 'error');
+      return true;
+    }
+    return false;
+  }, [addToast]);
+
   useFocusEffect(
     useCallback(() => {
-      fetchFavorites({ offset: 0, limit: PAGE_SIZE });
-    }, [fetchFavorites]),
+      void fetchFavorites({ offset: 0, limit: PAGE_SIZE }).catch((error) => {
+        handleConfigError(error);
+      });
+    }, [fetchFavorites, handleConfigError]),
   );
 
   useEffect(() => {
@@ -117,24 +128,31 @@ export default function FavoritesScreen() {
   const handleEndReached = useCallback(() => {
     const total = typeof favoritesTotal === 'number' && !Number.isNaN(favoritesTotal) ? favoritesTotal : Infinity;
     if (favoritesStatus === 'loading' || favorites.length >= total) return;
-    fetchFavorites({ offset: favorites.length, limit: PAGE_SIZE });
-  }, [favoritesStatus, favorites.length, favoritesTotal, fetchFavorites]);
+    void fetchFavorites({ offset: favorites.length, limit: PAGE_SIZE }).catch((error) => {
+      handleConfigError(error);
+    });
+  }, [favoritesStatus, favorites.length, favoritesTotal, fetchFavorites, handleConfigError]);
 
   const handleRemove = useCallback(
     async (dishId: string) => {
       try {
         await removeFavorite(dishId);
         addToast(t('favorites.remove.toast'), 'success');
-      } catch {
+      } catch (error) {
+        if (handleConfigError(error)) {
+          return;
+        }
         addToast(t('state.error.generic'), 'error');
       }
     },
-    [removeFavorite, addToast],
+    [removeFavorite, addToast, handleConfigError],
   );
 
   const handleRetry = useCallback(() => {
-    fetchFavorites({ offset: 0, limit: PAGE_SIZE });
-  }, [fetchFavorites]);
+    void fetchFavorites({ offset: 0, limit: PAGE_SIZE }).catch((error) => {
+      handleConfigError(error);
+    });
+  }, [fetchFavorites, handleConfigError]);
 
   const renderFooter = useCallback(() => {
     if (favoritesStatus === 'loading' && favorites.length > 0) {

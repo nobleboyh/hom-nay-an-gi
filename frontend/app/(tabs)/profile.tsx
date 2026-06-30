@@ -25,6 +25,7 @@ import { Toast } from '../../components/Toast';
 import { useAuthStore } from '../../stores/authStore';
 import { useDataStore } from '../../stores/dataStore';
 import { useUIStore } from '../../stores/uiStore';
+import { getApiBaseUrlOrThrow, isApiBaseUrlConfigurationError } from '../../lib/env';
 import { Colors, Radius, Spacing, Typography, oklchToRgba } from '../../lib/tokens';
 import { t } from '../../lib/i18n';
 import type { UserPreference } from '../../types/dish';
@@ -121,14 +122,22 @@ export default function ProfileScreen() {
   });
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    void initialize().catch((error) => {
+      if (isApiBaseUrlConfigurationError(error)) {
+        addToast(error.message, 'error');
+      }
+    });
+  }, [initialize, addToast]);
 
   useEffect(() => {
     if (authState !== 'loading') {
-      fetchPreferences();
+      void fetchPreferences().catch((error) => {
+        if (isApiBaseUrlConfigurationError(error)) {
+          addToast(error.message, 'error');
+        }
+      });
     }
-  }, [authState, fetchPreferences]);
+  }, [authState, fetchPreferences, addToast]);
 
   useEffect(() => {
     if (preferencesStatus === 'error') {
@@ -388,8 +397,16 @@ export default function ProfileScreen() {
 
   const handleClearHistory = useCallback(() => {
     confirmOrAlert(t('settings.clearHistory'), t('settings.clearHistory.confirm'), async () => {
-      await clearSearchHistory();
-      addToast(t('settings.clearHistory.done'), 'success');
+      try {
+        await clearSearchHistory();
+        addToast(t('settings.clearHistory.done'), 'success');
+      } catch (error) {
+        if (isApiBaseUrlConfigurationError(error)) {
+          addToast(error.message, 'error');
+          return;
+        }
+        addToast(t('state.error.generic'), 'error');
+      }
     });
   }, [clearSearchHistory, addToast]);
 
@@ -398,7 +415,11 @@ export default function ProfileScreen() {
       try {
         await clearAllFavorites();
         addToast(t('settings.clearFavorites.done'), 'success');
-      } catch {
+      } catch (error) {
+        if (isApiBaseUrlConfigurationError(error)) {
+          addToast(error.message, 'error');
+          return;
+        }
         addToast(t('state.error.generic'), 'error');
       }
     });
@@ -411,8 +432,7 @@ export default function ProfileScreen() {
         setDeleting(true);
         try {
           const token = useAuthStore.getState().accessToken;
-          const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
-          const response = await fetch(`${apiBase}/api/v1/account`, {
+          const response = await fetch(`${getApiBaseUrlOrThrow()}/api/v1/account`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
@@ -427,7 +447,11 @@ export default function ProfileScreen() {
           await logout();
           router.replace('/(tabs)/discover');
           addToast(t('settings.deleteAccount.done'), 'info');
-        } catch {
+        } catch (error) {
+          if (isApiBaseUrlConfigurationError(error)) {
+            addToast(error.message, 'error');
+            return;
+          }
           addToast(t('state.error.generic'), 'error');
         } finally {
           setDeleting(false);

@@ -17,6 +17,10 @@ import { useNetworkStatus } from '../lib/networkStatus';
 import { t } from '../lib/i18n';
 import { Colors, Spacing, Typography, oklchToRgba } from '../lib/tokens';
 
+function getConfigAwareRegisterMessage(error: LoginError, fallback: string): string {
+  return error.message.startsWith('[env]') ? error.message : fallback;
+}
+
 export default function RegisterScreen() {
   const register = useAuthStore((s) => s.register);
   const addToast = useUIStore((s) => s.addToast);
@@ -85,7 +89,7 @@ export default function RegisterScreen() {
         } else if (err.code === 'RATE_LIMIT_EXCEEDED') {
           addToast('⚠️ ' + t('login.rateLimited'), 'error', 5000);
         } else if (err.code === 'NETWORK_ERROR') {
-          setErrorMessage(t('register.offline'));
+          setErrorMessage(getConfigAwareRegisterMessage(err, t('register.offline')));
         } else {
           setErrorMessage(t('register.error'));
         }

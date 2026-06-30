@@ -146,7 +146,7 @@ test('tabs/_layout.tsx syncs active tab to uiStore', () => {
 // Task 11: .env.template
 test('.env.template has API_BASE_URL and GOOGLE_CLIENT_ID', () => {
   const envTemplate = fs.readFileSync(resolveFromFrontend('.env.template'), 'utf8');
-  assert.match(envTemplate, /API_BASE_URL=http:\/\/localhost:8080/);
+  assert.match(envTemplate, /API_BASE_URL=http:\/\/<LAN_IP>:8080/);
   assert.match(envTemplate, /GOOGLE_CLIENT_ID/);
 });
 

@@ -17,6 +17,7 @@ import { ResultCard, SortDropdown, EmptyState, Skeleton, Toast, Button } from '.
 import type { ResultCardAction, ResultCardDish } from '../components/ResultCard';
 import type { SortKey, SortOption } from '../components/SortDropdown';
 import { t } from '../lib/i18n';
+import { isApiBaseUrlConfigurationError } from '../lib/env';
 import { useReducedMotion } from '../lib/accessibility';
 import { useNetworkStatus } from '../lib/networkStatus';
 import { useDataStore } from '../stores/dataStore';
@@ -166,7 +167,11 @@ export default function ResultsScreen() {
             addToast(t('state.error.generic'), 'error');
           }
         }
-      } catch {
+      } catch (error) {
+        if (isApiBaseUrlConfigurationError(error)) {
+          addToast(error.message, 'error');
+          return;
+        }
         addToast(t('state.error.generic'), 'error');
       }
     },
