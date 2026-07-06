@@ -34,9 +34,40 @@ test('Expo config bridge exposes canonical API_BASE_URL via extra.apiBaseUrl', (
   assert.match(source, /apiBaseUrl/);
 });
 
-test('public Expo config preserves apiBaseUrl when API_BASE_URL is provided', () => {
+test('public Expo config falls back to shell API_BASE_URL when frontend .env is absent', () => {
   const previousValue = process.env.API_BASE_URL;
+  const envPath = resolveFromFrontend('.env');
+  const backupPath = resolveFromFrontend('.env.test-backup');
+  const hadEnvFile = fs.existsSync(envPath);
   process.env.API_BASE_URL = 'http://172.20.10.2:8080';
+
+  try {
+    if (hadEnvFile) {
+      fs.renameSync(envPath, backupPath);
+    }
+
+    const { getConfig } = requireFromFrontend('@expo/config');
+    const config = getConfig(resolveFromFrontend(), {
+      isPublicConfig: true,
+      skipSDKVersionRequirement: true,
+    });
+
+    assert.equal(config.exp.extra?.apiBaseUrl, 'http://172.20.10.2:8080');
+  } finally {
+    if (hadEnvFile && fs.existsSync(backupPath)) {
+      fs.renameSync(backupPath, envPath);
+    }
+    if (previousValue === undefined) {
+      delete process.env.API_BASE_URL;
+    } else {
+      process.env.API_BASE_URL = previousValue;
+    }
+  }
+});
+
+test('frontend .env API_BASE_URL overrides a stale shell API_BASE_URL', () => {
+  const previousValue = process.env.API_BASE_URL;
+  process.env.API_BASE_URL = 'http://<LAN_IP>:8080';
 
   try {
     const { getConfig } = requireFromFrontend('@expo/config');
@@ -45,7 +76,7 @@ test('public Expo config preserves apiBaseUrl when API_BASE_URL is provided', ()
       skipSDKVersionRequirement: true,
     });
 
-    assert.equal(config.exp.extra?.apiBaseUrl, 'http://172.20.10.2:8080');
+    assert.equal(config.exp.extra?.apiBaseUrl, 'http://localhost:8080');
   } finally {
     if (previousValue === undefined) {
       delete process.env.API_BASE_URL;

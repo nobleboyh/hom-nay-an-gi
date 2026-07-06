@@ -37,7 +37,7 @@ function readDotEnvApiBaseUrl(): string {
   return '';
 }
 
-const apiBaseUrl = process.env.API_BASE_URL ?? readDotEnvApiBaseUrl();
+const apiBaseUrl = readDotEnvApiBaseUrl() || process.env.API_BASE_URL || '';
 
 const config: ExpoConfig = {
   ...appJson.expo,
