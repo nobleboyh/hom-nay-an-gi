@@ -87,7 +87,7 @@ export function tokenize(text: string): Set<string> {
   );
 }
 
-function buildUserTokens(userIngredients: string[]): Set<string> {
+function _buildUserTokens(userIngredients: string[]): Set<string> {
   const tokens = new Set<string>();
   for (const ingredient of userIngredients) {
     const normalized = normalizeIngredientName(ingredient);

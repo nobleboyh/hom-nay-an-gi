@@ -20,11 +20,13 @@ const GEMINI_API_BASE =
 const GEMINI_MODEL = "gemini-2.5-flash";
 const DEEPSEEK_API_BASE = "https://api.deepseek.com/v1";
 const DEEPSEEK_MODEL = "deepseek-chat";
-const LLM_TIMEOUT_MS = 15_000;
+const OLLAMA_BASE_URL = env.OLLAMA_BASE_URL;
+const OLLAMA_MODEL = env.OLLAMA_MODEL;
+const LLM_TIMEOUT_MS = 30_000;
 
 const MAX_BODY_SIZE = 1_048_576;
 const PROMPT_MAX_LENGTH = 10_000;
-const VALID_PROVIDERS = ["gemini", "deepseek"] as const;
+const VALID_PROVIDERS = ["gemini", "deepseek", "ollama"] as const;
 type Provider = (typeof VALID_PROVIDERS)[number];
 
 function parseJsonBody(request: http.IncomingMessage): Promise<{
@@ -120,15 +122,6 @@ async function handleGenerate(
     return;
   }
 
-  if (!LLM_API_KEY) {
-    sendJson(
-      response,
-      502,
-      buildErrorResponse("LLM_PROVIDER_ERROR", "LLM_API_KEY is not configured"),
-    );
-    return;
-  }
-
   const rawProvider = body.provider ?? llmConfig.provider;
   if (!rawProvider || !VALID_PROVIDERS.includes(rawProvider as Provider)) {
     sendJson(
@@ -153,6 +146,18 @@ async function handleGenerate(
     let model: string;
 
     if (provider === "gemini") {
+      if (!LLM_API_KEY) {
+        clearTimeout(timeout);
+        sendJson(
+          response,
+          502,
+          buildErrorResponse(
+            "LLM_PROVIDER_ERROR",
+            "LLM_API_KEY is not configured for Gemini",
+          ),
+        );
+        return;
+      }
       model = GEMINI_MODEL;
       const geminiBody: Record<string, unknown> = {
         contents: [
@@ -231,6 +236,18 @@ async function handleGenerate(
 
       generatedText = candidate.content.parts[0]?.text ?? "";
     } else if (provider === "deepseek") {
+      if (!LLM_API_KEY) {
+        clearTimeout(timeout);
+        sendJson(
+          response,
+          502,
+          buildErrorResponse(
+            "LLM_PROVIDER_ERROR",
+            "LLM_API_KEY is not configured for DeepSeek",
+          ),
+        );
+        return;
+      }
       model = DEEPSEEK_MODEL;
       const messages = [];
 
@@ -285,6 +302,60 @@ async function handleGenerate(
       };
 
       generatedText = deepSeekData.choices?.[0]?.message?.content ?? "";
+    } else if (provider === "ollama") {
+      model = OLLAMA_MODEL;
+      const messages = [];
+
+      if (body.schema) {
+        const isArray = body.schema.type === "array";
+        messages.push({
+          role: "system",
+          content: `You must respond with valid JSON matching this schema: ${JSON.stringify(body.schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.`,
+        });
+      }
+
+      messages.push({ role: "user", content: body.prompt });
+
+      const ollamaResponse = await fetch(
+        `${OLLAMA_BASE_URL}/v1/chat/completions`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            model: OLLAMA_MODEL,
+            messages,
+            temperature: 0.7,
+            stream: false,
+            num_predict: 4096,
+          }),
+          signal: controller.signal,
+        },
+      );
+
+      clearTimeout(timeout);
+
+      if (!ollamaResponse.ok) {
+        const errorText = await ollamaResponse.text();
+        logger.error(
+          { status: ollamaResponse.status, errorText },
+          "Ollama API error",
+        );
+        sendJson(
+          response,
+          502,
+          buildErrorResponse(
+            "LLM_PROVIDER_ERROR",
+            `Ollama API returned ${ollamaResponse.status}`,
+          ),
+        );
+        return;
+      }
+
+      const ollamaData = (await ollamaResponse.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+
+      generatedText = ollamaData.choices?.[0]?.message?.content ?? "";
     } else {
       clearTimeout(timeout);
       sendJson(
@@ -376,6 +447,307 @@ function getApiKey(): string {
   return process.env.LLM_API_KEY ?? "";
 }
 
+async function handleGenerateExpress(
+  request: express.Request,
+  response: express.Response,
+): Promise<void> {
+  const {
+    provider: rawProvider,
+    prompt,
+    schema,
+  } = request.body as {
+    provider?: string;
+    prompt?: string;
+    schema?: Record<string, unknown>;
+  };
+
+  if (!prompt) {
+    response
+      .status(400)
+      .json(buildErrorResponse("VALIDATION_ERROR", "Prompt is required"));
+    return;
+  }
+
+  if (prompt.length > PROMPT_MAX_LENGTH) {
+    response
+      .status(400)
+      .json(
+        buildErrorResponse(
+          "VALIDATION_ERROR",
+          `Prompt exceeds ${PROMPT_MAX_LENGTH} character limit`,
+        ),
+      );
+    return;
+  }
+
+  const provider = rawProvider ?? getLlmConfig().provider;
+  if (!provider || !VALID_PROVIDERS.includes(provider as Provider)) {
+    response
+      .status(400)
+      .json(
+        buildErrorResponse(
+          "VALIDATION_ERROR",
+          `Unsupported provider: ${provider}`,
+        ),
+      );
+    return;
+  }
+
+  if (provider === "gemini" && !LLM_API_KEY) {
+    response
+      .status(502)
+      .json(
+        buildErrorResponse(
+          "LLM_PROVIDER_ERROR",
+          "LLM_API_KEY is not configured for Gemini",
+        ),
+      );
+    return;
+  }
+
+  if (provider === "deepseek" && !LLM_API_KEY) {
+    response
+      .status(502)
+      .json(
+        buildErrorResponse(
+          "LLM_PROVIDER_ERROR",
+          "LLM_API_KEY is not configured for DeepSeek",
+        ),
+      );
+    return;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), LLM_TIMEOUT_MS);
+
+    let generatedText: string;
+    let model: string;
+
+    if (provider === "gemini") {
+      model = GEMINI_MODEL;
+      const geminiBody: Record<string, unknown> = {
+        contents: [{ parts: [{ text: prompt }] }],
+      };
+
+      if (schema) {
+        const isArray = schema.type === "array";
+        geminiBody.systemInstruction = {
+          parts: [
+            {
+              text: `You must respond with valid JSON matching this schema: ${JSON.stringify(schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.`,
+            },
+          ],
+        };
+        geminiBody.generationConfig = {
+          response_mime_type: "application/json",
+          response_schema: schema,
+        };
+      }
+
+      const geminiResponse = await fetch(
+        `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-goog-api-key": LLM_API_KEY,
+          },
+          body: JSON.stringify(geminiBody),
+          signal: controller.signal,
+        },
+      );
+
+      clearTimeout(timeout);
+
+      if (!geminiResponse.ok) {
+        const errorText = await geminiResponse.text();
+        logger.error(
+          { status: geminiResponse.status, errorText },
+          "Gemini API error",
+        );
+        response
+          .status(502)
+          .json(
+            buildErrorResponse(
+              "LLM_PROVIDER_ERROR",
+              `Gemini API returned ${geminiResponse.status}`,
+            ),
+          );
+        return;
+      }
+
+      const geminiData = (await geminiResponse.json()) as {
+        candidates?: {
+          content?: { parts?: { text?: string }[] };
+          finishReason?: string;
+        }[];
+      };
+      const candidate = geminiData?.candidates?.[0];
+      if (!candidate?.content?.parts?.length) {
+        const reason = candidate?.finishReason ?? "unknown";
+        logger.error({ finishReason: reason }, "Gemini returned no content");
+        response
+          .status(502)
+          .json(
+            buildErrorResponse(
+              "LLM_INVALID_RESPONSE",
+              `Gemini returned no content (finishReason: ${reason})`,
+            ),
+          );
+        return;
+      }
+
+      generatedText = candidate.content.parts[0]?.text ?? "";
+    } else if (provider === "deepseek") {
+      model = DEEPSEEK_MODEL;
+      const messages: { role: string; content: string }[] = [];
+
+      if (schema) {
+        const isArray = schema.type === "array";
+        messages.push({
+          role: "system",
+          content: `You must respond with valid JSON matching this schema: ${JSON.stringify(schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.`,
+        });
+      }
+
+      messages.push({ role: "user", content: prompt });
+
+      const deepSeekResponse = await fetch(
+        `${DEEPSEEK_API_BASE}/chat/completions`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${LLM_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: DEEPSEEK_MODEL,
+            messages,
+            temperature: 0.3,
+          }),
+          signal: controller.signal,
+        },
+      );
+
+      clearTimeout(timeout);
+
+      if (!deepSeekResponse.ok) {
+        const errorText = await deepSeekResponse.text();
+        logger.error(
+          { status: deepSeekResponse.status, errorText },
+          "DeepSeek API error",
+        );
+        response
+          .status(502)
+          .json(
+            buildErrorResponse(
+              "LLM_PROVIDER_ERROR",
+              `DeepSeek API returned ${deepSeekResponse.status}`,
+            ),
+          );
+        return;
+      }
+
+      const deepSeekData = (await deepSeekResponse.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      generatedText = deepSeekData.choices?.[0]?.message?.content ?? "";
+    } else if (provider === "ollama") {
+      model = OLLAMA_MODEL;
+      const messages: { role: string; content: string }[] = [];
+
+      if (schema) {
+        const isArray = schema.type === "array";
+        messages.push({
+          role: "system",
+          content: `You must respond with valid JSON matching this schema: ${JSON.stringify(schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.`,
+        });
+      }
+
+      messages.push({ role: "user", content: prompt });
+
+      const ollamaResponse = await fetch(
+        `${OLLAMA_BASE_URL}/v1/chat/completions`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            model: OLLAMA_MODEL,
+            messages,
+            temperature: 0.7,
+            stream: false,
+            num_predict: 4096,
+          }),
+          signal: controller.signal,
+        },
+      );
+
+      clearTimeout(timeout);
+
+      if (!ollamaResponse.ok) {
+        const errorText = await ollamaResponse.text();
+        logger.error(
+          { status: ollamaResponse.status, errorText },
+          "Ollama API error",
+        );
+        response
+          .status(502)
+          .json(
+            buildErrorResponse(
+              "LLM_PROVIDER_ERROR",
+              `Ollama API returned ${ollamaResponse.status}`,
+            ),
+          );
+        return;
+      }
+
+      const ollamaData = (await ollamaResponse.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      generatedText = ollamaData.choices?.[0]?.message?.content ?? "";
+    } else {
+      clearTimeout(timeout);
+      response
+        .status(502)
+        .json(
+          buildErrorResponse(
+            "LLM_PROVIDER_ERROR",
+            `Unsupported provider: ${provider}`,
+          ),
+        );
+      return;
+    }
+
+    if (!generatedText) {
+      response
+        .status(502)
+        .json(
+          buildErrorResponse(
+            "LLM_INVALID_RESPONSE",
+            "LLM returned empty content",
+          ),
+        );
+      return;
+    }
+
+    response
+      .status(200)
+      .json(buildSuccessResponse({ content: generatedText, provider, model }));
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === "AbortError") {
+      response
+        .status(502)
+        .json(buildErrorResponse("LLM_TIMEOUT", "LLM request timed out"));
+      return;
+    }
+    logger.error({ error }, "LLM proxy generate error");
+    response
+      .status(502)
+      .json(buildErrorResponse("LLM_PROVIDER_ERROR", "LLM request failed"));
+  }
+}
+
 export function buildApp(): express.Express {
   const app = express();
 
@@ -392,6 +764,8 @@ export function buildApp(): express.Express {
       },
     });
   });
+
+  app.post("/generate", handleGenerateExpress);
 
   app.post("/complete", async (request, response) => {
     const { prompt } = request.body as {
