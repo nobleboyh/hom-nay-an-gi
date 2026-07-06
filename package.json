@@ -4,6 +4,9 @@
   "scripts": {
     "test": "npm test --prefix frontend & cd backend & pnpm test",
     "test:frontend": "npm test --prefix frontend",
-    "test:backend": "cd backend && pnpm test"
+    "test:backend": "cd backend && pnpm test",
+    "lint": "npm run lint --prefix frontend & cd backend & pnpm lint",
+    "lint:frontend": "npm run lint --prefix frontend",
+    "lint:backend": "cd backend && pnpm lint"
   }
 }

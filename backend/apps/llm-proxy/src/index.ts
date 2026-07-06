@@ -151,7 +151,10 @@ async function handleGenerate(
         sendJson(
           response,
           502,
-          buildErrorResponse("LLM_PROVIDER_ERROR", "LLM_API_KEY is not configured for Gemini"),
+          buildErrorResponse(
+            "LLM_PROVIDER_ERROR",
+            "LLM_API_KEY is not configured for Gemini",
+          ),
         );
         return;
       }
@@ -238,7 +241,10 @@ async function handleGenerate(
         sendJson(
           response,
           502,
-          buildErrorResponse("LLM_PROVIDER_ERROR", "LLM_API_KEY is not configured for DeepSeek"),
+          buildErrorResponse(
+            "LLM_PROVIDER_ERROR",
+            "LLM_API_KEY is not configured for DeepSeek",
+          ),
         );
         return;
       }
@@ -445,35 +451,69 @@ async function handleGenerateExpress(
   request: express.Request,
   response: express.Response,
 ): Promise<void> {
-  const { provider: rawProvider, prompt, schema } = request.body as {
+  const {
+    provider: rawProvider,
+    prompt,
+    schema,
+  } = request.body as {
     provider?: string;
     prompt?: string;
     schema?: Record<string, unknown>;
   };
 
   if (!prompt) {
-    response.status(400).json(buildErrorResponse("VALIDATION_ERROR", "Prompt is required"));
+    response
+      .status(400)
+      .json(buildErrorResponse("VALIDATION_ERROR", "Prompt is required"));
     return;
   }
 
   if (prompt.length > PROMPT_MAX_LENGTH) {
-    response.status(400).json(buildErrorResponse("VALIDATION_ERROR", `Prompt exceeds ${PROMPT_MAX_LENGTH} character limit`));
+    response
+      .status(400)
+      .json(
+        buildErrorResponse(
+          "VALIDATION_ERROR",
+          `Prompt exceeds ${PROMPT_MAX_LENGTH} character limit`,
+        ),
+      );
     return;
   }
 
   const provider = rawProvider ?? getLlmConfig().provider;
   if (!provider || !VALID_PROVIDERS.includes(provider as Provider)) {
-    response.status(400).json(buildErrorResponse("VALIDATION_ERROR", `Unsupported provider: ${provider}`));
+    response
+      .status(400)
+      .json(
+        buildErrorResponse(
+          "VALIDATION_ERROR",
+          `Unsupported provider: ${provider}`,
+        ),
+      );
     return;
   }
 
   if (provider === "gemini" && !LLM_API_KEY) {
-    response.status(502).json(buildErrorResponse("LLM_PROVIDER_ERROR", "LLM_API_KEY is not configured for Gemini"));
+    response
+      .status(502)
+      .json(
+        buildErrorResponse(
+          "LLM_PROVIDER_ERROR",
+          "LLM_API_KEY is not configured for Gemini",
+        ),
+      );
     return;
   }
 
   if (provider === "deepseek" && !LLM_API_KEY) {
-    response.status(502).json(buildErrorResponse("LLM_PROVIDER_ERROR", "LLM_API_KEY is not configured for DeepSeek"));
+    response
+      .status(502)
+      .json(
+        buildErrorResponse(
+          "LLM_PROVIDER_ERROR",
+          "LLM_API_KEY is not configured for DeepSeek",
+        ),
+      );
     return;
   }
 
@@ -493,7 +533,11 @@ async function handleGenerateExpress(
       if (schema) {
         const isArray = schema.type === "array";
         geminiBody.systemInstruction = {
-          parts: [{ text: `You must respond with valid JSON matching this schema: ${JSON.stringify(schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.` }],
+          parts: [
+            {
+              text: `You must respond with valid JSON matching this schema: ${JSON.stringify(schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.`,
+            },
+          ],
         };
         geminiBody.generationConfig = {
           response_mime_type: "application/json",
@@ -501,28 +545,56 @@ async function handleGenerateExpress(
         };
       }
 
-      const geminiResponse = await fetch(`${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent`, {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-goog-api-key": LLM_API_KEY },
-        body: JSON.stringify(geminiBody),
-        signal: controller.signal,
-      });
+      const geminiResponse = await fetch(
+        `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-goog-api-key": LLM_API_KEY,
+          },
+          body: JSON.stringify(geminiBody),
+          signal: controller.signal,
+        },
+      );
 
       clearTimeout(timeout);
 
       if (!geminiResponse.ok) {
         const errorText = await geminiResponse.text();
-        logger.error({ status: geminiResponse.status, errorText }, "Gemini API error");
-        response.status(502).json(buildErrorResponse("LLM_PROVIDER_ERROR", `Gemini API returned ${geminiResponse.status}`));
+        logger.error(
+          { status: geminiResponse.status, errorText },
+          "Gemini API error",
+        );
+        response
+          .status(502)
+          .json(
+            buildErrorResponse(
+              "LLM_PROVIDER_ERROR",
+              `Gemini API returned ${geminiResponse.status}`,
+            ),
+          );
         return;
       }
 
-      const geminiData = (await geminiResponse.json()) as { candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[] };
+      const geminiData = (await geminiResponse.json()) as {
+        candidates?: {
+          content?: { parts?: { text?: string }[] };
+          finishReason?: string;
+        }[];
+      };
       const candidate = geminiData?.candidates?.[0];
       if (!candidate?.content?.parts?.length) {
         const reason = candidate?.finishReason ?? "unknown";
         logger.error({ finishReason: reason }, "Gemini returned no content");
-        response.status(502).json(buildErrorResponse("LLM_INVALID_RESPONSE", `Gemini returned no content (finishReason: ${reason})`));
+        response
+          .status(502)
+          .json(
+            buildErrorResponse(
+              "LLM_INVALID_RESPONSE",
+              `Gemini returned no content (finishReason: ${reason})`,
+            ),
+          );
         return;
       }
 
@@ -533,28 +605,53 @@ async function handleGenerateExpress(
 
       if (schema) {
         const isArray = schema.type === "array";
-        messages.push({ role: "system", content: `You must respond with valid JSON matching this schema: ${JSON.stringify(schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.` });
+        messages.push({
+          role: "system",
+          content: `You must respond with valid JSON matching this schema: ${JSON.stringify(schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.`,
+        });
       }
 
       messages.push({ role: "user", content: prompt });
 
-      const deepSeekResponse = await fetch(`${DEEPSEEK_API_BASE}/chat/completions`, {
-        method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${LLM_API_KEY}` },
-        body: JSON.stringify({ model: DEEPSEEK_MODEL, messages, temperature: 0.3 }),
-        signal: controller.signal,
-      });
+      const deepSeekResponse = await fetch(
+        `${DEEPSEEK_API_BASE}/chat/completions`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${LLM_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: DEEPSEEK_MODEL,
+            messages,
+            temperature: 0.3,
+          }),
+          signal: controller.signal,
+        },
+      );
 
       clearTimeout(timeout);
 
       if (!deepSeekResponse.ok) {
         const errorText = await deepSeekResponse.text();
-        logger.error({ status: deepSeekResponse.status, errorText }, "DeepSeek API error");
-        response.status(502).json(buildErrorResponse("LLM_PROVIDER_ERROR", `DeepSeek API returned ${deepSeekResponse.status}`));
+        logger.error(
+          { status: deepSeekResponse.status, errorText },
+          "DeepSeek API error",
+        );
+        response
+          .status(502)
+          .json(
+            buildErrorResponse(
+              "LLM_PROVIDER_ERROR",
+              `DeepSeek API returned ${deepSeekResponse.status}`,
+            ),
+          );
         return;
       }
 
-      const deepSeekData = (await deepSeekResponse.json()) as { choices?: { message?: { content?: string } }[] };
+      const deepSeekData = (await deepSeekResponse.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
       generatedText = deepSeekData.choices?.[0]?.message?.content ?? "";
     } else if (provider === "ollama") {
       model = OLLAMA_MODEL;
@@ -562,48 +659,92 @@ async function handleGenerateExpress(
 
       if (schema) {
         const isArray = schema.type === "array";
-        messages.push({ role: "system", content: `You must respond with valid JSON matching this schema: ${JSON.stringify(schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.` });
+        messages.push({
+          role: "system",
+          content: `You must respond with valid JSON matching this schema: ${JSON.stringify(schema)}. Return ONLY the JSON ${isArray ? "array" : "object"}, no markdown, no explanation.`,
+        });
       }
 
       messages.push({ role: "user", content: prompt });
 
-      const ollamaResponse = await fetch(`${OLLAMA_BASE_URL}/v1/chat/completions`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ model: OLLAMA_MODEL, messages, temperature: 0.7, stream: false, num_predict: 4096 }),
-        signal: controller.signal,
-      });
+      const ollamaResponse = await fetch(
+        `${OLLAMA_BASE_URL}/v1/chat/completions`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            model: OLLAMA_MODEL,
+            messages,
+            temperature: 0.7,
+            stream: false,
+            num_predict: 4096,
+          }),
+          signal: controller.signal,
+        },
+      );
 
       clearTimeout(timeout);
 
       if (!ollamaResponse.ok) {
         const errorText = await ollamaResponse.text();
-        logger.error({ status: ollamaResponse.status, errorText }, "Ollama API error");
-        response.status(502).json(buildErrorResponse("LLM_PROVIDER_ERROR", `Ollama API returned ${ollamaResponse.status}`));
+        logger.error(
+          { status: ollamaResponse.status, errorText },
+          "Ollama API error",
+        );
+        response
+          .status(502)
+          .json(
+            buildErrorResponse(
+              "LLM_PROVIDER_ERROR",
+              `Ollama API returned ${ollamaResponse.status}`,
+            ),
+          );
         return;
       }
 
-      const ollamaData = (await ollamaResponse.json()) as { choices?: { message?: { content?: string } }[] };
+      const ollamaData = (await ollamaResponse.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
       generatedText = ollamaData.choices?.[0]?.message?.content ?? "";
     } else {
       clearTimeout(timeout);
-      response.status(502).json(buildErrorResponse("LLM_PROVIDER_ERROR", `Unsupported provider: ${provider}`));
+      response
+        .status(502)
+        .json(
+          buildErrorResponse(
+            "LLM_PROVIDER_ERROR",
+            `Unsupported provider: ${provider}`,
+          ),
+        );
       return;
     }
 
     if (!generatedText) {
-      response.status(502).json(buildErrorResponse("LLM_INVALID_RESPONSE", "LLM returned empty content"));
+      response
+        .status(502)
+        .json(
+          buildErrorResponse(
+            "LLM_INVALID_RESPONSE",
+            "LLM returned empty content",
+          ),
+        );
       return;
     }
 
-    response.status(200).json(buildSuccessResponse({ content: generatedText, provider, model }));
+    response
+      .status(200)
+      .json(buildSuccessResponse({ content: generatedText, provider, model }));
   } catch (error: unknown) {
     if (error instanceof Error && error.name === "AbortError") {
-      response.status(502).json(buildErrorResponse("LLM_TIMEOUT", "LLM request timed out"));
+      response
+        .status(502)
+        .json(buildErrorResponse("LLM_TIMEOUT", "LLM request timed out"));
       return;
     }
     logger.error({ error }, "LLM proxy generate error");
-    response.status(502).json(buildErrorResponse("LLM_PROVIDER_ERROR", "LLM request failed"));
+    response
+      .status(502)
+      .json(buildErrorResponse("LLM_PROVIDER_ERROR", "LLM request failed"));
   }
 }
 

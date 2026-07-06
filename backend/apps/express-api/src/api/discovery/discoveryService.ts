@@ -1,3 +1,4 @@
+import type { SeedRecipe } from "@hom-nay-an-gi/shared";
 import {
   AuthenticationError,
   cacheGet,
@@ -7,12 +8,11 @@ import {
   logger,
   redis,
 } from "@hom-nay-an-gi/shared";
+import { getSeedRecipes } from "../../data/seedLoader.js";
 import {
   type NearbyResult,
   searchNearby as nearbyFromClients,
 } from "../../services/index.js";
-import type { SeedRecipe } from "@hom-nay-an-gi/shared";
-import { getSeedRecipes } from "../../data/seedLoader.js";
 import type { TrendingDish } from "./discoveryValidation.js";
 import {
   LlmTrendingResponseSchema,
@@ -53,17 +53,15 @@ function getTrendingFromSeed(
   if (recipes.length === 0) return [];
 
   const filtered = cuisine
-    ? recipes.filter(
-        (r) => r.cuisine.toLowerCase() === cuisine.toLowerCase(),
-      )
+    ? recipes.filter((r) => r.cuisine.toLowerCase() === cuisine.toLowerCase())
     : recipes;
 
   const shuffled = [...filtered].sort(() => Math.random() - 0.5);
   const count = Math.min(shuffled.length, 20);
 
-  return shuffled.slice(0, count).map((recipe, i) =>
-    seedRecipeToTrendingDish(recipe, i + 1),
-  );
+  return shuffled
+    .slice(0, count)
+    .map((recipe, i) => seedRecipeToTrendingDish(recipe, i + 1));
 }
 
 function buildCacheKey(cuisine?: string, price?: string): string {
@@ -282,7 +280,10 @@ export async function getTrending(
   try {
     llmResult = await callLlmForTrending(cuisine, price);
   } catch (error) {
-    logger.warn({ error }, "trending LLM generation failed, falling back to seed data");
+    logger.warn(
+      { error },
+      "trending LLM generation failed, falling back to seed data",
+    );
     llmResult = getTrendingFromSeed(cuisine, price);
   }
 
