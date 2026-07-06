@@ -115,3 +115,27 @@ So that switching to places like Cầu Giấy, Hà Nội does not still show res
   - [ ] provider failure returning empty-state instead of HCMC seed data
   - [ ] manual location picker changes replacing prior nearby results
   - [ ] zero-result filtered states rendering correctly
+
+---
+
+## Story 3.5: Discovery Provider Runtime Hardening
+
+As a **developer**,
+I want the discovery external-provider integrations to fail truthfully and stay aligned with the runtime contract,
+So that `/api/v1/discovery/trending` and `/api/v1/discovery/nearby` do not break when the LLM proxy deployment or HERE configuration drifts from the code.
+
+**Acceptance Criteria:**
+
+- **Given** `GET /api/v1/discovery/trending` calls the internal LLM proxy, **When** the proxy runtime does not expose the expected route or is running an outdated image, **Then** the service detects the contract mismatch, logs a precise runtime error, and degrades using the defined fallback instead of surfacing an opaque 503.
+- **Given** the discovery service needs structured LLM output, **When** it invokes the proxy, **Then** it uses a single shared proxy client/endpoint contract instead of maintaining an ad hoc fetch path that can drift from the deployed proxy implementation.
+- **Given** nearby discovery calls HERE Maps, **When** the configured HERE credentials or endpoint are invalid for the runtime environment, **Then** the service classifies the failure as provider configuration/authorization error, logs actionable details, and falls back cleanly without pretending the request succeeded.
+- **Given** the primary HERE call fails and the Overpass fallback is unreachable or times out, **When** `GET /api/v1/discovery/nearby` completes, **Then** the response carries a truthful degraded/empty-state contract and observability signal rather than a silent empty success with no diagnostic context.
+- **Given** regression and integration tests run for discovery providers, **When** they simulate `404` from the LLM proxy, `403` from HERE Maps, and Overpass fetch failure, **Then** they verify the API behavior, logging path, and fallback/degraded semantics remain stable.
+
+**Technical Tasks:**
+- [ ] Introduce a shared discovery LLM proxy client/contract and remove duplicated raw `/generate` fetch logic from `discoveryService.ts`
+- [ ] Detect and surface proxy route/version mismatch (`/generate` missing or incompatible) with explicit logs and degraded fallback
+- [ ] Audit and update HERE integration to the supported endpoint/auth contract used by the active HERE product credentials
+- [ ] Classify nearby provider failures into configuration/auth, transport, timeout, and empty-result cases for better diagnosis
+- [ ] Expose truthful degraded metadata or equivalent server-side signal for nearby/trending provider failures
+- [ ] Add regression coverage for LLM proxy `404`, HERE `403`, and Overpass transport failure scenarios
