@@ -15,3 +15,5 @@ android/
 mongo-data/
 redis-data/
 backups/
+tests/e2e-results/
+tests/e2e-report/
