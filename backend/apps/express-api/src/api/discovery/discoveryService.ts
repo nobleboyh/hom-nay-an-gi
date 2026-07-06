@@ -1,5 +1,4 @@
 import {
-  AppError,
   AuthenticationError,
   cacheGet,
   cacheSet,
@@ -12,6 +11,8 @@ import {
   type NearbyResult,
   searchNearby as nearbyFromClients,
 } from "../../services/index.js";
+import type { SeedRecipe } from "@hom-nay-an-gi/shared";
+import { getSeedRecipes } from "../../data/seedLoader.js";
 import type { TrendingDish } from "./discoveryValidation.js";
 import {
   LlmTrendingResponseSchema,
@@ -23,6 +24,47 @@ const TRENDING_CACHE_TTL = 21600;
 const TRENDING_CACHE_PREFIX = "trending";
 const NEARBY_CACHE_TTL = 3600;
 const NEARBY_CACHE_PREFIX = "nearby";
+
+const PRICE_TAGS = ["rẻ", "trung bình", "đắt"] as const;
+
+function seedRecipeToTrendingDish(
+  recipe: SeedRecipe,
+  rank: number,
+): TrendingDish {
+  const matchedPriceTag = recipe.tags.find((t) =>
+    PRICE_TAGS.some((p) => t.toLowerCase().includes(p)),
+  );
+  return {
+    dishId: recipe.dishId,
+    name: recipe.name,
+    nameEn: recipe.nameEn,
+    cuisine: recipe.cuisine,
+    priceRange: matchedPriceTag ?? undefined,
+    trendingRank: rank,
+    imageDescription: recipe.imageDescription,
+  };
+}
+
+function getTrendingFromSeed(
+  cuisine?: string,
+  _price?: string,
+): TrendingDish[] {
+  const recipes = getSeedRecipes();
+  if (recipes.length === 0) return [];
+
+  const filtered = cuisine
+    ? recipes.filter(
+        (r) => r.cuisine.toLowerCase() === cuisine.toLowerCase(),
+      )
+    : recipes;
+
+  const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+  const count = Math.min(shuffled.length, 20);
+
+  return shuffled.slice(0, count).map((recipe, i) =>
+    seedRecipeToTrendingDish(recipe, i + 1),
+  );
+}
 
 function buildCacheKey(cuisine?: string, price?: string): string {
   const parts = [TRENDING_CACHE_PREFIX];
@@ -88,7 +130,7 @@ async function callLlmForTrending(
   const response = await fetch(`${proxyUrl}/generate`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ provider: "gemini", prompt, schema }),
+    body: JSON.stringify({ provider: llmConfig.provider, prompt, schema }),
     signal: AbortSignal.timeout(20_000),
   });
 
@@ -178,7 +220,7 @@ async function callLlmForTrendingRaw(
   const response = await fetch(`${proxyUrl}/generate`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ provider: "gemini", prompt, schema }),
+    body: JSON.stringify({ provider: llmConfig.provider, prompt, schema }),
     signal: AbortSignal.timeout(20_000),
   });
 
@@ -240,12 +282,8 @@ export async function getTrending(
   try {
     llmResult = await callLlmForTrending(cuisine, price);
   } catch (error) {
-    logger.error({ error }, "trending LLM generation failed");
-    throw new AppError(
-      "TRENDING_UNAVAILABLE",
-      503,
-      "Trending data is currently unavailable",
-    );
+    logger.warn({ error }, "trending LLM generation failed, falling back to seed data");
+    llmResult = getTrendingFromSeed(cuisine, price);
   }
 
   const validated = {
