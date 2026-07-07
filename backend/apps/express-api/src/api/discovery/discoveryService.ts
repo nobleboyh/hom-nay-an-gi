@@ -3,15 +3,18 @@ import {
   AuthenticationError,
   cacheGet,
   cacheSet,
-  getLlmConfig,
-  LLMError,
   logger,
   redis,
 } from "@hom-nay-an-gi/shared";
 import {
   type NearbyResult,
-  searchNearby as nearbyFromClients,
+  type NearbySearchOutcome,
+  searchNearbyDetailed,
 } from "../../services/index.js";
+import {
+  generateStructured,
+  LlmProxyContractError,
+} from "../../services/llmClient.js";
 import type { TrendingDish } from "./discoveryValidation.js";
 import {
   LlmTrendingResponseSchema,
@@ -23,6 +26,22 @@ const TRENDING_CACHE_TTL = 21600;
 const TRENDING_CACHE_PREFIX = "trending";
 const NEARBY_CACHE_TTL = 3600;
 const NEARBY_CACHE_PREFIX = "nearby";
+const TRENDING_GENERATION_SCHEMA = {
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      dishId: { type: "string" },
+      name: { type: "string" },
+      nameEn: { type: "string" },
+      cuisine: { type: "string" },
+      priceRange: { type: "string" },
+      trendingRank: { type: "number" },
+      imageDescription: { type: "string" },
+    },
+    required: ["dishId", "name", "nameEn", "cuisine", "trendingRank"],
+  },
+} as const;
 
 function buildCacheKey(cuisine?: string, price?: string): string {
   const parts = [TRENDING_CACHE_PREFIX];
@@ -61,157 +80,39 @@ async function callLlmForTrending(
   cuisine?: string,
   price?: string,
 ): Promise<TrendingDish[]> {
-  const llmConfig = getLlmConfig();
-  const proxyUrl = llmConfig.proxyUrl;
-
   const cuisineFilter = cuisine ? ` focusing on ${cuisine} cuisine` : "";
   const priceFilter = price ? ` in the ${price} price range` : "";
   const prompt = `${TRENDING_PROMPT_EN}${cuisineFilter}${priceFilter}.`;
 
-  const schema = {
-    type: "array",
-    items: {
-      type: "object",
-      properties: {
-        dishId: { type: "string" },
-        name: { type: "string" },
-        nameEn: { type: "string" },
-        cuisine: { type: "string" },
-        priceRange: { type: "string" },
-        trendingRank: { type: "number" },
-        imageDescription: { type: "string" },
-      },
-      required: ["dishId", "name", "nameEn", "cuisine", "trendingRank"],
-    },
-  };
-
-  const response = await fetch(`${proxyUrl}/generate`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ provider: "gemini", prompt, schema }),
-    signal: AbortSignal.timeout(20_000),
-  });
-
-  if (!response.ok) {
-    throw new LLMError(
-      "LLM_PROVIDER_ERROR",
-      `LLM proxy returned ${response.status}`,
-    );
-  }
-
-  let proxyBody: {
-    success: boolean;
-    data?: { content: string };
-    error?: { code: string; message: string };
-  };
   try {
-    proxyBody = (await response.json()) as typeof proxyBody;
-  } catch {
-    throw new LLMError(
-      "LLM_INVALID_RESPONSE",
-      "LLM proxy returned non-JSON response",
+    return await generateStructured(
+      prompt,
+      TRENDING_GENERATION_SCHEMA,
+      LlmTrendingResponseSchema,
     );
-  }
-
-  if (!proxyBody.success || !proxyBody.data?.content) {
-    throw new LLMError(
-      "LLM_INVALID_RESPONSE",
-      proxyBody.error?.message ?? "LLM proxy returned unsuccessful response",
-    );
-  }
-
-  function parseTrendingContent(rawJson: string): TrendingDish[] {
-    const raw = JSON.parse(rawJson);
-    return LlmTrendingResponseSchema.parse(raw);
-  }
-
-  let parsed: TrendingDish[];
-  try {
-    parsed = parseTrendingContent(proxyBody.data.content);
   } catch (error) {
-    logger.warn(
-      { error, contentPreview: proxyBody.data.content.slice(0, 200) },
-      "LLM response Zod validation failed, retrying once",
-    );
-    try {
-      const retryResult = await callLlmForTrendingRaw(cuisine, price);
-      parsed = retryResult;
-    } catch {
-      throw new LLMError(
-        "LLM_INVALID_RESPONSE",
-        `LLM response failed Zod validation: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
+    if (!(error instanceof AppError && error.code === "LLM_INVALID_RESPONSE")) {
+      throw error;
     }
-  }
 
-  return parsed;
+    logger.warn({ error }, "LLM response Zod validation failed, retrying once");
+    return callLlmForTrendingRaw(cuisine, price);
+  }
 }
 
 async function callLlmForTrendingRaw(
   cuisine?: string,
   price?: string,
 ): Promise<TrendingDish[]> {
-  const llmConfig = getLlmConfig();
-  const proxyUrl = llmConfig.proxyUrl;
-
   const cuisineFilter = cuisine ? ` focusing on ${cuisine} cuisine` : "";
   const priceFilter = price ? ` in the ${price} price range` : "";
   const prompt = `${TRENDING_PROMPT_EN}${cuisineFilter}${priceFilter}.`;
 
-  const schema = {
-    type: "array" as const,
-    items: {
-      type: "object" as const,
-      properties: {
-        dishId: { type: "string" as const },
-        name: { type: "string" as const },
-        nameEn: { type: "string" as const },
-        cuisine: { type: "string" as const },
-        priceRange: { type: "string" as const },
-        trendingRank: { type: "number" as const },
-        imageDescription: { type: "string" as const },
-      },
-      required: ["dishId", "name", "nameEn", "cuisine", "trendingRank"],
-    },
-  };
-
-  const response = await fetch(`${proxyUrl}/generate`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ provider: "gemini", prompt, schema }),
-    signal: AbortSignal.timeout(20_000),
-  });
-
-  if (!response.ok) {
-    throw new LLMError(
-      "LLM_PROVIDER_ERROR",
-      `LLM proxy returned ${response.status}`,
-    );
-  }
-
-  let proxyBody: {
-    success: boolean;
-    data?: { content: string };
-    error?: { code: string; message: string };
-  };
-  try {
-    proxyBody = (await response.json()) as typeof proxyBody;
-  } catch {
-    throw new LLMError(
-      "LLM_INVALID_RESPONSE",
-      "LLM proxy returned non-JSON response",
-    );
-  }
-
-  if (!proxyBody.success || !proxyBody.data?.content) {
-    throw new LLMError(
-      "LLM_INVALID_RESPONSE",
-      proxyBody.error?.message ?? "LLM proxy returned unsuccessful response",
-    );
-  }
-
-  const raw = JSON.parse(proxyBody.data.content);
-  return LlmTrendingResponseSchema.parse(raw);
+  return generateStructured(
+    prompt,
+    TRENDING_GENERATION_SCHEMA,
+    LlmTrendingResponseSchema,
+  );
 }
 
 export async function getTrending(
@@ -240,7 +141,21 @@ export async function getTrending(
   try {
     llmResult = await callLlmForTrending(cuisine, price);
   } catch (error) {
-    logger.error({ error }, "trending LLM generation failed");
+    if (error instanceof LlmProxyContractError) {
+      logger.error(
+        {
+          error: {
+            code: error.code,
+            endpoint: error.endpoint,
+            statusCode: error.statusCode,
+            message: error.message,
+          },
+        },
+        "trending LLM proxy contract mismatch detected",
+      );
+    } else {
+      logger.error({ error }, "trending LLM generation failed");
+    }
     throw new AppError(
       "TRENDING_UNAVAILABLE",
       503,
@@ -281,10 +196,10 @@ export async function getNearby(
     return cached.sort((a, b) => a.distance - b.distance).slice(0, limit);
   }
 
-  let results: NearbyResult[];
+  let nearbyOutcome: NearbySearchOutcome;
 
   try {
-    results = await nearbyFromClients({
+    nearbyOutcome = await searchNearbyDetailed({
       lat,
       lng,
       radius,
@@ -293,8 +208,29 @@ export async function getNearby(
     });
   } catch (error) {
     logger.warn({ error }, "nearby API clients failed");
-    results = [];
+    nearbyOutcome = {
+      items: [],
+      degraded: true,
+      reason: "NEARBY_PROVIDERS_UNAVAILABLE",
+      source: "degraded-empty",
+    };
   }
+
+  if (nearbyOutcome.degraded) {
+    logger.warn(
+      {
+        degraded: true,
+        reason: nearbyOutcome.reason,
+        source: nearbyOutcome.source,
+        lat,
+        lng,
+        radius,
+      },
+      "nearby discovery degraded after provider failures",
+    );
+  }
+
+  const results = nearbyOutcome.items;
 
   const capped = results
     .sort((a, b) => a.distance - b.distance)

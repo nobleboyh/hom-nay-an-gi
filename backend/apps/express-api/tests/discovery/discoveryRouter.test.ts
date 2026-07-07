@@ -125,51 +125,49 @@ const LLM_SUCCESS_RESPONSE: Response = {
   status: 200,
   json: vi.fn().mockResolvedValue({
     success: true,
-    data: {
-      content: JSON.stringify([
-        {
-          dishId: "api-1",
-          name: "Phở bò",
-          nameEn: "Beef Pho",
-          cuisine: "Vietnamese",
-          priceRange: "45.000đ – 65.000đ",
-          trendingRank: 1,
-          imageDescription: "Bowl of beef pho with herbs",
-        },
-        {
-          dishId: "api-2",
-          name: "Bún chả",
-          nameEn: "Grilled Pork Noodles",
-          cuisine: "Vietnamese",
-          priceRange: "35.000đ – 50.000đ",
-          trendingRank: 2,
-        },
-        {
-          dishId: "api-3",
-          name: "Bánh mì thịt",
-          nameEn: "Vietnamese Baguette",
-          cuisine: "Vietnamese",
-          priceRange: "25.000đ – 45.000đ",
-          trendingRank: 3,
-        },
-        {
-          dishId: "api-4",
-          name: "Cà phê sữa đá",
-          nameEn: "Iced Coffee",
-          cuisine: "Vietnamese",
-          priceRange: "15.000đ – 29.000đ",
-          trendingRank: 4,
-        },
-        {
-          dishId: "api-5",
-          name: "Cơm tấm",
-          nameEn: "Broken Rice",
-          cuisine: "Vietnamese",
-          priceRange: "30.000đ – 50.000đ",
-          trendingRank: 5,
-        },
-      ]),
-    },
+    data: [
+      {
+        dishId: "api-1",
+        name: "Phở bò",
+        nameEn: "Beef Pho",
+        cuisine: "Vietnamese",
+        priceRange: "45.000đ – 65.000đ",
+        trendingRank: 1,
+        imageDescription: "Bowl of beef pho with herbs",
+      },
+      {
+        dishId: "api-2",
+        name: "Bún chả",
+        nameEn: "Grilled Pork Noodles",
+        cuisine: "Vietnamese",
+        priceRange: "35.000đ – 50.000đ",
+        trendingRank: 2,
+      },
+      {
+        dishId: "api-3",
+        name: "Bánh mì thịt",
+        nameEn: "Vietnamese Baguette",
+        cuisine: "Vietnamese",
+        priceRange: "25.000đ – 45.000đ",
+        trendingRank: 3,
+      },
+      {
+        dishId: "api-4",
+        name: "Cà phê sữa đá",
+        nameEn: "Iced Coffee",
+        cuisine: "Vietnamese",
+        priceRange: "15.000đ – 29.000đ",
+        trendingRank: 4,
+      },
+      {
+        dishId: "api-5",
+        name: "Cơm tấm",
+        nameEn: "Broken Rice",
+        cuisine: "Vietnamese",
+        priceRange: "30.000đ – 50.000đ",
+        trendingRank: 5,
+      },
+    ],
   }),
 } as unknown as Response;
 
@@ -212,6 +210,27 @@ describe("Discovery Router - Trending", () => {
     const res = await request(app).get("/api/v1/discovery/trending?offset=-1");
 
     expect(res.status).toBe(400);
+  });
+
+  it("GET /api/v1/discovery/trending returns 503 when proxy contract drifts", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    vi.spyOn(global, "fetch").mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      statusText: "Not Found",
+      json: vi.fn(),
+      text: vi.fn().mockResolvedValue("route missing"),
+    } as unknown as Response);
+
+    const app = buildApp();
+    const res = await request(app).get("/api/v1/discovery/trending");
+
+    expect(res.status).toBe(503);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error).toEqual({
+      code: "TRENDING_UNAVAILABLE",
+      message: "Trending data is currently unavailable",
+    });
   });
 });
 

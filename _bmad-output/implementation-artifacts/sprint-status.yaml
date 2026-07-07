@@ -35,6 +35,7 @@ development_status:
   3-2-discovery-api-module: done
   3-3-discover-screen: done
   3-4-discover-nearby-location-relevance-regression-fix: ready-for-dev
+  3-5-discovery-provider-runtime-hardening: done
   epic-4: ready-for-dev
   4-1-auth-api-module: done
   4-2-login-screen: done
@@ -49,4 +50,4 @@ development_status:
   4-11-disliked-ingredients-search-filter-regression-fix: done
   q-4-expo-go-api-connectivity-contract-fix: done
 
-last_updated: 2026-06-30 (Q.4 Expo Go API connectivity contract fix done after code review fixes)
+last_updated: 2026-07-06 (Story 3.5 code review findings fixed and story moved to done)

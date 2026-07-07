@@ -2,7 +2,7 @@
   "name": "hom-nay-an-gi",
   "private": true,
   "scripts": {
-    "test": "npm test --prefix frontend & cd backend & pnpm test",
+    "test": "npm run test:frontend && npm run test:backend",
     "test:frontend": "npm test --prefix frontend",
     "test:backend": "cd backend && pnpm test"
   }

@@ -11,12 +11,14 @@ import {
 // Mocks
 // ============================================================================
 
+const mockLogger = vi.hoisted(() => ({
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 vi.mock("@hom-nay-an-gi/shared", () => ({
-  logger: {
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-  },
+  logger: mockLogger,
   env: {
     HERE_API_KEY: "test-here-api-key",
   },
@@ -113,8 +115,16 @@ describe("HERE Maps Client", () => {
 
     // Verify API was called with correct parameters
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("https://places.ls.hereapi.com/places/v1/browse"),
+      expect.stringContaining(
+        "https://discover.search.hereapi.com/v1/discover",
+      ),
       expect.any(Object),
+    );
+
+    const calledUrl = new URL(mockFetch.mock.calls[0][0] as string);
+    expect(calledUrl.searchParams.get("at")).toBeNull();
+    expect(calledUrl.searchParams.get("in")).toBe(
+      "circle:10.7626,106.6601;r=5000",
     );
   });
 
@@ -208,8 +218,9 @@ describe("HERE Maps Client", () => {
   it("should handle API errors (non-200 status)", async () => {
     const mockFetch = vi.fn().mockResolvedValueOnce({
       ok: false,
-      status: 401,
-      statusText: "Unauthorized",
+      status: 500,
+      statusText: "Internal Server Error",
+      text: vi.fn().mockResolvedValue("server error"),
     });
 
     global.fetch = mockFetch;
@@ -217,6 +228,21 @@ describe("HERE Maps Client", () => {
     await expect(
       hereMapsSearchNearby(DEFAULT_PARAMS, "invalid-key"),
     ).rejects.toThrow("HERE Maps API error");
+  });
+
+  it("should classify HERE 403 as configuration/auth failure", async () => {
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      statusText: "Forbidden",
+      text: vi.fn().mockResolvedValue("forbidden"),
+    });
+
+    global.fetch = mockFetch;
+
+    await expect(
+      hereMapsSearchNearby(DEFAULT_PARAMS, "invalid-key"),
+    ).rejects.toThrow("HERE Maps authorization/configuration error");
   });
 
   it("should handle timeout errors", async () => {
@@ -490,6 +516,13 @@ describe("Circuit Breaker (searchNearby)", () => {
     const results = await searchNearby(DEFAULT_PARAMS);
 
     expect(results).toEqual([]);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        degraded: true,
+        reason: "NEARBY_PROVIDERS_UNAVAILABLE",
+        msg: "Both nearby providers failed; returning degraded empty result",
+      }),
+    );
   });
 
   it("should handle missing API key gracefully", async () => {

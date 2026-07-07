@@ -41,6 +41,12 @@ const mockShared = vi.hoisted(() => {
       proxyUrl: "http://localhost:3001",
     }),
     AppError: MockAppError,
+    LLMError: class LLMError extends MockAppError {
+      constructor(code: string, message: string) {
+        super(code, 502, message);
+        this.name = "LLMError";
+      }
+    },
     AuthenticationError: class AuthenticationError extends MockAppError {
       constructor(message: string) {
         super("AUTH_TOKEN_EXPIRED", 401, message);
@@ -54,6 +60,11 @@ vi.mock("@hom-nay-an-gi/shared", () => mockShared);
 
 vi.mock("../../src/services/index.js", () => ({
   searchNearby: vi.fn().mockResolvedValue([]),
+  searchNearbyDetailed: vi.fn().mockResolvedValue({
+    items: [],
+    degraded: false,
+    source: "overpass-only",
+  }),
 }));
 
 import {
@@ -67,55 +78,53 @@ const LLM_SUCCESS_RESPONSE = {
   status: 200,
   json: vi.fn().mockResolvedValue({
     success: true,
-    data: {
-      content: JSON.stringify([
-        {
-          dishId: "api-1",
-          name: "Phở bò",
-          nameEn: "Beef Pho",
-          cuisine: "Vietnamese",
-          priceRange: "45.000đ – 65.000đ",
-          trendingRank: 1,
-          imageDescription: "Bowl of beef pho with herbs",
-        },
-        {
-          dishId: "api-2",
-          name: "Bún chả",
-          nameEn: "Grilled Pork Noodles",
-          cuisine: "Vietnamese",
-          priceRange: "35.000đ – 50.000đ",
-          trendingRank: 2,
-          imageDescription: "Grilled pork with rice noodles",
-        },
-        {
-          dishId: "api-3",
-          name: "Bánh mì thịt",
-          nameEn: "Vietnamese Baguette",
-          cuisine: "Vietnamese",
-          priceRange: "25.000đ – 45.000đ",
-          trendingRank: 3,
-          imageDescription: "Vietnamese baguette sandwich",
-        },
-        {
-          dishId: "api-4",
-          name: "Cà phê sữa đá",
-          nameEn: "Iced Coffee",
-          cuisine: "Vietnamese",
-          priceRange: "15.000đ – 29.000đ",
-          trendingRank: 4,
-          imageDescription: "Iced Vietnamese coffee",
-        },
-        {
-          dishId: "api-5",
-          name: "Cơm tấm",
-          nameEn: "Broken Rice",
-          cuisine: "Vietnamese",
-          priceRange: "30.000đ – 50.000đ",
-          trendingRank: 5,
-          imageDescription: "Broken rice with grilled pork",
-        },
-      ]),
-    },
+    data: [
+      {
+        dishId: "api-1",
+        name: "Phở bò",
+        nameEn: "Beef Pho",
+        cuisine: "Vietnamese",
+        priceRange: "45.000đ – 65.000đ",
+        trendingRank: 1,
+        imageDescription: "Bowl of beef pho with herbs",
+      },
+      {
+        dishId: "api-2",
+        name: "Bún chả",
+        nameEn: "Grilled Pork Noodles",
+        cuisine: "Vietnamese",
+        priceRange: "35.000đ – 50.000đ",
+        trendingRank: 2,
+        imageDescription: "Grilled pork with rice noodles",
+      },
+      {
+        dishId: "api-3",
+        name: "Bánh mì thịt",
+        nameEn: "Vietnamese Baguette",
+        cuisine: "Vietnamese",
+        priceRange: "25.000đ – 45.000đ",
+        trendingRank: 3,
+        imageDescription: "Vietnamese baguette sandwich",
+      },
+      {
+        dishId: "api-4",
+        name: "Cà phê sữa đá",
+        nameEn: "Iced Coffee",
+        cuisine: "Vietnamese",
+        priceRange: "15.000đ – 29.000đ",
+        trendingRank: 4,
+        imageDescription: "Iced Vietnamese coffee",
+      },
+      {
+        dishId: "api-5",
+        name: "Cơm tấm",
+        nameEn: "Broken Rice",
+        cuisine: "Vietnamese",
+        priceRange: "30.000đ – 50.000đ",
+        trendingRank: 5,
+        imageDescription: "Broken rice with grilled pork",
+      },
+    ],
   }),
 } as unknown as Response;
 
@@ -235,6 +244,59 @@ describe("getTrending", () => {
     );
   });
 
+  it("should classify proxy route drift when /complete returns 404", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    (global.fetch as Mock).mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: "Not Found",
+      text: vi.fn().mockResolvedValue("route missing"),
+      json: vi.fn(),
+    } as unknown as Response);
+
+    await expect(getTrending(undefined, undefined, 0, 5)).rejects.toThrow(
+      "Trending data is currently unavailable",
+    );
+
+    expect(mockShared.logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.objectContaining({
+          code: "LLM_PROXY_CONTRACT_MISMATCH",
+          endpoint: "/complete",
+          statusCode: 404,
+        }),
+      }),
+      "trending LLM proxy contract mismatch detected",
+    );
+  });
+
+  it("should retry once when structured LLM data fails schema validation", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    (global.fetch as Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockResolvedValue({
+          success: true,
+          data: [{ dishId: "broken" }],
+        }),
+      } as unknown as Response)
+      .mockResolvedValueOnce(LLM_SUCCESS_RESPONSE);
+
+    const result = await getTrending(undefined, undefined, 0, 5);
+
+    expect(result.items).toHaveLength(5);
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(mockShared.logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.objectContaining({
+          code: "LLM_INVALID_RESPONSE",
+        }),
+      }),
+      "LLM response Zod validation failed, retrying once",
+    );
+  });
+
   it("should filter by cuisine via LLM API", async () => {
     mockRedis.get.mockResolvedValue(null);
     const mockFilteredResponse = {
@@ -242,18 +304,16 @@ describe("getTrending", () => {
       status: 200,
       json: vi.fn().mockResolvedValue({
         success: true,
-        data: {
-          content: JSON.stringify([
-            {
-              dishId: "api-1",
-              name: "Phở bò",
-              nameEn: "Beef Pho",
-              cuisine: "Vietnamese",
-              priceRange: "45.000đ – 65.000đ",
-              trendingRank: 1,
-            },
-          ]),
-        },
+        data: [
+          {
+            dishId: "api-1",
+            name: "Phở bò",
+            nameEn: "Beef Pho",
+            cuisine: "Vietnamese",
+            priceRange: "45.000đ – 65.000đ",
+            trendingRank: 1,
+          },
+        ],
       }),
     } as unknown as Response;
     (global.fetch as Mock).mockResolvedValue(mockFilteredResponse);
@@ -357,5 +417,23 @@ describe("getNearby", () => {
   it("should accept lat, lng, radius, cuisine params", async () => {
     const result = await getNearby(10.7626, 106.6601, 5000, "Vietnamese");
     expect(Array.isArray(result)).toBe(true);
+  });
+
+  it("should log degraded nearby path when all providers fail", async () => {
+    const searchNearbyMock = await import("../../src/services/index.js");
+    vi.mocked(searchNearbyMock.searchNearbyDetailed).mockRejectedValueOnce(
+      new Error("All nearby providers failed"),
+    );
+
+    const result = await getNearby(10.7626, 106.6601, 5000, "Vietnamese");
+
+    expect(result).toEqual([]);
+    expect(mockShared.logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        degraded: true,
+        reason: "NEARBY_PROVIDERS_UNAVAILABLE",
+      }),
+      "nearby discovery degraded after provider failures",
+    );
   });
 });

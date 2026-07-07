@@ -50,10 +50,10 @@ services:
     command: ["pnpm", "start:llm-proxy"]
     environment:
       PORT: 3001
-      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
       # LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
       # LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
-      # LLM_API_KEY: ${LLM_API_KEY:-replace-with-llm-provider-api-key}
+      LLM_API_KEY: ${LLM_API_KEY}
 
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:8b}
@@ -69,7 +69,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "fetch('http://127.0.0.1:3001/health').then((response) => { if (!response.ok) process.exit(1); }).catch(() => process.exit(1))",
+          "const body={prompt:{system:'Return only valid JSON.',user:'Return exactly this JSON object: {\"ok\":true}'}}; fetch('http://127.0.0.1:3001/complete',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}).then(async(response)=>{const payload=await response.json().catch(()=>null); if(!response.ok||!payload?.success||payload?.meta?.degraded!==false||payload?.data?.ok!==true){console.error('Unexpected /complete healthcheck response',response.status,payload); process.exit(1);}}).catch((error)=>{console.error(error); process.exit(1);})",
         ]
       interval: 10s
       timeout: 5s

@@ -317,14 +317,29 @@ Expected response:
 {"success":true,"data":{"status":"ok"}}
 ```
 
-3. Optionally verify infrastructure containers:
+3. Verify the running `llm-proxy` contract with a real completion:
+
+```bash
+docker compose exec llm-proxy node -e "const body={prompt:{system:'Return only valid JSON.',user:'Return exactly this JSON object: {\"ok\":true}'}}; fetch('http://127.0.0.1:3001/complete',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}).then(async(response)=>{const payload=await response.json(); console.log('STATUS', response.status); console.log(JSON.stringify(payload)); process.exit(response.ok && payload.success && payload.meta?.degraded === false && payload.data?.ok === true ? 0 : 1);}).catch((error)=>{console.error(error); process.exit(1);})"
+```
+
+Expected result:
+
+- `STATUS 200`
+- Response body includes `"success":true`
+- Response body includes `"degraded":false`
+- Response body includes `"ok":true`
+- If you see `404`, the running `llm-proxy` image or target URL does not match the checked-in runtime contract used by the backend.
+- If you see `502` or a degraded/null payload, the configured provider credentials or upstream access are not usable.
+
+4. Optionally verify infrastructure containers:
 
 ```bash
 docker compose exec redis redis-cli ping
 docker compose exec mongo mongosh --quiet --eval "db.adminCommand('ping')"
 ```
 
-4. Open the frontend from the Expo web terminal output and confirm it can call the API with `API_BASE_URL=http://<LAN_IP>:8080` for Expo Go, or `http://localhost:8080` only for same-machine web testing.
+5. Open the frontend from the Expo web terminal output and confirm it can call the API with `API_BASE_URL=http://<LAN_IP>:8080` for Expo Go, or `http://localhost:8080` only for same-machine web testing.
 
 ### Verify The Non-Docker Startup Flow
 
@@ -341,12 +356,29 @@ Expected API response:
 {"success":true,"data":{"status":"ok"}}
 ```
 
-2. Verify local infrastructure:
+2. Verify the local `llm-proxy` contract with a real completion:
+
+```bash
+curl -i -sS -X POST http://localhost:3001/complete \
+  -H 'content-type: application/json' \
+  -d '{"prompt":{"system":"Return only valid JSON.","user":"Return exactly this JSON object: {\"ok\":true}"}}'
+```
+
+Expected result:
+
+- HTTP `200`
+- Response body contains `"success":true`
+- Response body contains `"degraded":false`
+- Response body contains `"ok":true`
+- HTTP `404` means the local proxy runtime does not expose the shared completion route expected by the backend.
+- HTTP `502` or a degraded/null payload means the configured provider credentials or upstream access are not usable.
+
+3. Verify local infrastructure:
 
 - Confirm MongoDB is listening on `127.0.0.1:27017`
 - Confirm Redis is listening on `127.0.0.1:6379`
 
-3. Open the frontend from the Expo web terminal output and confirm it can call the API with `API_BASE_URL=http://<LAN_IP>:3000` for Expo Go, or `http://localhost:3000` only for same-machine web testing.
+4. Open the frontend from the Expo web terminal output and confirm it can call the API with `API_BASE_URL=http://<LAN_IP>:3000` for Expo Go, or `http://localhost:3000` only for same-machine web testing.
 
 ### Code-Level Verification Commands
 

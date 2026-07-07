@@ -48,11 +48,32 @@ const HEREBrowseResponseSchema = z.object({
   items: z.array(HEREItemSchema),
 });
 
+export type HereMapsFailureKind =
+  | "configuration"
+  | "timeout"
+  | "transport"
+  | "invalid_response";
+
+export class HereMapsProviderError extends Error {
+  provider = "here" as const;
+  kind: HereMapsFailureKind;
+  statusCode?: number;
+
+  constructor(kind: HereMapsFailureKind, message: string, statusCode?: number) {
+    super(message);
+    this.name = "HereMapsProviderError";
+    this.kind = kind;
+    if (statusCode !== undefined) {
+      this.statusCode = statusCode;
+    }
+  }
+}
+
 // ============================================================================
 // Constants
 // ============================================================================
 
-const HERE_API_BASE_URL = "https://places.ls.hereapi.com/places/v1/browse";
+const HERE_API_BASE_URL = "https://discover.search.hereapi.com/v1/discover";
 const HERE_TIMEOUT_MS = 5000;
 const MAX_RESULTS = 20;
 const DEFAULT_CUISINE = "restaurant";
@@ -83,7 +104,6 @@ export async function hereMapsSearchNearby(
 
     const queryParams = new URLSearchParams({
       apiKey,
-      at: `${lat},${lng}`,
       q: searchQuery,
       limit: String(MAX_RESULTS),
       in: `circle:${lat},${lng};r=${radius}`,
@@ -105,14 +125,33 @@ export async function hereMapsSearchNearby(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
+      const errorBody = await response.text().catch(() => "");
+      const isConfigurationFailure =
+        response.status === 401 || response.status === 403;
+
       logger.error({
-        msg: "HERE Maps API returned error",
+        msg: isConfigurationFailure
+          ? "HERE Maps authorization/configuration failure"
+          : "HERE Maps API returned error",
         status: response.status,
         statusText: response.statusText,
+        errorBody,
+        endpoint: HERE_API_BASE_URL,
         context: "hereMapsSearchNearby",
       });
-      throw new Error(
+
+      if (isConfigurationFailure) {
+        throw new HereMapsProviderError(
+          "configuration",
+          `HERE Maps authorization/configuration error: ${response.status} ${response.statusText}`,
+          response.status,
+        );
+      }
+
+      throw new HereMapsProviderError(
+        "transport",
         `HERE Maps API error: ${response.status} ${response.statusText}`,
+        response.status,
       );
     }
 
@@ -149,7 +188,10 @@ export async function hereMapsSearchNearby(
         timeout_ms: HERE_TIMEOUT_MS,
         context: "hereMapsSearchNearby",
       });
-      throw new Error("HERE Maps API request timeout");
+      throw new HereMapsProviderError(
+        "timeout",
+        "HERE Maps API request timeout",
+      );
     }
 
     if (error instanceof z.ZodError) {
@@ -158,7 +200,14 @@ export async function hereMapsSearchNearby(
         errors: error.issues,
         context: "hereMapsSearchNearby",
       });
-      throw new Error("HERE Maps API response validation failed");
+      throw new HereMapsProviderError(
+        "invalid_response",
+        "HERE Maps API response validation failed",
+      );
+    }
+
+    if (error instanceof HereMapsProviderError) {
+      throw error;
     }
 
     logger.error({
@@ -167,7 +216,10 @@ export async function hereMapsSearchNearby(
       context: "hereMapsSearchNearby",
     });
 
-    throw error;
+    throw new HereMapsProviderError(
+      "transport",
+      error instanceof Error ? error.message : String(error),
+    );
   }
 }
 
