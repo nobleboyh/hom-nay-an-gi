@@ -107,12 +107,12 @@ RULES:
 6. caloriesPerServing must be reasonable for Vietnamese dishes.
 7. Return valid JSON only, no markdown or extra text.`;
 
-const _VI_FEW_SHOT_EXAMPLES: {
+const VI_FEW_SHOT_EXAMPLES: {
   ingredients: string;
   output: { dishes: unknown[] };
 }[] = [];
 
-const _EN_FEW_SHOT_EXAMPLES: {
+const EN_FEW_SHOT_EXAMPLES: {
   ingredients: string;
   output: { dishes: unknown[] };
 }[] = [];
